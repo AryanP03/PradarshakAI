@@ -1046,6 +1046,7 @@ export default function ChatInterface({
     return true;
   });
   const [isWelcomeComplete, setIsWelcomeComplete] = useState(!showWelcome || !!initialMessages?.length);
+  const [hasDismissedGuidance, setHasDismissedGuidance] = useState(false);
   const [playAttentionPop, setPlayAttentionPop] = useState(false);
   const prevWelcomeCompleteRef = useRef(isWelcomeComplete);
   const [isListening, setIsListening] = useState(false);
@@ -1071,6 +1072,14 @@ export default function ChatInterface({
     voiceAgentState === 'PROCESSING' ||
     voiceAgentState === 'SPEAKING' ||
     (messages.length > 0 && !showWelcome);
+
+  const isGuidanceVisible =
+    isWelcomeComplete &&
+    !hasDismissedGuidance &&
+    messages.length === 0 &&
+    !loading &&
+    voiceAgentState === 'IDLE' &&
+    !category;
 
   // Trigger attention scale pop shortly after the chatbox begins its smooth slide up
   useEffect(() => {
@@ -1703,6 +1712,7 @@ export default function ChatInterface({
   ]);
 
   const handleToggleVoiceAgent = useCallback(() => {
+    setHasDismissedGuidance(true);
     if (voiceAgentState === 'SPEAKING') {
       stopAudio();
       setVoiceAgentState('INTERRUPTED');
@@ -1773,6 +1783,7 @@ export default function ChatInterface({
       setMessages([]);
       setShowWelcome(true);
       setIsWelcomeComplete(false);
+      setHasDismissedGuidance(false);
       setInput('');
       setLoading(false);
       setSpeechError(null);
@@ -1863,6 +1874,7 @@ export default function ChatInterface({
     async (text: string) => {
       if (!text.trim() || loading) return;
 
+      setHasDismissedGuidance(true);
       if (isListening) stopListening();
 
       setShowWelcome(false);
@@ -1934,6 +1946,7 @@ export default function ChatInterface({
   const handleSchemeAction = useCallback(
     async (action: 'KNOW_MORE' | 'DOCUMENTS' | 'EMI', scheme: Scheme) => {
       if (loading) return;
+      setHasDismissedGuidance(true);
       if (isListening) stopListening();
 
       let actionLabel = '';
@@ -2417,8 +2430,52 @@ export default function ChatInterface({
           <div
             className={`chatbox-row ${playAttentionPop ? 'chatbox-attention-pop' : ''}`}
             onAnimationEnd={() => setPlayAttentionPop(false)}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, transformOrigin: 'center center' }}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              transformOrigin: 'center center',
+              position: 'relative',
+            }}
           >
+            {/* ── Guidance Line directly above the chatbot composer / chatbox ── */}
+            <div
+              className="guidance-hint-line"
+              aria-live="polite"
+              style={{
+                position: 'absolute',
+                bottom: 'calc(100% + 12px)',
+                left: 0,
+                right: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+                padding: '0 12px',
+                pointerEvents: 'none',
+                opacity: isGuidanceVisible ? 1 : 0,
+                visibility: isGuidanceVisible ? 'visible' : 'hidden',
+                transition: 'opacity 200ms cubic-bezier(0.16, 1, 0.3, 1), visibility 200ms ease',
+                zIndex: 5,
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 'clamp(13px, 1.8vw, 14.5px)',
+                  fontWeight: 500,
+                  color: '#475569',
+                  letterSpacing: '0.01em',
+                  lineHeight: 1.45,
+                }}
+              >
+                {t(
+                  'chat.guidance_hint',
+                  'Type or speak your question, or click “Talk to PradarshakAI” for a voice conversation.'
+                )}
+              </p>
+            </div>
             {/* ── Chat Composer (Flow A: Text chat with speech-to-text dictation mic) ── */}
             <div
               className="chat-composer"
