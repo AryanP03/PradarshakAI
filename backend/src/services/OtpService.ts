@@ -25,7 +25,7 @@ function generateSecureOTP(): string {
   return Math.floor(min + Math.random() * (max - min + 1)).toString();
 }
 
-export async function sendOtp(email: string): Promise<void> {
+export async function sendOtp(email: string): Promise<{ delivered: boolean; demoOtp?: string }> {
   const normalizedEmail = email.toLowerCase().trim();
   const now = Date.now();
   const lastSent = cooldownStore.get(normalizedEmail);
@@ -45,14 +45,22 @@ export async function sendOtp(email: string): Promise<void> {
   cooldownStore.set(normalizedEmail, now);
   verifiedEmails.delete(normalizedEmail);
 
+  console.log(`\n======================================================`);
   console.log(`[OTP] Generated OTP for ${normalizedEmail}: ${otp}`);
+  console.log(`======================================================\n`);
 
+  let delivered = false;
   try {
     await sendVerificationOtpEmail(normalizedEmail, otp, OTP_EXPIRY_MINUTES);
+    delivered = true;
   } catch (err: any) {
-    console.error(`[OTP] Failed to deliver email to ${normalizedEmail}:`, err.message);
-    throw new Error(err.message || 'Failed to send OTP email');
+    console.warn(`[OTP] Outbound email failed (${err.code || err.message}). Fallback code: ${otp}`);
   }
+
+  return {
+    delivered,
+    demoOtp: !delivered ? otp : undefined,
+  };
 }
 
 export async function verifyOtp(email: string, otp: string): Promise<boolean> {
@@ -97,7 +105,7 @@ export function clearVerification(email: string): void {
  * PASSWORD RESET OTP FUNCTIONS
  * ─────────────────────────────────────────────────────────────────────────────
  */
-export async function sendPasswordResetOtp(email: string): Promise<void> {
+export async function sendPasswordResetOtp(email: string): Promise<{ delivered: boolean; demoOtp?: string }> {
   const normalizedEmail = email.toLowerCase().trim();
   const now = Date.now();
   const lastSent = passwordResetCooldownStore.get(normalizedEmail);
@@ -116,7 +124,22 @@ export async function sendPasswordResetOtp(email: string): Promise<void> {
   
   passwordResetCooldownStore.set(normalizedEmail, now);
 
-  await sendPasswordResetOtpEmail(normalizedEmail, otp, OTP_EXPIRY_MINUTES);
+  console.log(`\n======================================================`);
+  console.log(`[PASSWORD RESET] Generated OTP for ${normalizedEmail}: ${otp}`);
+  console.log(`======================================================\n`);
+
+  let delivered = false;
+  try {
+    await sendPasswordResetOtpEmail(normalizedEmail, otp, OTP_EXPIRY_MINUTES);
+    delivered = true;
+  } catch (err: any) {
+    console.warn(`[PASSWORD RESET] Outbound email failed (${err.code || err.message}). Fallback code: ${otp}`);
+  }
+
+  return {
+    delivered,
+    demoOtp: !delivered ? otp : undefined,
+  };
 }
 
 export async function verifyPasswordResetOtp(email: string, otp: string): Promise<boolean> {

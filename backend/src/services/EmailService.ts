@@ -2,6 +2,12 @@ import 'dotenv/config';
 import nodemailer, { SendMailOptions } from 'nodemailer';
 import path from 'path';
 import fs from 'fs';
+import dns from 'dns';
+
+// Render / cloud containers do not have IPv6 outbound routing; force IPv4 DNS resolution
+try {
+  dns.setDefaultResultOrder('ipv4first');
+} catch {}
 
 // Strict Brand Name Requirement
 export const BRAND_NAME = 'PradarshakAI';
@@ -19,24 +25,26 @@ export function getTransporter() {
     throw new Error('Missing SMTP credentials. Please configure SMTP_USER and SMTP_PASSWORD in environment variables.');
   }
 
-  // Use service 'gmail' when using Gmail to ensure direct SSL and prevent cloud port-587 blocks
+  // Use service 'gmail' with family: 4 to force IPv4 and prevent ENETUNREACH
   if (host === 'smtp.gmail.com' || user.endsWith('@gmail.com')) {
     return nodemailer.createTransport({
       service: 'gmail',
+      family: 4,
       auth: {
         user,
         pass,
       },
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 15000,
-    });
+      connectionTimeout: 7000,
+      greetingTimeout: 7000,
+      socketTimeout: 10000,
+    } as any);
   }
 
   return nodemailer.createTransport({
     host,
     port,
     secure: port === 465,
+    family: 4,
     auth: {
       user,
       pass,
@@ -44,10 +52,10 @@ export function getTransporter() {
     tls: {
       rejectUnauthorized: false,
     },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
-  });
+    connectionTimeout: 7000,
+    greetingTimeout: 7000,
+    socketTimeout: 10000,
+  } as any);
 }
 
 export function getSmtpFrom(): string {

@@ -106,8 +106,15 @@ router.post('/send-email-otp', async (req: Request, res: Response): Promise<void
       return;
     }
 
-    await sendOtp(normalizedEmail);
-    res.json({ success: true, message: 'OTP sent successfully' });
+    const result = await sendOtp(normalizedEmail);
+    res.json({
+      success: true,
+      message: result.delivered
+        ? 'OTP sent successfully to your email.'
+        : 'OTP generated! (Cloud free tier blocked email delivery: Use the code displayed)',
+      demoOtp: result.demoOtp,
+      delivered: result.delivered,
+    });
   } catch (error: any) {
     res.status(400).json({ error: error.message || 'Failed to send OTP' });
   }

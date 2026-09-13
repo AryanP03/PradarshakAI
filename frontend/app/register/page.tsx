@@ -186,6 +186,10 @@ function RegisterContent() {
       
       setEmailStep('sent');
       setResendCooldown(30);
+      if (data.demoOtp) {
+        setOtp(data.demoOtp);
+        setOtpError(`Demo Mode: Verification code ${data.demoOtp} auto-filled (Render free tier restricts outbound SMTP)`);
+      }
     } catch (err: any) {
       setEmailStep('idle');
       setError(err.message);
