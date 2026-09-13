@@ -14,6 +14,8 @@ import chatsRoutes from './routes/chats';
 import ttsRoutes from './routes/tts';
 import sttRoutes from './routes/stt';
 import registrationRoutes from './routes/registration';
+import telegramRoutes from './routes/telegram';
+import { TelegramBotService } from './services/TelegramBotService';
 import { pool } from './db/pool';
 import fs from 'fs';
 
@@ -85,6 +87,7 @@ app.use('/api/stt', sttRoutes);
 app.use('/api/users', userAuthRoutes);
 app.use('/api/chats', chatsRoutes);
 app.use('/api/registration', registrationRoutes);
+app.use('/api/telegram', telegramRoutes);
 
 // Serve static uploads
 const uploadsDir = path.join(__dirname, '../../uploads');
@@ -157,7 +160,22 @@ app.use((err: Error, _req: import('express').Request, res: import('express').Res
 });
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`API running on http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  console.log(`API running on http://localhost:${PORT}`);
+  if (TelegramBotService.isConfigured()) {
+    console.log('[Telegram Bot] Initialized with token.');
+    const webhookUrl = process.env.TELEGRAM_WEBHOOK_URL || 'https://pradarshakai.onrender.com/api/telegram/webhook';
+    TelegramBotService.setWebhook(webhookUrl, process.env.TELEGRAM_WEBHOOK_SECRET)
+      .then((res) => {
+        if (res?.ok) {
+          console.log(`[Telegram Bot] Webhook successfully registered: ${webhookUrl}`);
+        } else {
+          console.warn('[Telegram Bot] Webhook registration response:', res);
+        }
+      })
+      .catch((err) => console.warn('[Telegram Bot] Webhook sync warning:', err.message));
+  }
+});
 
 // ── Admin static server (port 3001) ──────────────────────────────────────────
 
