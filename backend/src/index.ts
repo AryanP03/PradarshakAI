@@ -26,43 +26,57 @@ process.on('unhandledRejection', (reason) => console.error('Unhandled rejection:
 // ── Main API (port 4000) ──────────────────────────────────────────────────────
 
 const app = express();
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://127.0.0.1:3000',
-  'http://localhost:3001',
-  'http://127.0.0.1:3001',
-  process.env.FRONTEND_URL,
-  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
-].filter((value): value is string => Boolean(value));
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-      return;
+const rawFrontendUrl = process.env.FRONTEND_URL?.trim();
+const configuredOrigins = rawFrontendUrl
+  ? rawFrontendUrl.split(',').map((u) => u.trim().replace(/\/+$/, ''))
+  : [];
+
+const isAllowedOrigin = (origin: string): boolean => {
+  try {
+    const parsed = new URL(origin);
+    const originClean = `${parsed.protocol}//${parsed.host}`;
+
+    // Explicit configured frontend origins (e.g. from FRONTEND_URL env var)
+    if (configuredOrigins.includes(originClean) || configuredOrigins.includes(origin)) {
+      return true;
     }
 
-    // Allow local network IP addresses (e.g. 192.168.x.x, 10.x.x.x, 172.16-31.x.x) on port 3000 / 3001 / 3002
-    try {
-      const parsed = new URL(origin);
-      if (
-        parsed.hostname === 'localhost' ||
-        parsed.hostname === '127.0.0.1' ||
-        /^192\.168\.\d{1,3}\.\d{1,3}$/.test(parsed.hostname) ||
-        /^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(parsed.hostname) ||
-        /^172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}$/.test(parsed.hostname)
-      ) {
-        callback(null, true);
-        return;
-      }
-    } catch {}
+    // Automatically allow Vercel domains (production & branch preview deployments)
+    if (parsed.hostname.endsWith('.vercel.app') || parsed.hostname === 'vercel.app') {
+      return true;
+    }
 
-    callback(new Error(`Origin ${origin} not allowed by CORS`));
+    // Localhost & local development ports / network IPs
+    if (
+      parsed.hostname === 'localhost' ||
+      parsed.hostname === '127.0.0.1' ||
+      /^192\.168\.\d{1,3}\.\d{1,3}$/.test(parsed.hostname) ||
+      /^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(parsed.hostname) ||
+      /^172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}$/.test(parsed.hostname)
+    ) {
+      return true;
+    }
+  } catch {}
+
+  return false;
+};
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || isAllowedOrigin(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use('/api/chat', chatRoutes);
