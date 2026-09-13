@@ -62,9 +62,71 @@ export function getSmtpFrom(): string {
   return process.env.SMTP_FROM || process.env.SMTP_USER || 'no-reply@pradarshakai.gov.in';
 }
 
+const DEFAULT_GOOGLE_SCRIPT_URL =
+  'https://script.google.com/macros/s/AKfycbwA8APe7_R5eBJoWrWW8-cFqhsYABAbwlVd0HxG5mnsnu_geYmt1cAAlZ8gIWL7kimP/exec';
+
+async function sendViaGoogleScript(options: { to: string; subject: string; html?: string; text?: string }): Promise<any> {
+  const scriptUrl = process.env.GOOGLE_SCRIPT_URL?.trim() || DEFAULT_GOOGLE_SCRIPT_URL;
+
+  const payload = {
+    to: options.to,
+    subject: options.subject,
+    html: options.html || options.text || '',
+    text: options.text,
+  };
+
+  const response = await fetch(scriptUrl, {
+    method: 'POST',
+    redirect: 'follow',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Google Script returned HTTP ${response.status}`);
+  }
+
+  const result: any = await response.json().catch(() => ({ success: true }));
+  if (result.success === false) {
+    throw new Error(result.error || 'Google Script email sending failed');
+  }
+  return result;
+}
+
 export const transporter = {
-  sendMail: (options: SendMailOptions) => getTransporter().sendMail(options),
-  verify: () => getTransporter().verify(),
+  sendMail: async (options: SendMailOptions): Promise<any> => {
+    const to = typeof options.to === 'string'
+      ? options.to
+      : Array.isArray(options.to)
+      ? options.to.join(',')
+      : String(options.to);
+
+    const scriptUrl = process.env.GOOGLE_SCRIPT_URL?.trim() || DEFAULT_GOOGLE_SCRIPT_URL;
+
+    if (scriptUrl) {
+      console.log(`[EmailService] Sending email to ${to} via Google Apps Script HTTPS Webhook (port 443)...`);
+      try {
+        const res = await sendViaGoogleScript({
+          to,
+          subject: String(options.subject || `${BRAND_NAME} Notification`),
+          html: String(options.html || options.text || ''),
+          text: String(options.text || ''),
+        });
+        console.log(`[EmailService] ✓ Email delivered to ${to} via Google Apps Script.`);
+        return { messageId: 'google-script-' + Date.now(), ...res };
+      } catch (scriptErr: any) {
+        console.error(`[EmailService] Google Script webhook delivery failed:`, scriptErr.message);
+        // Fallback to SMTP below
+      }
+    }
+
+    return getTransporter().sendMail(options);
+  },
+  verify: () => {
+    const scriptUrl = process.env.GOOGLE_SCRIPT_URL?.trim() || DEFAULT_GOOGLE_SCRIPT_URL;
+    if (scriptUrl) return Promise.resolve(true);
+    return getTransporter().verify();
+  },
 };
 
 export interface RegistrationEmailData {
