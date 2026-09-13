@@ -147,12 +147,29 @@ app.listen(PORT, () => console.log(`API running on http://localhost:${PORT}`));
 
 // ── Admin static server (port 3001) ──────────────────────────────────────────
 
-const adminApp = express();
-adminApp.use(cors());
-// Serve admin SPA from admin-static directory
-const adminDir = path.join(__dirname, 'admin-static');
-adminApp.use(express.static(adminDir));
-adminApp.use((_req, res) => res.sendFile(path.join(adminDir, 'index.html')));
+const adminDir = fs.existsSync(path.join(__dirname, 'admin-static'))
+  ? path.join(__dirname, 'admin-static')
+  : path.join(__dirname, '../src/admin-static');
 
-const ADMIN_PORT = process.env.ADMIN_PORT || 3001;
-adminApp.listen(ADMIN_PORT, () => console.log(`Admin panel running on http://localhost:${ADMIN_PORT}`));
+// In cloud environments like Render, only one HTTP port is exposed.
+// Run the standalone admin server only if explicitly enabled or when running locally.
+const shouldRunAdminServer =
+  process.env.ENABLE_ADMIN_SERVER === 'true' ||
+  (!process.env.RENDER && process.env.DISABLE_ADMIN_SERVER !== 'true');
+
+if (shouldRunAdminServer) {
+  const adminApp = express();
+  adminApp.use(cors());
+  adminApp.use(express.static(adminDir));
+  adminApp.use((_req, res) => {
+    const indexPath = path.join(adminDir, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      res.status(404).send('Admin panel static files not found');
+    }
+  });
+
+  const ADMIN_PORT = process.env.ADMIN_PORT || 3001;
+  adminApp.listen(ADMIN_PORT, () => console.log(`Admin panel running on http://localhost:${ADMIN_PORT}`));
+}
