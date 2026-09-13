@@ -1072,3 +1072,50 @@ html, body {
   height: 100vh;
   height: 100dvh;
 }
+
+/* ── Institutional Responsive Navbar System ────────────────────────────────── */
+.navbar-desktop-nav {
+  display: none !important;
+}
+
+.navbar-desktop-auth {
+  display: none !important;
+}
+
+.navbar-hamburger-btn {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar-mobile-drawer-root {
+  display: block;
+}
+
+/* On Desktop / Laptop screens where full navbar fits comfortably (>= 1024px) */
+@media (min-width: 1024px) {
+  .navbar-desktop-nav {
+    display: flex !important;
+  }
+
+  .navbar-desktop-auth {
+    display: flex !important;
+  }
+
+  .navbar-hamburger-btn {
+    display: none !important;
+  }
+
+  .navbar-mobile-drawer-root {
+    display: none !important;
+  }
+}
+
+/* Compact spacing for 1024px to 1279px to prevent cramped layout or text wrapping */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .navbar-nav-link {
+    padding: 6px 9px !important;
+    font-size: 12.5px !important;
+    gap: 5px !important;
+  }
+}

@@ -63,6 +63,17 @@ function NavBarContent() {
     }
   }, [mobileOpen]);
 
+  // Auto-close mobile drawer if resized to laptop/desktop width (>= 1024px)
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setMobileOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   function logout() {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
@@ -105,7 +116,7 @@ function NavBarContent() {
       >
         <div
           style={{
-            maxWidth: 1200,
+            maxWidth: 1360,
             margin: '0 auto',
             padding: '0 16px',
             height: 64,
@@ -159,7 +170,7 @@ function NavBarContent() {
                 </span>
               </div>
               <span
-                className="hidden sm:inline-block"
+                className="hidden xl:inline-block"
                 style={{
                   fontSize: 10,
                   color: '#cbd5e1',
@@ -177,7 +188,7 @@ function NavBarContent() {
           </Link>
 
           {/* ── Desktop Navigation Tabs (Light-on-Dark Theme) ──────────────── */}
-          <nav className="hidden lg:flex items-center gap-1" style={{ marginLeft: 8 }}>
+          <nav className="navbar-desktop-nav items-center gap-1" style={{ marginLeft: 8 }}>
             {navLinks.map((link) => {
               const Icon = link.icon;
               const active = isActive(link.href);
@@ -185,6 +196,7 @@ function NavBarContent() {
                 <Link
                   key={link.href}
                   href={link.href}
+                  className="navbar-nav-link"
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -338,9 +350,9 @@ function NavBarContent() {
               )}
             </div>
 
-            {/* Desktop Auth Controls (Hidden on mobile/small tablets, accessible in mobile menu) */}
+            {/* Desktop Auth Controls (Hidden on mobile/tablets, full horizontal display on laptop/desktop) */}
             {user ? (
-              <div className="hidden sm:flex items-center gap-2">
+              <div className="navbar-desktop-auth items-center gap-2">
                 <Link
                   href="/profile"
                   className="btn-bounce focus-ring"
@@ -385,7 +397,7 @@ function NavBarContent() {
                 </button>
               </div>
             ) : (
-              <div className="hidden sm:flex items-center gap-2">
+              <div className="navbar-desktop-auth items-center gap-2">
                 <Link
                   href="/auth"
                   className="btn-bounce focus-ring"
@@ -431,10 +443,10 @@ function NavBarContent() {
               </div>
             )}
 
-            {/* Mobile Hamburger Menu Button (Touch-Friendly >= 44x44px) */}
+            {/* Mobile Hamburger Menu Button (Touch-Friendly >= 44x44px) - Strictly hidden on Laptop/Desktop */}
             <button
               type="button"
-              className="lg:hidden interactive-control focus-ring"
+              className="navbar-hamburger-btn interactive-control focus-ring"
               onClick={() => setMobileOpen((prev) => !prev)}
               style={{
                 width: 42,
@@ -444,9 +456,6 @@ function NavBarContent() {
                 border: '1px solid rgba(255, 255, 255, 0.2)',
                 color: '#ffffff',
                 cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
                 flexShrink: 0,
               }}
               aria-label={mobileOpen ? 'Close mobile menu' : 'Open navigation menu'}
@@ -460,7 +469,7 @@ function NavBarContent() {
 
       {/* ── Mobile Navigation Drawer & Backdrop ─────────────────────────── */}
       {mobileOpen && (
-        <div className="lg:hidden" role="dialog" aria-modal="true" aria-label="Mobile navigation">
+        <div className="navbar-mobile-drawer-root" role="dialog" aria-modal="true" aria-label="Mobile navigation">
           {/* Smooth Backdrop Overlay */}
           <div
             className="mobile-nav-backdrop"

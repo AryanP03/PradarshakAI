@@ -373,7 +373,23 @@ export default function SchemesPage() {
       });
   }, []);
 
-  const schemeList = Array.isArray(schemes) ? schemes : [];
+  // Curate a diverse selection of 10 schemes across categories
+  const FEATURED_10_IDS = [
+    1,  // Micro Credit Finance (MCF) - Micro Finance
+    2,  // Mahila Samriddhi Yojana (MSY) - Micro Finance / Women Exclusive
+    4,  // Shilpi Samriddhi Yojana (SSY) - Term Loan / Artisans
+    5,  // Term Loan (TL) - Entrepreneurship / Term Loan
+    6,  // Green Business Scheme (GBS) - Entrepreneurship / Sanitation
+    7,  // Swachhta Udyami Yojana (SUY) - Entrepreneurship / Sanitation
+    8,  // Udyam Nidhi Yojana (UNY) - Entrepreneurship
+    10, // Educational Loan Scheme (ELS) - Education Loan
+    12, // PM-DAKSH - Skill Development
+    13, // SMILE - Government Welfare Programme
+  ];
+
+  const schemeList = Array.isArray(schemes)
+    ? schemes.filter((s) => FEATURED_10_IDS.includes(s.id))
+    : [];
   const filtered = schemeList.filter((s) => {
     const isInfo = s.scheme_type === 'informational' || s.channel_partner_applicable === false;
     if (typeFilter === 'financing' && isInfo) return false;
@@ -719,7 +735,7 @@ export default function SchemesPage() {
             </button>
           </div>
         ) : (
-          <div className="scheme-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 24 }}>
+          <div className="scheme-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: 24 }}>
             {filtered.map((scheme) => (
               <SchemeCard
                 key={scheme.id}
