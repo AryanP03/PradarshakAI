@@ -9,14 +9,28 @@ export const BRAND_NAME = 'PradarshakAI';
 const uploadDir = path.join(__dirname, '../../uploads');
 
 export function getTransporter() {
-  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
-  const port = parseInt(process.env.SMTP_PORT || '587', 10);
-  const user = process.env.SMTP_USER?.trim();
-  const rawPass = process.env.SMTP_PASSWORD?.trim();
+  const user = process.env.SMTP_USER?.trim() || 'monarchcredit8@gmail.com';
+  const rawPass = process.env.SMTP_PASSWORD?.trim() || 'soqj htcn ubmc cznu';
   const pass = rawPass ? rawPass.replace(/\s+/g, '') : undefined;
+  const host = process.env.SMTP_HOST?.trim() || 'smtp.gmail.com';
+  const port = parseInt(process.env.SMTP_PORT || '465', 10);
 
   if (!user || !pass) {
-    throw new Error('Missing SMTP credentials. Please ensure SMTP_USER and SMTP_PASSWORD are set in backend/.env');
+    throw new Error('Missing SMTP credentials. Please configure SMTP_USER and SMTP_PASSWORD in environment variables.');
+  }
+
+  // Use service 'gmail' when using Gmail to ensure direct SSL and prevent cloud port-587 blocks
+  if (host === 'smtp.gmail.com' || user.endsWith('@gmail.com')) {
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user,
+        pass,
+      },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
+    });
   }
 
   return nodemailer.createTransport({
@@ -27,6 +41,12 @@ export function getTransporter() {
       user,
       pass,
     },
+    tls: {
+      rejectUnauthorized: false,
+    },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
   });
 }
 

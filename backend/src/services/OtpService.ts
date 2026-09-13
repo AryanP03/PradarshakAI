@@ -45,7 +45,14 @@ export async function sendOtp(email: string): Promise<void> {
   cooldownStore.set(normalizedEmail, now);
   verifiedEmails.delete(normalizedEmail);
 
-  await sendVerificationOtpEmail(normalizedEmail, otp, OTP_EXPIRY_MINUTES);
+  console.log(`[OTP] Generated OTP for ${normalizedEmail}: ${otp}`);
+
+  try {
+    await sendVerificationOtpEmail(normalizedEmail, otp, OTP_EXPIRY_MINUTES);
+  } catch (err: any) {
+    console.error(`[OTP] Failed to deliver email to ${normalizedEmail}:`, err.message);
+    throw new Error(err.message || 'Failed to send OTP email');
+  }
 }
 
 export async function verifyOtp(email: string, otp: string): Promise<boolean> {
