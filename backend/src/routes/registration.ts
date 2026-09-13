@@ -150,13 +150,35 @@ router.post('/complete', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    const docVerificationEnabled = process.env.DOCUMENT_VERIFICATION_ENABLED === 'true';
     const session = getRegistrationSession(emailStr);
-    if (session.casteStatus !== 'VERIFIED' || session.incomeStatus !== 'VERIFIED') {
-      res.status(400).json({ error: 'CERTIFICATES_NOT_VERIFIED' });
-      return;
+
+    if (docVerificationEnabled) {
+      if (session.casteStatus !== 'VERIFIED' || session.incomeStatus !== 'VERIFIED') {
+        res.status(400).json({ error: 'CERTIFICATES_NOT_VERIFIED' });
+        return;
+      }
     }
 
-    const resolvedSalary = req.body.salary ? Number(req.body.salary) : (session.extractedIncome || null);
+    let resolvedSalary: number | null = null;
+    if (req.body.salary !== undefined && req.body.salary !== null && req.body.salary !== '') {
+      const num = Number(req.body.salary);
+      if (isNaN(num) || num <= 0) {
+        res.status(400).json({ error: 'Please enter a valid positive annual family income.' });
+        return;
+      }
+      resolvedSalary = num;
+    } else if (session?.extractedIncome) {
+      resolvedSalary = session.extractedIncome;
+    }
+
+    const resolvedOther = (trade_category === 'other' && typeof req.body.job_business_other === 'string')
+      ? req.body.job_business_other.trim()
+      : null;
+
+    const resolvedEligibilityStatus = (docVerificationEnabled && session.casteStatus === 'VERIFIED' && session.incomeStatus === 'VERIFIED')
+      ? 'verified'
+      : (eligibility_status === 'verified' ? 'pending_manual_review' : (eligibility_status || 'pending_manual_review'));
 
     const { rows } = await pool.query(`
       INSERT INTO users (
@@ -165,22 +187,25 @@ router.post('/complete', async (req: Request, res: Response): Promise<void> => {
         address_line1, address_line2, city, district, state, pincode,
         selfie_image, sc_certificate_file, income_certificate_file, aadhaar,
         eligibility_status, registration_complete, salary,
-        education_level, trade_category, funding_bracket, caste_category
+        education_level, trade_category, funding_bracket, caste_category,
+        job_business_other
       ) VALUES (
         $1, $2, $3, $4, $5, $6,
         true, false,
         $7, $8, $9, $10, $11, $12,
         $13, $14, $15, $16,
         $17, true, $18,
-        $19, $20, $21, $22
-      ) RETURNING id, name, email, phone, salary, eligibility_status, education_level, trade_category, funding_bracket, caste_category
+        $19, $20, $21, $22,
+        $23
+      ) RETURNING id, name, email, phone, salary, eligibility_status, education_level, trade_category, funding_bracket, caste_category, job_business_other
     `, [
       full_name, mobile, emailStr, passwordHash, dob || null, gender || null,
       address_line1 || null, address_line2 || null, city || null, district || null, state || null, pincode || null,
       selfie_image || null, sc_certificate_file || null, income_certificate_file || null, aadhaar || null,
-      eligibility_status || 'pending_manual_review',
+      resolvedEligibilityStatus,
       resolvedSalary,
-      education_level || null, trade_category || null, funding_bracket || null, caste_category || 'SC'
+      education_level || null, trade_category || null, funding_bracket || null, caste_category || 'SC',
+      resolvedOther
     ]);
 
     const user = rows[0];

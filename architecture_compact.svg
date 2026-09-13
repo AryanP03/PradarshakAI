@@ -1,0 +1,279 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 480" width="100%" height="100%" style="background:#0b1120; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="clientGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="edgeGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0369a1"/>
+      <stop offset="100%" stop-color="#075985"/>
+    </linearGradient>
+    <linearGradient id="appGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1e3a8a"/>
+      <stop offset="100%" stop-color="#172554"/>
+    </linearGradient>
+    <linearGradient id="aiGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#854d0e"/>
+      <stop offset="100%" stop-color="#713f12"/>
+    </linearGradient>
+    <linearGradient id="dataGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="extGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#991b1b"/>
+      <stop offset="100%" stop-color="#7f1d1d"/>
+    </linearGradient>
+    <linearGradient id="bandGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="50%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e1b4b"/>
+    </linearGradient>
+
+    <!-- Arrow Marker -->
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#fbbf24"/>
+    </marker>
+    <marker id="arrow-slate" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#94a3b8"/>
+    </marker>
+    
+    <!-- Shadow Filter -->
+    <filter id="shadow" x="-4%" y="-8%" width="108%" height="116%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- ================= TOP OBSERVABILITY CROSS-CUTTING BAND ================= -->
+  <g id="observability-band">
+    <rect x="12" y="8" width="736" height="22" rx="4" fill="url(#bandGrad)" stroke="#4338ca" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="24" y="23" fill="#a5b4fc" font-size="10" font-weight="700" letter-spacing="0.5">OBSERVABILITY</text>
+    <text x="125" y="23" fill="#64748b" font-size="9.5">|</text>
+    <text x="135" y="23" fill="#cbd5e1" font-size="9.5">Distributed Tracing (OpenTelemetry) • Structured Health Logging • Real-time Metrics &amp; Error Alerts</text>
+  </g>
+
+  <!-- ================= LAYER 1: CLIENT & EDGE ================= -->
+  <g id="layer-client-edge">
+    <!-- Container Band -->
+    <rect x="12" y="38" width="108" height="402" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1"/>
+    <text x="20" y="52" fill="#94a3b8" font-size="9.5" font-weight="700" letter-spacing="0.5">CLIENT / EDGE</text>
+
+    <!-- Client Box -->
+    <g filter="url(#shadow)">
+      <rect x="18" y="60" width="96" height="66" rx="5" fill="url(#clientGrad)" stroke="#334155" stroke-width="1"/>
+      <rect x="18" y="60" width="96" height="4" rx="2" fill="#38bdf8"/>
+      <text x="66" y="80" fill="#f8fafc" font-size="10.5" font-weight="700" text-anchor="middle">Citizen Client</text>
+      <text x="66" y="95" fill="#94a3b8" font-size="8.5" text-anchor="middle">Next.js Web / PWA</text>
+      <text x="66" y="108" fill="#38bdf8" font-size="8" text-anchor="middle">Voice • Text • Regional UI</text>
+    </g>
+
+    <!-- API Gateway Box -->
+    <g filter="url(#shadow)">
+      <rect x="18" y="175" width="96" height="90" rx="5" fill="url(#edgeGrad)" stroke="#0284c7" stroke-width="1"/>
+      <text x="66" y="194" fill="#ffffff" font-size="10.5" font-weight="700" text-anchor="middle">API Gateway</text>
+      <line x1="26" y1="202" x2="106" y2="202" stroke="#38bdf8" stroke-opacity="0.4" stroke-width="1"/>
+      <text x="66" y="217" fill="#e0f2fe" font-size="8.5" text-anchor="middle">Rate Limiter (Token)</text>
+      <text x="66" y="231" fill="#bae6fd" font-size="8" text-anchor="middle">WAF • DDOS Guard</text>
+      <text x="66" y="246" fill="#7dd3fc" font-size="8" text-anchor="middle">TLS 1.3 Termination</text>
+    </g>
+  </g>
+
+  <!-- ================= LAYER 2: FRONTEND & BACKEND SERVICES ================= -->
+  <g id="layer-backend">
+    <!-- Container Band -->
+    <rect x="128" y="38" width="168" height="402" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1"/>
+    <text x="136" y="52" fill="#94a3b8" font-size="9.5" font-weight="700" letter-spacing="0.5">APP &amp; BACKEND CORE</text>
+
+    <!-- Frontend Box -->
+    <g filter="url(#shadow)">
+      <rect x="136" y="60" width="152" height="66" rx="5" fill="url(#appGrad)" stroke="#2563eb" stroke-width="1"/>
+      <text x="212" y="80" fill="#ffffff" font-size="10.5" font-weight="700" text-anchor="middle">Next.js App Server</text>
+      <text x="212" y="95" fill="#bfdbfe" font-size="8.5" text-anchor="middle">SSR • App Router (Unified)</text>
+      <text x="212" y="108" fill="#93c5fd" font-size="8" text-anchor="middle">i18n UI • Audio Streaming</text>
+    </g>
+
+    <!-- Core Express Backend Box (Compound) -->
+    <g filter="url(#shadow)">
+      <rect x="136" y="145" width="152" height="190" rx="5" fill="url(#appGrad)" stroke="#1d4ed8" stroke-width="1"/>
+      <!-- Header -->
+      <text x="212" y="163" fill="#ffffff" font-size="10.5" font-weight="700" text-anchor="middle">Express Backend</text>
+      <line x1="146" y1="170" x2="278" y2="170" stroke="#3b82f6" stroke-opacity="0.4" stroke-width="1"/>
+      
+      <!-- Sub-module 1: Auth -->
+      <rect x="142" y="176" width="140" height="32" rx="3" fill="#1e293b" stroke="#3b82f6" stroke-width="0.5"/>
+      <text x="212" y="189" fill="#f8fafc" font-size="9" font-weight="600" text-anchor="middle">Auth &amp; Session Layer</text>
+      <text x="212" y="201" fill="#94a3b8" font-size="8" text-anchor="middle">JWT • Bcrypt • OTP Verify</text>
+
+      <!-- Sub-module 2: Chat Orchestration API -->
+      <rect x="142" y="213" width="140" height="32" rx="3" fill="#1e293b" stroke="#3b82f6" stroke-width="0.5"/>
+      <text x="212" y="226" fill="#f8fafc" font-size="9" font-weight="600" text-anchor="middle">Chat Orchestration API</text>
+      <text x="212" y="238" fill="#94a3b8" font-size="8" text-anchor="middle">REST / Stream • Session Sync</text>
+
+      <!-- Sub-module 3: Business Logic -->
+      <rect x="142" y="250" width="140" height="42" rx="3" fill="#1e293b" stroke="#3b82f6" stroke-width="0.5"/>
+      <text x="212" y="263" fill="#f8fafc" font-size="9" font-weight="600" text-anchor="middle">Business Engines</text>
+      <text x="212" y="275" fill="#60a5fa" font-size="8" text-anchor="middle">SchemeEngine • Financial (EMI)</text>
+      <text x="212" y="286" fill="#60a5fa" font-size="8" text-anchor="middle">Location / Geo Partner Router</text>
+      
+      <!-- Bottom tag -->
+      <text x="212" y="325" fill="#93c5fd" font-size="8" text-anchor="middle">State Machine &amp; Session Router</text>
+    </g>
+
+    <!-- Secrets Manager Box -->
+    <g filter="url(#shadow)">
+      <rect x="136" y="352" width="152" height="42" rx="4" fill="#0f172a" stroke="#475569" stroke-width="1"/>
+      <text x="156" y="373" fill="#f59e0b" font-size="11">🔒</text>
+      <text x="172" y="369" fill="#f1f5f9" font-size="9.5" font-weight="600">Secrets Manager</text>
+      <text x="172" y="382" fill="#94a3b8" font-size="8">Encrypted KMS &amp; Vault API Keys</text>
+    </g>
+  </g>
+
+  <!-- ================= LAYER 3: ASYNC, AI & VOICE LAYER ================= -->
+  <g id="layer-ai-voice">
+    <!-- Container Band -->
+    <rect x="304" y="38" width="268" height="402" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1"/>
+    <text x="314" y="52" fill="#fbbf24" font-size="9.5" font-weight="700" letter-spacing="0.5">ASYNC &amp; AI / VOICE ORCHESTRATION</text>
+
+    <!-- Session Cache (Redis) -->
+    <g filter="url(#shadow)">
+      <rect x="312" y="60" width="122" height="66" rx="5" fill="#1e293b" stroke="#dc2626" stroke-width="1"/>
+      <rect x="312" y="60" width="122" height="4" rx="2" fill="#ef4444"/>
+      <text x="373" y="80" fill="#ffffff" font-size="10" font-weight="700" text-anchor="middle">Context Cache</text>
+      <text x="373" y="95" fill="#fca5a5" font-size="8.5" text-anchor="middle">Redis (In-Memory)</text>
+      <text x="373" y="108" fill="#cbd5e1" font-size="8" text-anchor="middle">Fast Session &amp; Tool State</text>
+    </g>
+
+    <!-- Message Queue Box -->
+    <g filter="url(#shadow)">
+      <rect x="442" y="60" width="122" height="66" rx="5" fill="#1e293b" stroke="#8b5cf6" stroke-width="1"/>
+      <rect x="442" y="60" width="122" height="4" rx="2" fill="#a78bfa"/>
+      <text x="503" y="80" fill="#ffffff" font-size="10" font-weight="700" text-anchor="middle">Async Job Queue</text>
+      <text x="503" y="95" fill="#ddd6fe" font-size="8.5" text-anchor="middle">BullMQ / Worker Queue</text>
+      <text x="503" y="108" fill="#cbd5e1" font-size="8" text-anchor="middle">Async STT / Audio Buffer</text>
+    </g>
+
+    <!-- Agentic Orchestrator Box -->
+    <g filter="url(#shadow)">
+      <rect x="312" y="145" width="252" height="88" rx="5" fill="url(#aiGrad)" stroke="#d97706" stroke-width="1"/>
+      <text x="438" y="166" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">Agentic AI Orchestrator</text>
+      <text x="438" y="181" fill="#fef08a" font-size="8.5" text-anchor="middle">Autonomous Tool-Calling Loop (Tools.ts)</text>
+      <line x1="324" y1="188" x2="552" y2="188" stroke="#fef08a" stroke-opacity="0.3" stroke-width="1"/>
+      <text x="438" y="202" fill="#ffffff" font-size="8.5" text-anchor="middle">Intent &amp; Language Detection • Param Extraction</text>
+      <text x="438" y="216" fill="#fef08a" font-size="8" text-anchor="middle">Grounded Explanations (Zero Hallucination)</text>
+    </g>
+
+    <!-- Speech Services (STT / TTS Merged) -->
+    <g filter="url(#shadow)">
+      <rect x="312" y="247" width="252" height="74" rx="5" fill="url(#aiGrad)" stroke="#d97706" stroke-width="1"/>
+      <text x="438" y="267" fill="#ffffff" font-size="10.5" font-weight="700" text-anchor="middle">Speech Services Pipeline</text>
+      <line x1="324" y1="273" x2="552" y2="273" stroke="#fef08a" stroke-opacity="0.3" stroke-width="1"/>
+      <text x="375" y="290" fill="#fef3c7" font-size="9" font-weight="600" text-anchor="middle">STT Engine</text>
+      <text x="375" y="303" fill="#cbd5e1" font-size="8" text-anchor="middle">11 Regional Dialects</text>
+
+      <line x1="438" y1="278" x2="438" y2="310" stroke="#fde68a" stroke-opacity="0.4" stroke-width="1"/>
+
+      <text x="500" y="290" fill="#fef3c7" font-size="9" font-weight="600" text-anchor="middle">TTS Synthesis</text>
+      <text x="500" y="303" fill="#cbd5e1" font-size="8" text-anchor="middle">Voice Agent Audio</text>
+    </g>
+
+    <!-- Circuit Breaker / Retry Wrapper -->
+    <g filter="url(#shadow)">
+      <rect x="312" y="337" width="252" height="57" rx="5" fill="#1e1b4b" stroke="#6366f1" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="438" y="356" fill="#c7d2fe" font-size="9.5" font-weight="700" text-anchor="middle">🛡️ Circuit Breaker &amp; Resilience Wrapper</text>
+      <text x="438" y="371" fill="#e0e7ff" font-size="8.5" text-anchor="middle">Auto-Retry • Fallback Provider Routing • Timeout Guard (25s)</text>
+      <text x="438" y="383" fill="#a5b4fc" font-size="7.5" text-anchor="middle">Guarantees Graceful Degradation on API Outages</text>
+    </g>
+  </g>
+
+  <!-- ================= LAYER 4: DATA & EXTERNAL SERVICES ================= -->
+  <g id="layer-data-ext">
+    <!-- Container Band -->
+    <rect x="580" y="38" width="168" height="402" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1"/>
+    <text x="588" y="52" fill="#94a3b8" font-size="9.5" font-weight="700" letter-spacing="0.5">DATA &amp; EXTERNAL PROVIDERS</text>
+
+    <!-- Database (Primary + Replica + Backup) -->
+    <g filter="url(#shadow)">
+      <rect x="588" y="60" width="152" height="120" rx="5" fill="url(#dataGrad)" stroke="#64748b" stroke-width="1"/>
+      <text x="664" y="80" fill="#ffffff" font-size="10.5" font-weight="700" text-anchor="middle">PostgreSQL Database</text>
+      <text x="664" y="94" fill="#38bdf8" font-size="8.5" font-weight="600" text-anchor="middle">Primary (Write) + Read Replica</text>
+      <line x1="598" y1="101" x2="730" y2="101" stroke="#475569" stroke-width="1"/>
+      
+      <text x="664" y="115" fill="#cbd5e1" font-size="8" text-anchor="middle">• Users &amp; Profiles</text>
+      <text x="664" y="127" fill="#cbd5e1" font-size="8" text-anchor="middle">• Schemes &amp; Eligibility Catalog</text>
+      <text x="664" y="139" fill="#cbd5e1" font-size="8" text-anchor="middle">• Channel Partners &amp; Geo-Data</text>
+      <text x="664" y="151" fill="#cbd5e1" font-size="8" text-anchor="middle">• Chat History &amp; Share Tokens</text>
+
+      <!-- Backup/DR small annotation -->
+      <rect x="594" y="158" width="140" height="16" rx="3" fill="#0f172a" stroke="#94a3b8" stroke-width="0.5" stroke-dasharray="2,2"/>
+      <text x="664" y="170" fill="#94a3b8" font-size="7.5" text-anchor="middle">📦 Daily Automated Backup &amp; DR Replica</text>
+    </g>
+
+    <!-- External: OpenRouter (LLM) -->
+    <g filter="url(#shadow)">
+      <rect x="588" y="200" width="152" height="74" rx="5" fill="url(#extGrad)" stroke="#ef4444" stroke-width="1"/>
+      <text x="664" y="222" fill="#ffffff" font-size="10.5" font-weight="700" text-anchor="middle">OpenRouter API</text>
+      <text x="664" y="238" fill="#fecaca" font-size="8.5" text-anchor="middle">External LLM Provider</text>
+      <line x1="598" y1="246" x2="730" y2="246" stroke="#fca5a5" stroke-opacity="0.3" stroke-width="1"/>
+      <text x="664" y="260" fill="#fee2e2" font-size="8" text-anchor="middle">Multi-Model Agent Execution</text>
+    </g>
+
+    <!-- External: Sarvam AI (Speech) -->
+    <g filter="url(#shadow)">
+      <rect x="588" y="294" width="152" height="74" rx="5" fill="url(#extGrad)" stroke="#ef4444" stroke-width="1"/>
+      <text x="664" y="316" fill="#ffffff" font-size="10.5" font-weight="700" text-anchor="middle">Sarvam AI API</text>
+      <text x="664" y="332" fill="#fecaca" font-size="8.5" text-anchor="middle">Indic Speech &amp; Voice AI</text>
+      <line x1="598" y1="340" x2="730" y2="340" stroke="#fca5a5" stroke-opacity="0.3" stroke-width="1"/>
+      <text x="664" y="354" fill="#fee2e2" font-size="8" text-anchor="middle">Saaras:v3 STT &amp; Bulbul TTS</text>
+    </g>
+  </g>
+
+  <!-- ================= BOTTOM COMPLIANCE CROSS-CUTTING BAND ================= -->
+  <g id="compliance-band">
+    <rect x="12" y="448" width="736" height="24" rx="4" fill="url(#bandGrad)" stroke="#4338ca" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="24" y="464" fill="#a5b4fc" font-size="10" font-weight="700" letter-spacing="0.5">COMPLIANCE &amp; SECURITY</text>
+    <text x="175" y="464" fill="#64748b" font-size="9.5">|</text>
+    <text x="185" y="464" fill="#cbd5e1" font-size="9.5">DPDP Act Ready • In-Flight PII Redaction • TLS 1.3 in Transit • AES-256 at Rest • Zero Data-Sharing Guarantee</text>
+  </g>
+
+  <!-- ================= DIRECT CONNECTING ARROWS ================= -->
+  <!-- Client to Gateway -->
+  <path d="M 66 126 L 66 175" fill="none" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  
+  <!-- Gateway to Frontend / Backend -->
+  <path d="M 114 200 L 136 200" fill="none" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M 114 93 L 136 93" fill="none" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Frontend to Backend -->
+  <path d="M 212 126 L 212 145" fill="none" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Secrets feeding Backend & AI -->
+  <path d="M 288 373 L 306 373" fill="none" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="3,2" marker-end="url(#arrow-amber)"/>
+
+  <!-- Backend to Redis Cache & DB -->
+  <path d="M 288 185 L 312 93" fill="none" stroke="#38bdf8" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <path d="M 288 285 L 304 285" fill="none" stroke="#38bdf8" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- Backend to Orchestrator -->
+  <path d="M 288 230 L 312 189" fill="none" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Orchestrator to Business Tools (Loopback) -->
+  <path d="M 312 210 L 288 260" fill="none" stroke="#fbbf24" stroke-width="1.2" marker-end="url(#arrow-amber)"/>
+
+  <!-- Orchestrator to DB -->
+  <path d="M 288 300 Q 438 310 588 140" fill="none" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="2,2" marker-end="url(#arrow-slate)"/>
+
+  <!-- Orchestrator to Queue / Speech -->
+  <path d="M 438 233 L 438 247" fill="none" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrow-amber)"/>
+  <path d="M 503 126 L 503 145" fill="none" stroke="#a78bfa" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- Circuit Breaker wrapping to External APIs -->
+  <path d="M 564 237 L 588 237" fill="none" stroke="#ef4444" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M 564 331 L 588 331" fill="none" stroke="#ef4444" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Database connection from Business Engine -->
+  <path d="M 276 292 Q 350 420 620 180" fill="none" stroke="#38bdf8" stroke-width="1.2" marker-end="url(#arrow)"/>
+</svg>

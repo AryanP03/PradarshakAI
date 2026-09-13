@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { useRouter } from 'next/navigation';
@@ -432,6 +432,24 @@ export default function SchemesPage() {
 
   const hasActiveFilters = typeFilter !== 'all' || catFilter.length > 0 || genderFilter !== 'all' || search;
 
+  const isNavigatingRef = useRef(false);
+
+  const handleSchemeInquire = (name: string) => {
+    if (isNavigatingRef.current) return;
+    isNavigatingRef.current = true;
+    setTimeout(() => {
+      isNavigatingRef.current = false;
+    }, 1500);
+
+    if (typeof window !== 'undefined') {
+      try {
+        sessionStorage.removeItem('pradarshak_active_chat');
+      } catch {}
+    }
+    const inquiryId = 'inq_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 7);
+    router.push(`/chat?q=${encodeURIComponent(`Tell me about the ${name} scheme`)}&inquiry=1&inquiryId=${inquiryId}`);
+  };
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f8fafc' }}>
       <NavBar />
@@ -454,33 +472,35 @@ export default function SchemesPage() {
           </p>
 
           {/* Type Filter Segment Selector */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
+          <div className="flex flex-wrap items-center gap-2 mt-3">
             <button
               onClick={() => setTypeFilter('all')}
               style={{
                 fontSize: 13,
                 fontWeight: typeFilter === 'all' ? 800 : 600,
-                padding: '8px 18px',
+                padding: '8px 16px',
                 borderRadius: 12,
-                border: typeFilter === 'all' ? '2px solid #0b1f3a' : '1.5px solid #cbd5e1',
+                border: '1.5px solid',
+                borderColor: typeFilter === 'all' ? '#0b1f3a' : '#cbd5e1',
                 background: typeFilter === 'all' ? '#0b1f3a' : '#ffffff',
-                color: typeFilter === 'all' ? '#ffffff' : '#334155',
+                color: typeFilter === 'all' ? '#ffffff' : '#475569',
                 cursor: 'pointer',
                 transition: 'all 150ms ease',
               }}
             >
-              {t('schemes.tab_all', 'All Programmes')} ({schemeList.length})
+              {t('schemes.tab_all', 'All Catalog')} ({schemeList.length})
             </button>
             <button
               onClick={() => setTypeFilter('financing')}
               style={{
                 fontSize: 13,
                 fontWeight: typeFilter === 'financing' ? 800 : 600,
-                padding: '8px 18px',
+                padding: '8px 16px',
                 borderRadius: 12,
-                border: typeFilter === 'financing' ? '2px solid #059669' : '1.5px solid #a7f3d0',
+                border: '1.5px solid',
+                borderColor: typeFilter === 'financing' ? '#059669' : '#cbd5e1',
                 background: typeFilter === 'financing' ? '#ecfdf5' : '#ffffff',
-                color: typeFilter === 'financing' ? '#065f46' : '#059669',
+                color: typeFilter === 'financing' ? '#065f46' : '#475569',
                 cursor: 'pointer',
                 transition: 'all 150ms ease',
               }}
@@ -492,11 +512,12 @@ export default function SchemesPage() {
               style={{
                 fontSize: 13,
                 fontWeight: typeFilter === 'informational' ? 800 : 600,
-                padding: '8px 18px',
+                padding: '8px 16px',
                 borderRadius: 12,
-                border: typeFilter === 'informational' ? '2px solid #2563eb' : '1.5px solid #bfdbfe',
+                border: '1.5px solid',
+                borderColor: typeFilter === 'informational' ? '#2563eb' : '#cbd5e1',
                 background: typeFilter === 'informational' ? '#eff6ff' : '#ffffff',
-                color: typeFilter === 'informational' ? '#1d4ed8' : '#2563eb',
+                color: typeFilter === 'informational' ? '#1e40af' : '#475569',
                 cursor: 'pointer',
                 transition: 'all 150ms ease',
               }}
@@ -654,7 +675,7 @@ export default function SchemesPage() {
 
         {/* ── Scheme Grid ─────────────────────────────────────────────────── */}
         {loading ? (
-          <div className="scheme-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 24 }}>
+          <div className="scheme-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: 24 }}>
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} style={{ height: 360, background: '#e2e8f0', borderRadius: 18, animation: 'pulse 1.5s infinite' }} />
             ))}
@@ -703,9 +724,7 @@ export default function SchemesPage() {
               <SchemeCard
                 key={scheme.id}
                 scheme={scheme}
-                onChat={(name) =>
-                  router.push(`/chat?q=${encodeURIComponent(`Tell me about the ${name} scheme`)}`)
-                }
+                onChat={handleSchemeInquire}
               />
             ))}
           </div>

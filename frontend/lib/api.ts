@@ -44,6 +44,7 @@ export interface UserProfile {
   registration_complete?: boolean | null;
   education_level?: string | null;
   trade_category?: string | null;
+  job_business_other?: string | null;
   funding_bracket?: string | null;
   caste_category?: string | null;
   guest?: boolean;
@@ -110,21 +111,25 @@ export async function sendChat(
   languageProbability?: number | null,
   category?: string | null,
   schemeAction?: SchemeActionPayload,
-  history?: { role: 'user' | 'assistant'; content: string }[]
+  history?: { role: 'user' | 'assistant'; content: string }[],
+  newChat?: boolean,
+  inquiryId?: string | null
 ): Promise<ChatResponse> {
   const res = await fetch(`${BASE}/chat`, {
     method: 'POST',
     headers: userHeaders(token),
     body: JSON.stringify({
       message,
-      sessionId,
-      chatId,
+      sessionId: newChat ? undefined : sessionId,
+      chatId: newChat ? undefined : chatId,
       language,
       detectedLanguageCode,
       languageProbability,
       category,
       schemeAction,
-      history,
+      history: newChat ? undefined : history,
+      newChat,
+      inquiryId: inquiryId || undefined,
     }),
   });
   if (!res.ok) {

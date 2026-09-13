@@ -221,14 +221,13 @@ function AuthContent() {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f8fafc' }}>
       <NavBar />
 
-      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 24px' }}>
+      <main className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-12">
         <div
+          className="grid grid-cols-1 lg:grid-cols-[1fr_1.05fr]"
           style={{
             maxWidth: 1040,
             width: '100%',
             margin: '0 auto',
-            display: 'grid',
-            gridTemplateColumns: '1fr 1.05fr',
             borderRadius: 24,
             overflow: 'hidden',
             boxShadow: '0 12px 36px rgba(11, 31, 58, 0.08)',

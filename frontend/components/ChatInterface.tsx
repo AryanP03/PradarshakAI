@@ -1003,6 +1003,8 @@ interface ChatInterfaceProps {
   onMessagesChange?: (messages: Message[], currentChatId: string | null) => void;
   initialMessages?: ChatMessage[];
   initialQuery?: string | null;
+  inquiryId?: string | null;
+  isNewInquiry?: boolean;
   category?: string | null;
 }
 
@@ -1015,6 +1017,8 @@ export default function ChatInterface({
   onMessagesChange,
   initialMessages,
   initialQuery,
+  inquiryId,
+  isNewInquiry,
   category,
 }: ChatInterfaceProps) {
   const router = useRouter();
@@ -1222,7 +1226,12 @@ export default function ChatInterface({
   // ── Hydrate messages and sessionId from sessionStorage after mount (client-only) ──
   useEffect(() => {
     if (_hydratedFromSession) return;
-    if (initialMessages && initialMessages.length > 0) {
+    if (isNewInquiry || initialQuery || (initialMessages && initialMessages.length > 0)) {
+      if (typeof window !== 'undefined' && (isNewInquiry || initialQuery)) {
+        try {
+          sessionStorage.removeItem('pradarshak_active_chat');
+        } catch {}
+      }
       _setHydratedFromSession(true);
       return;
     }
@@ -1771,6 +1780,9 @@ export default function ChatInterface({
     initialMessages && initialMessages.length > 0 ? initialMessages : null
   );
 
+  const inFlightQueryRef = useRef<string | null>(null);
+  const processedInquiryKeyRef = useRef<string | null>(null);
+
   // Reset chat on explicit New Chat action
   useEffect(() => {
     if (resetKey !== undefined && resetKey > 0) {
@@ -1787,13 +1799,15 @@ export default function ChatInterface({
       setInput('');
       setLoading(false);
       setSpeechError(null);
-      lastProcessedQueryRef.current = null;
+      if (!inquiryId) {
+        processedInquiryKeyRef.current = null;
+      }
       stopAudio();
       stopListening();
       cleanupVoiceAgent();
       setVoiceAgentState('IDLE');
     }
-  }, [resetKey, stopAudio, stopListening, cleanupVoiceAgent]);
+  }, [resetKey, stopAudio, stopListening, cleanupVoiceAgent, inquiryId]);
 
   // Synchronize messages state with parent and sessionStorage for session retention
   useEffect(() => {
@@ -1871,8 +1885,14 @@ export default function ChatInterface({
   }, [propChatId, initialMessages, stopAudio, stopListening, cleanupVoiceAgent]);
 
   const send = useCallback(
-    async (text: string) => {
-      if (!text.trim() || loading) return;
+    async (text: string, forceNewChat?: boolean, inquiryIdForApi?: string) => {
+      const trimmed = text.trim();
+      if (!trimmed || loading) return;
+      if (inFlightQueryRef.current === trimmed) {
+        console.warn('[chat] In-flight query already executing, dropping duplicate send:', trimmed);
+        return;
+      }
+      inFlightQueryRef.current = trimmed;
 
       setHasDismissedGuidance(true);
       if (isListening) stopListening();
@@ -1887,13 +1907,17 @@ export default function ChatInterface({
         const reqLang = isAuto ? 'auto' : language;
         const res = await sendChat(
           text,
-          sessionId || undefined,
-          chatIdRef.current || undefined,
+          forceNewChat ? undefined : (sessionId || undefined),
+          forceNewChat ? undefined : (chatIdRef.current || undefined),
           token,
           reqLang,
           sttDetectedLang.code,
           sttDetectedLang.probability,
-          category || undefined
+          category || undefined,
+          undefined,
+          undefined,
+          forceNewChat || Boolean(isNewInquiry),
+          inquiryIdForApi || inquiryId || undefined
         );
         setSttDetectedLang({ code: null, probability: null });
 
@@ -1936,12 +1960,18 @@ export default function ChatInterface({
         });
         console.error(err);
       } finally {
+        inFlightQueryRef.current = null;
         setLoading(false);
         setTimeout(() => inputRef.current?.focus(), 100);
       }
     },
-    [loading, sessionId, token, onChatCreated, onStepComplete, addMessage, isListening, stopListening, language, isAuto, updateDetectedLang, category]
+    [loading, sessionId, token, onChatCreated, onStepComplete, addMessage, isListening, stopListening, language, isAuto, updateDetectedLang, category, isNewInquiry, inquiryId, t]
   );
+
+  const sendRef = useRef(send);
+  useEffect(() => {
+    sendRef.current = send;
+  });
 
   const handleSchemeAction = useCallback(
     async (action: 'KNOW_MORE' | 'DOCUMENTS' | 'EMI', scheme: Scheme) => {
@@ -2091,14 +2121,16 @@ export default function ChatInterface({
     [loading, isListening, stopListening, addMessage, isAuto, language, sessionId, token, sttDetectedLang.code, sttDetectedLang.probability, category, onChatCreated, onStepComplete, t, updateDetectedLang]
   );
 
-  const lastProcessedQueryRef = useRef<string | null>(null);
-
   useEffect(() => {
-    if (initialQuery && initialQuery.trim() && lastProcessedQueryRef.current !== initialQuery) {
-      lastProcessedQueryRef.current = initialQuery;
-      send(initialQuery);
+    if (!initialQuery || !initialQuery.trim()) return;
+
+    const key = inquiryId ? `inq:${inquiryId}` : `q:${initialQuery.trim()}`;
+    if (processedInquiryKeyRef.current === key) {
+      return;
     }
-  }, [initialQuery, send]);
+    processedInquiryKeyRef.current = key;
+    sendRef.current(initialQuery, true, inquiryId || undefined);
+  }, [initialQuery, inquiryId]);
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {

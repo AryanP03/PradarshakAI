@@ -9,6 +9,22 @@ import { UserProfileContext, getOrCreate, hydrateSessionHistory } from '../servi
 const router = Router();
 router.use(optionalUser);
 
+interface CachedInquiryResponse {
+  response: any;
+  timestamp: number;
+}
+const inFlightInquiries = new Map<string, Promise<any>>();
+const recentInquiryCache = new Map<string, CachedInquiryResponse>();
+
+function cleanOldInquiryCache() {
+  const now = Date.now();
+  for (const [key, val] of recentInquiryCache.entries()) {
+    if (now - val.timestamp > 60000) {
+      recentInquiryCache.delete(key);
+    }
+  }
+}
+
 // POST /api/chat
 router.post('/', async (req: UserAuthRequest, res: Response) => {
   const {
@@ -21,6 +37,9 @@ router.post('/', async (req: UserAuthRequest, res: Response) => {
     category,
     schemeAction,
     history,
+    newChat,
+    isNewChat: altNewChat,
+    inquiryId,
   } = req.body as {
     message?: string;
     chatId?: string;
@@ -31,7 +50,33 @@ router.post('/', async (req: UserAuthRequest, res: Response) => {
     category?: string;
     schemeAction?: SchemeActionPayload;
     history?: { role: 'user' | 'assistant'; content: string }[];
+    newChat?: boolean;
+    isNewChat?: boolean;
+    inquiryId?: string;
   };
+
+  cleanOldInquiryCache();
+
+  // Deduplication / Idempotency guard for Explore Schemes inquiries
+  if (inquiryId) {
+    const cached = recentInquiryCache.get(inquiryId);
+    if (cached) {
+      console.log(`[chat-idempotency] Returning cached response for inquiryId: ${inquiryId}`);
+      res.json(cached.response);
+      return;
+    }
+    const inFlight = inFlightInquiries.get(inquiryId);
+    if (inFlight) {
+      console.log(`[chat-idempotency] Awaiting in-flight response for inquiryId: ${inquiryId}`);
+      try {
+        const result = await inFlight;
+        res.json(result);
+      } catch (e: any) {
+        res.status(500).json({ error: 'Internal server error', detail: e?.message || String(e) });
+      }
+      return;
+    }
+  }
 
   const effectiveMessage = (message && message.trim()) || (
     schemeAction?.action === 'KNOW_MORE'
@@ -62,10 +107,12 @@ router.post('/', async (req: UserAuthRequest, res: Response) => {
     }
   }
 
-  let chatId = incomingChatId;
-  const activeSessionId = chatId || incomingSessionId || undefined;
+  const forceNewChat = Boolean(newChat || altNewChat || inquiryId);
 
-  try {
+  const runChat = async () => {
+    let chatId = forceNewChat ? undefined : incomingChatId;
+    const activeSessionId = forceNewChat ? undefined : (chatId || incomingSessionId || undefined);
+
     // If authenticated, persist the chat
     if (validUserId) {
       try {
@@ -108,6 +155,7 @@ router.post('/', async (req: UserAuthRequest, res: Response) => {
         console.warn('[chat] Failed to persist user message in DB:', dbErr);
       }
     }
+
     // Fetch complete user profile info if authenticated (Unified Context Bus)
     let userContext: UserProfileContext | undefined;
     if (validUserId) {
@@ -123,12 +171,17 @@ router.post('/', async (req: UserAuthRequest, res: Response) => {
         trade_category: string | null;
         funding_bracket: string | null;
         caste_category: string | null;
+        job_business_other: string | null;
       }>(
-        'SELECT name, salary, gender, city, district, state, pincode, education_level, trade_category, funding_bracket, caste_category FROM users WHERE id = $1',
+        'SELECT name, salary, gender, city, district, state, pincode, education_level, trade_category, funding_bracket, caste_category, job_business_other FROM users WHERE id = $1',
         [validUserId]
       );
       if (userRows.length > 0) {
         const u = userRows[0];
+        const effectiveTrade = (u.trade_category === 'other' && u.job_business_other)
+          ? u.job_business_other
+          : (u.trade_category || u.job_business_other || null);
+
         userContext = {
           name: u.name,
           salary: u.salary != null ? Number(u.salary) : null,
@@ -138,7 +191,8 @@ router.post('/', async (req: UserAuthRequest, res: Response) => {
           state: u.state,
           pincode: u.pincode,
           education_level: u.education_level,
-          trade_category: u.trade_category,
+          trade_category: effectiveTrade,
+          job_business_other: u.job_business_other,
           funding_bracket: u.funding_bracket,
           caste_category: u.caste_category || 'SC',
         };
@@ -147,7 +201,7 @@ router.post('/', async (req: UserAuthRequest, res: Response) => {
 
     // Hydrate session history if this is an existing chat and in-memory history is empty
     const session = getOrCreate(activeSessionId);
-    if (session.conversationHistory.length === 0) {
+    if (!forceNewChat && session.conversationHistory.length === 0) {
       if (validUserId && chatId) {
         try {
           const { rows: prevMsgs } = await pool.query(
@@ -200,7 +254,24 @@ router.post('/', async (req: UserAuthRequest, res: Response) => {
       }
     }
 
-    res.json({ ...response, chatId: chatId || response.sessionId });
+    return { ...response, chatId: chatId || response.sessionId };
+  };
+
+  try {
+    if (inquiryId) {
+      const execPromise = runChat();
+      inFlightInquiries.set(inquiryId, execPromise);
+      try {
+        const finalResult = await execPromise;
+        recentInquiryCache.set(inquiryId, { response: finalResult, timestamp: Date.now() });
+        res.json(finalResult);
+      } finally {
+        inFlightInquiries.delete(inquiryId);
+      }
+    } else {
+      const finalResult = await runChat();
+      res.json(finalResult);
+    }
   } catch (err) {
     const msg = (err as Error)?.message || String(err);
     console.error('[chat-error]', msg);

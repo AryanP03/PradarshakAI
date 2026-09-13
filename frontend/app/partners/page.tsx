@@ -520,16 +520,61 @@ function PartnersContent() {
 
         {/* ── Split Layout: Partner Cards List + Leaflet Map ────────────────── */}
         <div
-          className="partners-layout"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1.15fr 1fr',
-            gap: 28,
-            alignItems: 'start',
-          }}
+          className="grid grid-cols-1 lg:grid-cols-[1.15fr_1fr] gap-7 items-start"
         >
-          {/* Left Column: Partner List */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Right Column (on desktop) / Top Column (on mobile): Dynamic Leaflet Map */}
+          <div
+            className="partner-map surface-card order-1 lg:order-2"
+            style={{
+              background: '#ffffff',
+              border: '1.5px solid #e2e8f0',
+              borderRadius: 18,
+              boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
+              overflow: 'hidden',
+              position: 'relative',
+            }}
+          >
+            <div className="h-[280px] sm:h-[360px] lg:h-[520px] w-full">
+              <LeafletMap
+                userLocation={userLocation}
+                partners={filteredPartners as unknown as MapPartner[]}
+                selectedPartner={selectedPartner as unknown as MapPartner}
+                onPartnerClick={(p) => {
+                  const matched = filteredPartners.find((fp) => fp.id === p.id);
+                  if (matched) setSelectedPartner(matched);
+                }}
+                height="100%"
+              />
+            </div>
+
+            {/* Map Legend */}
+            <div
+              className="flex flex-wrap items-center justify-between gap-2 text-xs"
+              style={{
+                padding: '12px 16px',
+                background: '#f8fafc',
+                borderTop: '1px solid #e2e8f0',
+                color: '#64748b',
+                fontWeight: 600,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#0b1f3a' }} />
+                <span>Channel Partner</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ea580c' }} />
+                <span>Selected</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#2563eb' }} />
+                <span>User GPS</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Left Column (on desktop) / Bottom Column (on mobile): Partner List */}
+          <div className="order-2 lg:order-1" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 4 }}>
               <span style={{ fontSize: 14, fontWeight: 800, color: '#0b1f3a' }}>
@@ -628,74 +673,6 @@ function PartnersContent() {
                 </p>
               </div>
             )}
-          </div>
-
-          {/* Right Column: Dynamic Leaflet Map */}
-          <div
-            className="partner-map surface-card"
-            style={{
-              background: '#ffffff',
-              border: '1.5px solid #e2e8f0',
-              borderRadius: 18,
-              boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
-              overflow: 'hidden',
-              position: 'sticky',
-              top: 80,
-            }}
-          >
-            <LeafletMap
-              userLocation={userLocation}
-              partners={filteredPartners as unknown as MapPartner[]}
-              selectedPartner={selectedPartner as unknown as MapPartner}
-              onPartnerClick={(p) => {
-                const matched = filteredPartners.find((fp) => fp.id === p.id);
-                if (matched) setSelectedPartner(matched);
-              }}
-              height="520px"
-            />
-
-            {/* Map Legend */}
-            <div
-              style={{
-                padding: '12px 16px',
-                background: '#f8fafc',
-                borderTop: '1px solid #e2e8f0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                fontSize: 11.5,
-                color: '#475569',
-                flexWrap: 'wrap',
-                gap: 8,
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#1e40af' }} />
-                  <span>SCA</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#065f46' }} />
-                  <span>PSB</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#047857' }} />
-                  <span>RRB</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#6b21a8' }} />
-                  <span>NBFC-MFI</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#c2410c' }} />
-                  <span>Co-op Bank</span>
-                </div>
-              </div>
-
-              <span style={{ fontSize: 10.5, color: '#94a3b8' }}>
-                PostGIS & Leaflet
-              </span>
-            </div>
           </div>
         </div>
       </main>

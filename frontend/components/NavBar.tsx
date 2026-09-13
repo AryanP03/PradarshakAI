@@ -47,6 +47,22 @@ function NavBarContent() {
     }
   }, [langOpen]);
 
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') setMobileOpen(false);
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.body.style.overflow = '';
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    } else {
+      document.body.style.overflow = '';
+    }
+  }, [mobileOpen]);
+
   function logout() {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
@@ -91,12 +107,12 @@ function NavBarContent() {
           style={{
             maxWidth: 1200,
             margin: '0 auto',
-            padding: '0 20px',
-            height: 68,
+            padding: '0 16px',
+            height: 64,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: 20,
+            gap: 12,
           }}
         >
           {/* ── Brand Emblem & Title ───────────────────────────────────────── */}
@@ -105,15 +121,16 @@ function NavBarContent() {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 9,
+              gap: 8,
               textDecoration: 'none',
               flexShrink: 0,
+              minWidth: 0,
             }}
           >
             <div
               style={{
-                width: 36,
-                height: 40,
+                width: 34,
+                height: 38,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -123,14 +140,14 @@ function NavBarContent() {
                 padding: '2px',
               }}
             >
-              <EmblemOfIndia size={32} />
+              <EmblemOfIndia size={30} />
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span
                   style={{
-                    fontSize: 16.5,
+                    fontSize: 'clamp(14.5px, 2vw, 16.5px)',
                     fontWeight: 800,
                     color: '#ffffff',
                     letterSpacing: '-0.01em',
@@ -142,12 +159,16 @@ function NavBarContent() {
                 </span>
               </div>
               <span
+                className="hidden sm:inline-block"
                 style={{
-                  fontSize: 10.5,
+                  fontSize: 10,
                   color: '#cbd5e1',
                   fontWeight: 500,
                   whiteSpace: 'nowrap',
                   letterSpacing: '0.01em',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: 'clamp(160px, 35vw, 360px)',
                 }}
               >
                 {t('brand.subtitle', 'Ministry of Social Justice and Empowerment')}
@@ -156,7 +177,7 @@ function NavBarContent() {
           </Link>
 
           {/* ── Desktop Navigation Tabs (Light-on-Dark Theme) ──────────────── */}
-          <nav className="hidden md:flex items-center gap-1" style={{ marginLeft: 8 }}>
+          <nav className="hidden lg:flex items-center gap-1" style={{ marginLeft: 8 }}>
             {navLinks.map((link) => {
               const Icon = link.icon;
               const active = isActive(link.href);
@@ -168,9 +189,9 @@ function NavBarContent() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 6,
-                    padding: '8px 14px',
+                    padding: '8px 12px',
                     borderRadius: 6,
-                    fontSize: 13.5,
+                    fontSize: 13,
                     fontWeight: active ? 700 : 500,
                     color: active ? '#ffffff' : '#cbd5e1',
                     background: active ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
@@ -191,7 +212,7 @@ function NavBarContent() {
                     }
                   }}
                 >
-                  <Icon size={16} color={active ? '#ffffff' : '#94a3b8'} />
+                  <Icon size={15} color={active ? '#ffffff' : '#94a3b8'} />
                   <span>{link.label}</span>
                 </Link>
               );
@@ -199,7 +220,7 @@ function NavBarContent() {
           </nav>
 
           {/* ── Right Controls: Language Selector & User Auth ───────────────── */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
             {/* Single Global Language Selector Dropdown */}
             <div style={{ position: 'relative' }}>
               <button
@@ -212,10 +233,10 @@ function NavBarContent() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 6,
-                  padding: '7px 11px',
+                  gap: 5,
+                  padding: '6px 10px',
                   borderRadius: 6,
-                  fontSize: 13,
+                  fontSize: 12.5,
                   fontWeight: 600,
                   color: '#ffffff',
                   background: 'rgba(255, 255, 255, 0.08)',
@@ -223,10 +244,11 @@ function NavBarContent() {
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
                 }}
+                aria-label="Select language"
               >
-                <Globe size={14} color="#ffdcc2" />
-                <span>{currentLangObj.nativeName}</span>
-                <ChevronDown size={13} style={{ transform: langOpen ? 'rotate(180deg)' : 'none', transition: 'transform 150ms' }} />
+                <Globe size={13} color="#ffdcc2" />
+                <span className="max-w-[70px] sm:max-w-none truncate">{currentLangObj.nativeName}</span>
+                <ChevronDown size={12} style={{ transform: langOpen ? 'rotate(180deg)' : 'none', transition: 'transform 150ms' }} />
               </button>
 
               {langOpen && (
@@ -240,9 +262,9 @@ function NavBarContent() {
                     overflowY: 'auto',
                     background: '#ffffff',
                     border: '1px solid #e2e8f0',
-                    borderRadius: 6,
+                    borderRadius: 8,
                     padding: '4px',
-                    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
                     zIndex: 100,
                     display: 'flex',
                     flexDirection: 'column',
@@ -316,9 +338,9 @@ function NavBarContent() {
               )}
             </div>
 
-            {/* Auth Login / User Badge */}
+            {/* Desktop Auth Controls (Hidden on mobile/small tablets, accessible in mobile menu) */}
             {user ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div className="hidden sm:flex items-center gap-2">
                 <Link
                   href="/profile"
                   className="btn-bounce focus-ring"
@@ -326,57 +348,50 @@ function NavBarContent() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 6,
-                    padding: '7px 11px',
+                    padding: '6px 11px',
                     borderRadius: 6,
-                    fontSize: 13,
+                    fontSize: 12.5,
                     fontWeight: 600,
                     color: '#ffffff',
                     background: '#003366',
                     textDecoration: 'none',
                   }}
                 >
-                  <User size={14} color="#ffdcc2" />
+                  <User size={13} color="#ffdcc2" />
                   <span>{user.name?.split(' ')[0] || 'Citizen'}</span>
                 </Link>
                 <button
                   onClick={logout}
                   className="btn-bounce focus-ring"
                   style={{
-                    padding: '7px 14px',
-                    borderRadius: 8,
-                    fontSize: 12.5,
+                    padding: '6px 12px',
+                    borderRadius: 6,
+                    fontSize: 12,
                     fontWeight: 700,
                     color: '#ffffff',
                     background: 'linear-gradient(135deg, #dc2626, #b91c1c)',
                     border: 'none',
-                    boxShadow: '0 2px 8px rgba(220, 38, 38, 0.28)',
+                    boxShadow: '0 2px 6px rgba(220, 38, 38, 0.25)',
                     cursor: 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: 6,
+                    gap: 5,
                     transition: 'all 180ms ease',
                   }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
-                    (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 14px rgba(220, 38, 38, 0.4)';
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = 'linear-gradient(135deg, #dc2626, #b91c1c)';
-                    (e.currentTarget as HTMLElement).style.boxShadow = '0 2px 8px rgba(220, 38, 38, 0.28)';
-                  }}
+                  title={t('nav.signout', 'Sign Out')}
                 >
-                  <LogOut size={13} color="#ffffff" />
-                  <span>{t('nav.signout', 'Sign Out')}</span>
+                  <LogOut size={12} color="#ffffff" />
+                  <span className="hidden md:inline">{t('nav.signout', 'Sign Out')}</span>
                 </button>
               </div>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+              <div className="hidden sm:flex items-center gap-2">
                 <Link
                   href="/auth"
                   className="btn-bounce focus-ring"
                   style={{
-                    fontSize: 13,
-                    padding: '7px 14px',
+                    fontSize: 12.5,
+                    padding: '6px 12px',
                     borderRadius: 6,
                     fontWeight: 600,
                     color: '#ffffff',
@@ -385,20 +400,19 @@ function NavBarContent() {
                     textDecoration: 'none',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: 6,
+                    gap: 5,
                     whiteSpace: 'nowrap',
-                    flexShrink: 0,
                   }}
                 >
-                  <User size={13} color="#ffdcc2" />
-                  <span style={{ whiteSpace: 'nowrap' }}>{t('nav.signin', 'Sign In')}</span>
+                  <User size={12} color="#ffdcc2" />
+                  <span>{t('nav.signin', 'Sign In')}</span>
                 </Link>
                 <Link
                   href="/register"
                   className="btn-bounce focus-ring"
                   style={{
-                    fontSize: 13,
-                    padding: '7px 16px',
+                    fontSize: 12.5,
+                    padding: '6px 14px',
                     borderRadius: 6,
                     fontWeight: 700,
                     color: '#ffffff',
@@ -407,148 +421,304 @@ function NavBarContent() {
                     textDecoration: 'none',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: 6,
+                    gap: 5,
                     whiteSpace: 'nowrap',
-                    flexShrink: 0,
                   }}
                 >
-                  <ShieldCheck size={14} />
-                  <span style={{ whiteSpace: 'nowrap' }}>{t('nav.register', 'Register')}</span>
+                  <ShieldCheck size={13} />
+                  <span>{t('nav.register', 'Register')}</span>
                 </Link>
               </div>
             )}
 
-            {/* Mobile Hamburger Menu */}
+            {/* Mobile Hamburger Menu Button (Touch-Friendly >= 44x44px) */}
             <button
               type="button"
-              className="md:hidden interactive-control focus-ring"
+              className="lg:hidden interactive-control focus-ring"
               onClick={() => setMobileOpen((prev) => !prev)}
               style={{
-                padding: '7px',
-                borderRadius: 6,
+                width: 42,
+                height: 42,
+                borderRadius: 8,
                 background: 'rgba(255, 255, 255, 0.08)',
                 border: '1px solid rgba(255, 255, 255, 0.2)',
                 color: '#ffffff',
                 cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
               }}
+              aria-label={mobileOpen ? 'Close mobile menu' : 'Open navigation menu'}
+              aria-expanded={mobileOpen}
             >
-              {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* ── Mobile Menu Dropdown (Dark Theme) ─────────────────────────────── */}
+      {/* ── Mobile Navigation Drawer & Backdrop ─────────────────────────── */}
       {mobileOpen && (
-        <div
-          className="md:hidden material-sheet"
-          style={{
-            background: '#00132b',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
-            padding: '12px 20px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 6,
-            boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-          }}
-        >
-          {navLinks.map((link) => {
-            const Icon = link.icon;
-            const active = isActive(link.href);
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
+        <div className="lg:hidden" role="dialog" aria-modal="true" aria-label="Mobile navigation">
+          {/* Smooth Backdrop Overlay */}
+          <div
+            className="mobile-nav-backdrop"
+            onClick={() => setMobileOpen(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0, 19, 43, 0.65)',
+              backdropFilter: 'blur(4px)',
+              WebkitBackdropFilter: 'blur(4px)',
+              zIndex: 998,
+            }}
+          />
+
+          {/* Slide-over Drawer Panel */}
+          <div
+            className="mobile-nav-drawer"
+            style={{
+              position: 'fixed',
+              top: 0,
+              right: 0,
+              bottom: 0,
+              width: 'min(320px, 86vw)',
+              background: '#00132b',
+              borderLeft: '1px solid rgba(255, 255, 255, 0.15)',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '-8px 0 28px rgba(0,0,0,0.5)',
+              zIndex: 999,
+              overflowY: 'auto',
+              padding: '20px 18px',
+              gap: 16,
+            }}
+          >
+            {/* Drawer Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 12, borderBottom: '1px solid rgba(255, 255, 255, 0.12)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 30, height: 34, background: '#ffffff', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2px' }}>
+                  <EmblemOfIndia size={26} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: 15, fontWeight: 800, color: '#ffffff' }}>PradarshakAI</span>
+                  <span style={{ fontSize: 10, color: '#cbd5e1' }}>Citizen Portal</span>
+                </div>
+              </div>
+              <button
+                type="button"
                 onClick={() => setMobileOpen(false)}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '9px 12px',
+                  width: 38,
+                  height: 38,
                   borderRadius: 6,
-                  fontSize: 14,
-                  fontWeight: active ? 700 : 500,
-                  color: active ? '#ffffff' : '#cbd5e1',
-                  background: active ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
-                  textDecoration: 'none',
-                }}
-              >
-                <Icon size={18} color={active ? '#ffffff' : '#94a3b8'} />
-                <span>{link.label}</span>
-              </Link>
-            );
-          })}
-
-          {user ? (
-            <div style={{ display: 'flex', gap: 8, marginTop: 8, paddingTop: 10, borderTop: '1px solid rgba(255, 255, 255, 0.12)' }}>
-              <button
-                onClick={() => {
-                  setMobileOpen(false);
-                  logout();
-                }}
-                style={{
-                  width: '100%',
-                  padding: '10px 14px',
-                  borderRadius: 8,
-                  textAlign: 'center',
-                  fontSize: 13.5,
-                  fontWeight: 700,
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
                   color: '#ffffff',
-                  background: 'linear-gradient(135deg, #dc2626, #b91c1c)',
-                  border: 'none',
-                  boxShadow: '0 2px 8px rgba(220, 38, 38, 0.3)',
-                  cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 8,
+                  cursor: 'pointer',
                 }}
+                aria-label="Close navigation"
               >
-                <LogOut size={16} color="#ffffff" />
-                <span>{t('nav.signout', 'Sign Out')}</span>
+                <X size={18} />
               </button>
             </div>
-          ) : (
-            <div style={{ display: 'flex', gap: 8, marginTop: 8, paddingTop: 10, borderTop: '1px solid rgba(255, 255, 255, 0.12)' }}>
-              <Link
-                href="/auth"
-                onClick={() => setMobileOpen(false)}
-                style={{
-                  flex: 1,
-                  padding: '10px 12px',
-                  borderRadius: 6,
-                  textAlign: 'center',
-                  fontSize: 13.5,
-                  fontWeight: 600,
-                  color: '#ffffff',
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  border: '1px solid rgba(255, 255, 255, 0.25)',
-                  textDecoration: 'none',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {t('nav.signin', 'Sign In')}
-              </Link>
-              <Link
-                href="/register"
-                onClick={() => setMobileOpen(false)}
-                style={{
-                  flex: 1,
-                  padding: '10px 12px',
-                  borderRadius: 6,
-                  textAlign: 'center',
-                  fontSize: 13.5,
-                  fontWeight: 700,
-                  color: '#ffffff',
-                  background: '#f58220',
-                  textDecoration: 'none',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {t('nav.register', 'Register')}
-              </Link>
+
+            {/* Navigation Links */}
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {navLinks.map((link) => {
+                const Icon = link.icon;
+                const active = isActive(link.href);
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                      padding: '12px 14px',
+                      borderRadius: 8,
+                      fontSize: 14,
+                      fontWeight: active ? 700 : 500,
+                      color: active ? '#ffffff' : '#cbd5e1',
+                      background: active ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+                      textDecoration: 'none',
+                      minHeight: 44,
+                    }}
+                  >
+                    <Icon size={18} color={active ? '#fbbf24' : '#94a3b8'} />
+                    <span>{link.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* Profile & Auth Controls Section */}
+            <div style={{ paddingTop: 12, borderTop: '1px solid rgba(255, 255, 255, 0.12)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {user ? (
+                <>
+                  <Link
+                    href="/profile"
+                    onClick={() => setMobileOpen(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                      padding: '12px 14px',
+                      borderRadius: 8,
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: '#ffffff',
+                      background: 'rgba(0, 51, 102, 0.6)',
+                      border: '1px solid rgba(255, 255, 255, 0.15)',
+                      textDecoration: 'none',
+                      minHeight: 44,
+                    }}
+                  >
+                    <User size={18} color="#ffdcc2" />
+                    <span>{user.name || 'Citizen Profile'}</span>
+                  </Link>
+
+                  <button
+                    onClick={() => {
+                      setMobileOpen(false);
+                      logout();
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px',
+                      borderRadius: 8,
+                      textAlign: 'center',
+                      fontSize: 13.5,
+                      fontWeight: 700,
+                      color: '#ffffff',
+                      background: 'linear-gradient(135deg, #dc2626, #b91c1c)',
+                      border: 'none',
+                      boxShadow: '0 2px 8px rgba(220, 38, 38, 0.3)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 8,
+                      minHeight: 44,
+                    }}
+                  >
+                    <LogOut size={16} color="#ffffff" />
+                    <span>{t('nav.signout', 'Sign Out')}</span>
+                  </button>
+                </>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <Link
+                    href="/auth"
+                    onClick={() => setMobileOpen(false)}
+                    style={{
+                      padding: '12px 14px',
+                      borderRadius: 8,
+                      textAlign: 'center',
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: '#ffffff',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      border: '1px solid rgba(255, 255, 255, 0.25)',
+                      textDecoration: 'none',
+                      minHeight: 44,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 8,
+                    }}
+                  >
+                    <User size={16} color="#ffdcc2" />
+                    <span>{t('nav.signin', 'Sign In')}</span>
+                  </Link>
+
+                  <Link
+                    href="/register"
+                    onClick={() => setMobileOpen(false)}
+                    style={{
+                      padding: '12px 14px',
+                      borderRadius: 8,
+                      textAlign: 'center',
+                      fontSize: 14,
+                      fontWeight: 700,
+                      color: '#ffffff',
+                      background: '#f58220',
+                      textDecoration: 'none',
+                      minHeight: 44,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 8,
+                    }}
+                  >
+                    <ShieldCheck size={16} />
+                    <span>{t('nav.register', 'Register (Verified)')}</span>
+                  </Link>
+                </div>
+              )}
             </div>
-          )}
+
+            {/* Language Selection Inside Mobile Drawer */}
+            <div style={{ marginTop: 'auto', paddingTop: 14, borderTop: '1px solid rgba(255, 255, 255, 0.12)' }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 8 }}>
+                {t('nav.select_lang', 'Language / भाषा')}
+              </span>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLang('auto');
+                    setMobileOpen(false);
+                  }}
+                  style={{
+                    padding: '8px 10px',
+                    borderRadius: 6,
+                    fontSize: 12,
+                    fontWeight: isAuto ? 700 : 500,
+                    color: isAuto ? '#fbbf24' : '#cbd5e1',
+                    background: isAuto ? 'rgba(251, 191, 36, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                    border: isAuto ? '1px solid #fbbf24' : '1px solid rgba(255, 255, 255, 0.1)',
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                  }}
+                >
+                  Auto
+                </button>
+                {SUPPORTED_LANGUAGES.slice(0, 7).map((item) => {
+                  const isSelected = !isAuto && selectedMode === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        setLang(item.id);
+                        setMobileOpen(false);
+                      }}
+                      style={{
+                        padding: '8px 10px',
+                        borderRadius: 6,
+                        fontSize: 12,
+                        fontWeight: isSelected ? 700 : 500,
+                        color: isSelected ? '#fbbf24' : '#cbd5e1',
+                        background: isSelected ? 'rgba(251, 191, 36, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                        border: isSelected ? '1px solid #fbbf24' : '1px solid rgba(255, 255, 255, 0.1)',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                      }}
+                    >
+                      {item.nativeName}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </header>

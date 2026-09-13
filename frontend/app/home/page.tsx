@@ -154,20 +154,20 @@ export default function PortalOverviewPage() {
       </section>
 
       {/* ── QUICK SERVICES SECTION ────────────────────────────────────────── */}
-      <section style={{ padding: '48px 24px 60px', maxWidth: 1200, margin: '0 auto', width: '100%' }}>
+      <section className="py-10 md:py-14 px-4 sm:px-6" style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <h2 style={{ fontSize: 28, fontWeight: 800, color: '#003366', margin: '0 0 12px 0' }}>
+          <h2 style={{ fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: 800, color: '#003366', margin: '0 0 12px 0' }}>
             {t('home.services_title', 'What would you like to do?')}
           </h2>
-          <p style={{ fontSize: 16, color: '#64748b', margin: 0 }}>
+          <p style={{ fontSize: 'clamp(14px, 1.8vw, 16px)', color: '#64748b', margin: 0 }}>
             {t('home.services_sub', t('home.services_subtitle', 'Select an option below to get started with PradarshakAI'))}
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: 20 }}>
           {/* Card 1: Explore Schemes */}
           <Link href="/schemes" style={{ textDecoration: 'none' }}>
-            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, padding: '32px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.03)', height: '100%' }}>
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, padding: '28px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.03)', height: '100%' }}>
               <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Layers size={32} color="#003366" />
               </div>
@@ -184,7 +184,7 @@ export default function PortalOverviewPage() {
 
           {/* Card 2: Check Eligibility */}
           <Link href="/chat" style={{ textDecoration: 'none' }}>
-            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, padding: '32px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.03)', height: '100%' }}>
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, padding: '28px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.03)', height: '100%' }}>
               <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ShieldCheck size={32} color="#003366" />
               </div>
@@ -201,7 +201,7 @@ export default function PortalOverviewPage() {
 
           {/* Card 3: Calculate EMI */}
           <Link href="/chat?tab=emi" style={{ textDecoration: 'none' }}>
-            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, padding: '32px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.03)', height: '100%' }}>
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, padding: '28px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.03)', height: '100%' }}>
               <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Calculator size={32} color="#d97706" />
               </div>
@@ -218,7 +218,7 @@ export default function PortalOverviewPage() {
 
           {/* Card 4: Find a Partner */}
           <Link href="/partners" style={{ textDecoration: 'none' }}>
-            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, padding: '32px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.03)', height: '100%' }}>
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, padding: '28px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.03)', height: '100%' }}>
               <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <MapPin size={32} color="#15803d" />
               </div>
@@ -236,14 +236,14 @@ export default function PortalOverviewPage() {
       </section>
 
       {/* ── FEATURED SCHEMES ────────────────────────────────────────────── */}
-      <section style={{ background: '#ffffff', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: '64px 24px' }}>
+      <section className="py-12 md:py-16 px-4 sm:px-6" style={{ background: '#ffffff', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 40, flexWrap: 'wrap', gap: 16 }}>
             <div>
-              <h2 style={{ fontSize: 28, fontWeight: 800, color: '#003366', margin: '0 0 12px 0' }}>
+              <h2 style={{ fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: 800, color: '#003366', margin: '0 0 12px 0' }}>
                 {t('home.featured_title', 'Featured Schemes')}
               </h2>
-              <p style={{ fontSize: 16, color: '#64748b', margin: 0 }}>
+              <p style={{ fontSize: 'clamp(14px, 1.8vw, 16px)', color: '#64748b', margin: 0 }}>
                 {t('home.featured_sub', t('home.featured_subtitle', 'Popular concessional loan programs'))}
               </p>
             </div>
@@ -253,7 +253,7 @@ export default function PortalOverviewPage() {
             </Link>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 24 }}>
             {featuredSchemes.map((scheme, idx) => (
               <div key={idx} style={{ border: '1px solid #e2e8f0', borderRadius: 8, padding: '24px', display: 'flex', flexDirection: 'column', gap: 16, background: '#F5F6F8' }}>
                 <div>

@@ -19,7 +19,8 @@
     "db:migrate": "tsx src/db/migrate.ts",
     "db:migrate-v2": "tsx src/db/migrate-v2.ts",
     "db:migrate-v4": "tsx src/db/migrate-v4.ts",
-    "db:migrate-v5": "tsx src/db/migrate-v5.ts"
+    "db:migrate-v5": "tsx src/db/migrate-v5.ts",
+    "db:migrate-v10": "tsx src/db/migrate-v10.ts"
   },
   "keywords": [],
   "author": "",

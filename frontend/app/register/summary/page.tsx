@@ -5,6 +5,7 @@ import { CheckCircle2, AlertCircle, ArrowRight, ShieldCheck } from 'lucide-react
 import { useEffect, useState } from 'react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
+import { getJobCategoryLabel } from '@/lib/jobCategories';
 
 export default function SummaryPage() {
   const router = useRouter();
@@ -80,13 +81,21 @@ export default function SummaryPage() {
           <div>
             <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>Account Status</div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: isVerified ? '#ecfdf5' : '#fffbeb', color: isVerified ? '#059669' : '#d97706', padding: '4px 10px', borderRadius: 20, fontSize: 13, fontWeight: 700 }}>
-              {isVerified ? 'Active & Verified' : 'Pending Review'}
+              {isVerified ? 'Active & Verified' : 'Registered (Self-Declared)'}
             </div>
           </div>
           <div>
-            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>Verified Annual Salary / Income</div>
+            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>
+              {isVerified ? 'Verified Annual Family Income' : 'Annual Family Income (Self-Declared)'}
+            </div>
             <div style={{ fontSize: 15, color: '#0f172a', fontWeight: 700 }}>
               {data.salary ? `₹${Number(data.salary).toLocaleString('en-IN')}` : '≤ ₹5,00,000'}
+            </div>
+          </div>
+          <div style={{ gridColumn: 'span 2' }}>
+            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>Current Job / Business</div>
+            <div style={{ fontSize: 15, color: '#0f172a', fontWeight: 600 }}>
+              {getJobCategoryLabel(data.trade_category, data.job_business_other)}
             </div>
           </div>
         </div>

@@ -84,9 +84,174 @@ export async function fetchSchemeById(id: number): Promise<Scheme | null> {
   return rows[0] || null;
 }
 
+export function normalizeMultilingualText(str: string): string {
+  return (str || '')
+    .toLowerCase()
+    .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"'।॥]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export const MULTILINGUAL_SCHEME_ALIASES: Record<number, string[]> = {
+  1: [ // MCF
+    'माइक्रो क्रेडिट फाइनेंस', 'मायक्रो क्रेडिट फायनान्स', 'માઇક્રો ક્રેડિટ ફાઇનાન્સ',
+    'ক্ষুদ্র ঋণ অর্থায়ন', 'ಮೈಕ್ರೋ ಕ್ರೆಡಿಟ್ ಫೈನಾನ್ಸ್', 'മൈക്രോ ക്രെഡിറ്റ് ഫിനാൻസ്',
+    'ମାଇକ୍ରୋ କ୍ରେଡିଟ୍ ଫାଇନାନ୍ସ', 'ਮਾਈਕਰੋ ਕ੍ਰੈਡਿਟ ਫਾਈਨਾਂਸ', 'மைக்ரோ கிரெடிட் ஃபைனான்ஸ்',
+    'మైక్రో క్రెడిట్ ఫైనాన్స్',
+  ],
+  2: [ // MSY
+    'महिला समृद्धि योजना', 'महिला समृद्धि', 'महिला समृद्धी योजना', 'महिला समृद्धी',
+    'મહિલા સમૃદ્ધિ યોજના', 'મહિલા સમૃદ્ધિ', 'মহিলা সমৃদ্ধি যোজনা', 'মহিলা সমৃদ্ধি',
+    'ಮಹಿಳಾ ಸಮೃದ್ಧಿ ಯೋಜನೆ', 'ಮಹಿಳಾ ಸಮೃದ್ಧಿ', 'മഹിളാ സമൃദ്ധി യോജന', 'മഹിളാ സമൃദ്ധി',
+    'ମହିଳା ସମୃଦ୍ଧି ଯୋଜନା', 'ମହିଳା ସମୃଦ୍ଧି', 'ਮਹਿਲਾ ਸਮ੍ਰਿਧੀ ਯੋਜਨਾ', 'ਮਹਿਲਾ ਸਮ੍ਰਿਧੀ',
+    'மகிளா சம்ரித்தி யோஜனா', 'மகிளா சம்ரித்தி', 'మహిళా సమృద్ధి యోజన', 'మహిళా సమృద్ధి',
+  ],
+  3: [ // MAY
+    'महिला अधिकारिता योजना', 'महिला अधिकारिता', 'महिला किसान योजना', 'महिला किसान',
+    'મહિલા અધિકારિતા યોજના', 'મહિલા કિસાન યોજના',
+    'মহিলা অধিকারিতা যোজনা', 'মহিলা কিষাণ যোজনা',
+  ],
+  4: [ // SSY
+    'शिल्पी समृद्धि योजना', 'शिल्पी समृद्धि', 'शिल्पी समृद्धी योजना', 'शिल्पी समृद्धी',
+    'શિલ્પી સમૃદ્ધિ યોજના', 'શિલ્પી સમૃદ્ધિ',
+  ],
+  5: [ // TL
+    'टर्म लोन', 'मुद्दत कर्ज', 'ટર્મ લોન', 'টার্ম লোন', 'ಟರ್ಮ್ ಲೋನ್', 'டேர்ம் லோன்', 'టర్మ్ లోన్',
+  ],
+  6: [ // GBS
+    'हरित व्यापार योजना', 'हरित व्यवसाय योजना', 'ગ્રીન બિઝનેસ સ્કીમ',
+  ],
+  7: [ // SUY
+    'स्वच्छता उद्यमी योजना', 'स्वच्छता उद्यमी',
+  ],
+  8: [ // UNY
+    'उद्यम निधि योजना', 'उद्यम निधी योजना', 'લઘુ વ્યવસાય યોજના', 'लघु व्यवसाय योजना',
+  ],
+  9: [ // AMY
+    'आजीविका माइक्रोफाइनेंस योजना', 'आजीविका मायक्रोफायनान्स योजना',
+  ],
+  10: [ // ELS
+    'शिक्षा ऋण योजना', 'शैक्षणिक कर्ज योजना', 'શિક્ષણ લોન યોજના', 'শিক্ষা ঋণ প্রকল্প',
+    'ಶೈಕ್ಷಣಿಕ ಸಾಲ ಯೋಜನೆ', 'கல்விக் கடன் திட்டம்', 'విద్యా రుణ పథకం',
+  ],
+  11: [ // VETLS
+    'व्यावसायिक शिक्षा एवं प्रशिक्षण ऋण', 'व्यावसायिक शिक्षण व प्रशिक्षण कर्ज',
+  ],
+  12: [ // PM-DAKSH
+    'पीएम-दक्ष', 'पीएम दक्ष', 'पीएम-दक्ष कौशल विकास', 'પીએમ-દક્ષ',
+  ],
+  13: [ // SMILE
+    'स्माइल योजना', 'स्माईल योजना',
+  ],
+  14: [ // Stand-Up India
+    'स्टैंड-अप इंडिया', 'स्टँड-अप इंडिया', 'સ્ટેન્ડ-અપ ઇન્ડિયા',
+  ],
+};
+
+export interface SpecificSchemeResolution {
+  scheme: Scheme | null;
+  isSpecificSchemeQuery: boolean;
+  isAlternativeOrCompare: boolean;
+  queryFocus?: 'overview' | 'interest_rate' | 'eligibility' | 'documents' | 'tenure' | 'loan_amount' | 'partner';
+}
+
+export function identifySpecificScheme(
+  message: string,
+  activeSchemes: Scheme[],
+  currentSelected?: { id?: number; name?: string }
+): SpecificSchemeResolution {
+  const normAscii = normalizeSchemeText(message);
+  const normMulti = normalizeMultilingualText(message);
+
+  // 1. Check if user is asking for alternatives, comparison, or broad options
+  const isAlternativeOrCompare =
+    /\b(alternative|alternatives|other schemes?|similar|options|compare|comparison|versus|vs|better|all schemes?|more schemes?|which scheme is better|diff|difference)\b/i.test(message) ||
+    /विकल्प|अन्य योजना|इतर योजना|तुलना|फरक|સરખામણી|તુલના|વિકલ્પ|অন্যান্য/i.test(message);
+
+  // Determine query focus
+  let queryFocus: SpecificSchemeResolution['queryFocus'] = 'overview';
+  if (/interest rate|interest|rate of interest|vyaaj|vyaj|ब्याज|व्याज|વ્યાજ|સુદ|வட்டி|వడ్డీ/i.test(message)) {
+    queryFocus = 'interest_rate';
+  } else if (/eligib|who can apply|criteria|qualified|qualification|पात्रता|पात्र|योग्य|લાયકાત|যোগ্যতা/i.test(message)) {
+    queryFocus = 'eligibility';
+  } else if (/document|checklist|papers|proof|certificate|दस्तावेज|कागदपत्र|દસ્તાવેજ|নথি|ஆவணங்கள்|పత్రాలు/i.test(message)) {
+    queryFocus = 'documents';
+  } else if (/tenure|repay|duration|period|months|years|अवधि|मुदत|સમયગાળો|মেয়াদ/i.test(message)) {
+    queryFocus = 'tenure';
+  } else if (/how much|loan amount|maximum loan|limit|ceiling|kitna|kiti|કેટલું|কত|எவ்வளவு|ఎంత|राशि|रक्कम/i.test(message)) {
+    queryFocus = 'loan_amount';
+  } else if (/partner|branch|bank|where to apply|kahan|kothe|ક્યાં|কোথায়|எங்கே|ఎక్కడ|निकटतम|शाखा|कहाँ/i.test(message)) {
+    queryFocus = 'partner';
+  }
+
+  // 2. Try to identify a specific named scheme directly in the message
+  let matchedScheme: Scheme | null = null;
+  const words = normAscii.split(' ').filter(Boolean);
+
+  for (const s of activeSchemes) {
+    const parensMatch = s.name.match(/\(([^)]+)\)/);
+    const acronym = parensMatch ? normalizeSchemeText(parensMatch[1]) : '';
+    const baseName = normalizeSchemeText(s.name.replace(/\([^)]+\)/, ''));
+    const fullName = normalizeSchemeText(s.name);
+    const shortName = s.short_name ? normalizeSchemeText(s.short_name) : '';
+    const normAliases = (s.aliases || []).map((a) => normalizeSchemeText(a));
+    const multiAliases = (MULTILINGUAL_SCHEME_ALIASES[s.id] || []).map((a) => normalizeMultilingualText(a));
+
+    // Acronym match: require standalone word match (e.g. "msy", "mcf", "els")
+    const isAcronymMatch = acronym.length >= 2 && words.includes(acronym);
+    const isShortMatch = shortName.length >= 2 && words.includes(shortName);
+
+    // Full name or base name match: require substring match with at least 5 characters to avoid false positives
+    const isFullNameMatch = fullName.length >= 5 && normAscii.includes(fullName);
+    const isBaseNameMatch = baseName.length >= 5 && normAscii.includes(baseName);
+
+    // Alias match:
+    const isAliasMatch = normAliases.some((alias) => {
+      if (alias.length <= 4) return words.includes(alias);
+      return normAscii.includes(alias);
+    });
+
+    // Multilingual native script match:
+    const isMultiMatch = multiAliases.some((alias) => {
+      return normMulti.includes(alias);
+    });
+
+    if (isAcronymMatch || isShortMatch || isFullNameMatch || isBaseNameMatch || isAliasMatch || isMultiMatch) {
+      matchedScheme = s;
+      break;
+    }
+  }
+
+  // 3. If no direct name match in message, check if this is a follow-up about the previously selected scheme
+  if (!matchedScheme && currentSelected?.id) {
+    const prevScheme = activeSchemes.find((s) => s.id === currentSelected.id);
+    if (prevScheme) {
+      const isPronounOrFollowup =
+        /\b(this|that|it|its|the scheme|this scheme|this loan|that loan|the loan)\b/i.test(message) ||
+        /इस योजना|यह योजना|या योजने|या योजनेची|આ યોજના|এই প্রকল্প|அந்த திட்டம்|ఈ పథకం/i.test(message) ||
+        // Or specific attribute queries without specifying any other scheme
+        (queryFocus !== 'overview' && !/\b(which scheme|what schemes|any scheme|suggest|recommend)\b/i.test(message));
+
+      if (isPronounOrFollowup && !isAlternativeOrCompare) {
+        matchedScheme = prevScheme;
+      }
+    }
+  }
+
+  const isSpecificSchemeQuery = Boolean(matchedScheme) && !isAlternativeOrCompare;
+
+  return {
+    scheme: matchedScheme,
+    isSpecificSchemeQuery,
+    isAlternativeOrCompare,
+    queryFocus,
+  };
+}
+
 export async function fetchSchemeByName(name: string): Promise<Scheme | null> {
   const all = await fetchActiveSchemes();
   const normInput = normalizeSchemeText(name);
+  const normMultiInput = normalizeMultilingualText(name);
 
   for (const s of all) {
     const parensMatch = s.name.match(/\(([^)]+)\)/);
@@ -95,13 +260,15 @@ export async function fetchSchemeByName(name: string): Promise<Scheme | null> {
     const fullName = normalizeSchemeText(s.name);
     const shortName = s.short_name ? normalizeSchemeText(s.short_name) : '';
     const normAliases = (s.aliases || []).map((a) => normalizeSchemeText(a));
+    const multiAliases = (MULTILINGUAL_SCHEME_ALIASES[s.id] || []).map((a) => normalizeMultilingualText(a));
 
     if (
       (acronym && (normInput === acronym || normInput.split(' ').includes(acronym))) ||
       (shortName && (normInput === shortName || normInput.split(' ').includes(shortName))) ||
       (baseName && (normInput === baseName || normInput.includes(baseName) || baseName.includes(normInput))) ||
       (fullName && (normInput === fullName || normInput.includes(fullName) || fullName.includes(normInput))) ||
-      normAliases.some((alias) => alias.length >= 2 && (normInput === alias || normInput.includes(alias) || alias.includes(normInput)))
+      normAliases.some((alias) => alias.length >= 2 && (normInput === alias || normInput.includes(alias) || alias.includes(normInput))) ||
+      multiAliases.some((alias) => alias.length >= 2 && (normMultiInput === alias || normMultiInput.includes(alias) || alias.includes(normMultiInput)))
     ) {
       return s;
     }

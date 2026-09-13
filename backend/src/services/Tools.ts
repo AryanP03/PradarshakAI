@@ -26,13 +26,29 @@ export const TOOL_DEFS: ToolDef[] = [
   {
     type: 'function',
     function: {
+      name: 'get_scheme_details',
+      description: 'Fetch complete details, guidelines, loan limits, interest rates, and eligibility for ONE specific NSFDC government loan scheme (e.g. Mahila Samriddhi Yojana / MSY, Micro Credit Finance / MCF, Educational Loan Scheme / ELS, etc.). Call this whenever the user asks about a specific scheme by name or acronym, or asks follow-up questions about a previously identified scheme (such as its interest rate, eligibility, or limits). Do NOT call recommend_schemes for a specific named scheme inquiry.',
+      parameters: {
+        type: 'object',
+        properties: {
+          scheme_id: { type: 'number', description: 'Numeric ID of the specific scheme if known' },
+          scheme_name: { type: 'string', description: 'Exact or partial name, acronym, or local name of the scheme (e.g. "MSY", "Mahila Samriddhi Yojana", "MCF", "ELS")' },
+          query_focus: { type: 'string', enum: ['overview', 'interest_rate', 'eligibility', 'documents', 'tenure', 'loan_amount'], description: 'What specific aspect the user is asking about' },
+        },
+        required: ['scheme_name'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
       name: 'recommend_schemes',
-      description: 'Search and score NSFDC government loan schemes from the database. Call this whenever the user asks about loans, schemes, financial assistance, business funding, education loans, or wants scheme recommendations. Also call this when the user describes a business plan, educational goal, or asks "what schemes are available".',
+      description: 'Search and score NSFDC government loan schemes from the database. Call this whenever the user asks for broad scheme suggestions, options, business ideas, financial assistance discovery, or asks "what schemes are available". Do NOT call this when the user is asking about ONE specific named scheme.',
       parameters: {
         type: 'object',
         properties: {
           query: { type: 'string', description: 'The user\'s search query or question about schemes' },
-          purpose: { type: 'string', description: 'Loan purpose, business type, or scheme name/acronym (e.g. tailoring, education, MCF, dairy)' },
+          purpose: { type: 'string', description: 'Loan purpose, business type, or trade (e.g. tailoring, dairy, retail shop, education)' },
           loan_amount_rs: { type: 'number', description: 'Requested loan amount in rupees' },
           family_income_rs: { type: 'number', description: 'Annual family income in rupees' },
           education_level: { type: 'string', enum: ['school', 'diploma', 'undergraduate', 'postgraduate'] },
@@ -114,6 +130,43 @@ export interface ToolResult {
 
 export async function executeTool(name: string, args: Record<string, unknown>): Promise<ToolResult> {
   switch (name) {
+    case 'get_scheme_details': {
+      let scheme: Scheme | null = null;
+      if (args.scheme_id != null) {
+        scheme = await fetchSchemeById(Number(args.scheme_id));
+      }
+      const schemeName = (args.scheme_name as string | undefined)?.trim();
+      if (!scheme && schemeName) {
+        scheme = await fetchSchemeByName(schemeName);
+      }
+
+      if (!scheme) {
+        const active = await fetchActiveSchemes();
+        scheme = active.find((s) =>
+          (schemeName && s.name.toLowerCase().includes(schemeName.toLowerCase())) ||
+          (schemeName && s.aliases?.some((a) => a.toLowerCase().includes(schemeName.toLowerCase())))
+        ) || active[0];
+      }
+
+      const scoredScheme: ScoredScheme = {
+        ...scheme,
+        score: 100,
+        tier: 'ELIGIBLE_OPTIMAL',
+        matchReasons: ['Official NSFDC Concessional Scheme Guidelines'],
+        warnings: [],
+      };
+
+      return {
+        toolName: name,
+        data: {
+          scheme: scoredScheme,
+          schemes: [scoredScheme],
+          isSpecificScheme: true,
+          queryFocus: args.query_focus || 'overview',
+        },
+      };
+    }
+
     case 'recommend_schemes': {
       const rawPurpose = ((args.purpose || args.query || '') as string).trim();
       const lowerPurpose = rawPurpose.toLowerCase();
@@ -166,7 +219,13 @@ export async function executeTool(name: string, args: Record<string, unknown>): 
         }
       }
 
-      // Direct single-scheme lookup (by specific acronym or exact scheme name) returns 1 scheme; category/intent inquiries return top schemes
+      // Direct single-scheme lookup (by specific acronym or exact scheme name)
+      const isAlternativeOrCompare =
+        /alternative|other schemes?|similar|compare|versus|vs|better|all schemes?|more schemes?|which scheme is better/i.test(rawPurpose);
+
+      const isExplicitMultiInquiry =
+        /suggest|recommend|find|best|good|list|available|options|what schemes|which schemes/i.test(rawPurpose);
+
       const isSpecificSchemeLookup =
         schemes[0] &&
         rawPurpose &&
@@ -174,13 +233,9 @@ export async function executeTool(name: string, args: Record<string, unknown>): 
           (schemes[0].short_name && schemes[0].short_name.toLowerCase() === rawPurpose.toLowerCase()) ||
           (schemes[0].aliases && schemes[0].aliases.some((a) => a.toLowerCase() === rawPurpose.toLowerCase())));
 
-      const isCategoryInquiry =
-        isEdu ||
-        isWomen ||
-        args.category_hint != null ||
-        /suggest|recommend|find|best|good|list|available|options|what schemes|which schemes/i.test(rawPurpose);
-
-      const returnedSchemes = isSpecificSchemeLookup && !isCategoryInquiry ? schemes.slice(0, 1) : schemes.slice(0, 3);
+      const returnedSchemes = (isSpecificSchemeLookup && !isAlternativeOrCompare && !isExplicitMultiInquiry)
+        ? schemes.slice(0, 1)
+        : schemes.slice(0, 3);
 
       return {
         toolName: name,

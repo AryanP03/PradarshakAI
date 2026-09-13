@@ -44,7 +44,7 @@ export default function KeyLeadership() {
   const { t } = useLanguage();
 
   return (
-    <section style={{ backgroundColor: '#071326', padding: '80px 24px', width: '100%', position: 'relative', zIndex: 10 }}>
+    <section className="py-12 md:py-20 px-4 sm:px-6" style={{ backgroundColor: '#071326', width: '100%', position: 'relative', zIndex: 10 }}>
       <div style={{ maxWidth: '1152px', margin: '0 auto', textAlign: 'center' }}>
         
         {/* BADGE */}
@@ -53,12 +53,12 @@ export default function KeyLeadership() {
         </div>
 
         {/* HEADING */}
-        <h2 style={{ fontSize: '36px', fontWeight: 800, color: '#ffffff', marginBottom: '12px', lineHeight: 1.2 }}>
+        <h2 style={{ fontSize: 'clamp(26px, 4vw, 36px)', fontWeight: 800, color: '#ffffff', marginBottom: '12px', lineHeight: 1.2 }}>
           {t('leadership.title', 'Key Leadership')}
         </h2>
 
         {/* SUBTITLE */}
-        <p style={{ fontSize: '16px', color: '#94a3b8', maxWidth: '640px', margin: '0 auto 80px auto', lineHeight: 1.6 }}>
+        <p className="mb-14 sm:mb-20 text-sm sm:text-base" style={{ color: '#94a3b8', maxWidth: '640px', margin: '0 auto 4rem auto', lineHeight: 1.6 }}>
           {t('leadership.subtitle', 'Distinguished leadership steering national affirmative action, concessional financial assistance, and socioeconomic empowerment.')}
         </p>
 

@@ -7,9 +7,8 @@ import Footer from '@/components/Footer';
 import CameraCapture from '@/components/CameraCapture';
 import { Loader2, Eye, EyeOff, CheckCircle2, XCircle, FileImage, RefreshCw, AlertTriangle } from 'lucide-react';
 
-const BACKEND = process.env.NEXT_PUBLIC_API_URL
-  ? process.env.NEXT_PUBLIC_API_URL.replace(/\/api$/, '')
-  : 'http://localhost:4000';
+import { API_BASE } from '@/lib/apiBase';
+const BACKEND = API_BASE.replace(/\/api$/, '');
 
 function dataURLtoFile(dataurl: string, filename: string): File {
   const arr = dataurl.split(',');
@@ -21,6 +20,8 @@ function dataURLtoFile(dataurl: string, filename: string): File {
   while (n--) u8arr[n] = bstr.charCodeAt(n);
   return new File([u8arr], filename, { type: mime });
 }
+
+import { JOB_CATEGORIES } from '@/lib/jobCategories';
 
 const STATES = [
   'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat','Haryana',
@@ -35,24 +36,6 @@ const EDUCATION_LEVELS = [
   { id: 'diploma', label: 'Vocational Diploma / ITI', desc: 'Polytechnic, ITI or Technical Cert' },
   { id: 'undergraduate', label: 'Graduate / Bachelor’s', desc: 'B.A, B.Sc, B.Com, B.Tech, etc.' },
   { id: 'postgraduate', label: 'Postgraduate / Professional', desc: 'M.A, M.Sc, MBA, MBBS, LLB, etc.' },
-];
-
-const TRADE_CATEGORIES = [
-  { id: 'retail_shop', icon: '🏪', label: 'Retail & Kirana Store', desc: 'Grocery, general store, provisions, daily consumer goods' },
-  { id: 'tailoring_garments', icon: '🧵', label: 'Tailoring & Garments', desc: 'Boutique, readymade apparel, garment manufacturing' },
-  { id: 'agriculture_allied', icon: '🐄', label: 'Dairy & Agri Allied', desc: 'Dairy farming, poultry, cold storage, farm value-add' },
-  { id: 'transport_logistics', icon: '🚚', label: 'Transport & Logistics', desc: 'Auto-rickshaw, commercial delivery EV, light transport' },
-  { id: 'it_technical_services', icon: '💻', label: 'IT & Tech Services', desc: 'Mobile servicing, computer hardware, electronics, DTP' },
-  { id: 'artisans_handicrafts', icon: '🎨', label: 'Artisans & Handicrafts', desc: 'Leather goods, pottery, handloom, wooden crafts' },
-  { id: 'education_training', icon: '🎓', label: 'Education & Training', desc: 'Vocational coaching, higher education, skill development' },
-  { id: 'sanitation_green_business', icon: '♻️', label: 'Sanitation & Green Biz', desc: 'Solar installation, solid waste recycling, sanitation unit' },
-];
-
-const FUNDING_BRACKETS = [
-  { id: 'MICRO_UNDER_1_4L', icon: '🪙', label: 'Micro Finance (≤ ₹1.40 Lakh)', desc: 'Micro Credit Finance (MCF), Mahila Samriddhi Yojana (MSY)' },
-  { id: 'SMALL_1_4_TO_15L', icon: '💼', label: 'Small Business (₹1.40L – ₹15 Lakh)', desc: 'Shilpi Samriddhi, Green Business Scheme (GBS), Transport' },
-  { id: 'MEDIUM_15_TO_50L', icon: '🏭', label: 'Term Loan Enterprise (₹15L – ₹50 Lakh)', desc: 'Flagship Term Loan (TL) for commercial enterprise units' },
-  { id: 'EDUCATION_VOCATIONAL', icon: '📚', label: 'Education Loan (Up to ₹20L / ₹30L)', desc: 'Concessional student loan for premier Indian & overseas courses' },
 ];
 
 const inputStyle: React.CSSProperties = {
@@ -134,10 +117,16 @@ function RegisterContent() {
   const [showPw, setShowPw] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
+  // Feature Gate: Document verification optional/disabled for development/demo
+  const DOC_VERIFICATION_ENABLED = process.env.NEXT_PUBLIC_DOCUMENT_VERIFICATION_ENABLED === 'true';
+
+  // Manual Annual Family Income (always collected)
+  const [manualIncome, setManualIncome] = useState('');
+
   // Onboarding Intent (SIH PS 26092 Pre-Qualification)
   const [educationLevel, setEducationLevel] = useState('');
-  const [tradeCategory, setTradeCategory] = useState('');
-  const [fundingBracket, setFundingBracket] = useState('');
+  const [jobCategory, setJobCategory] = useState('');
+  const [jobBusinessOther, setJobBusinessOther] = useState('');
 
   // Verification States
   const [emailStep, setEmailStep] = useState<'idle' | 'sending' | 'sent' | 'verifying' | 'verified'>('idle');
@@ -329,13 +318,29 @@ function RegisterContent() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-    if (scStatus !== 'VERIFIED' || incomeStatus !== 'VERIFIED') {
+    if (DOC_VERIFICATION_ENABLED && (scStatus !== 'VERIFIED' || incomeStatus !== 'VERIFIED')) {
       setError('Please ensure both certificates are verified before continuing.');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-    if (!educationLevel || !tradeCategory || !fundingBracket) {
-      setError('Please select your education level, business trade category, and desired funding bracket.');
+    const incomeNum = Number(manualIncome);
+    if (!manualIncome || isNaN(incomeNum) || incomeNum <= 0) {
+      setError('Please enter a valid positive Annual Family Income.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    if (!educationLevel) {
+      setError('Please select your highest education level.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    if (!jobCategory) {
+      setError('Please select your current job / business.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    if (jobCategory === 'other' && !jobBusinessOther.trim()) {
+      setError('Please specify your current job / business details.');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -368,6 +373,7 @@ function RegisterContent() {
       const uploadData = await uploadRes.json();
 
       // Step 2: Create account
+      const isVerifiedStatus = DOC_VERIFICATION_ENABLED && scStatus === 'VERIFIED' && incomeStatus === 'VERIFIED';
       setStatusText('Creating your account...');
       const completeRes = await fetch(`${BACKEND}/api/registration/complete`, {
         method: 'POST',
@@ -387,13 +393,14 @@ function RegisterContent() {
           password,
           aadhaar: aadhaar || null,
           selfie_image: uploadData.selfie,
-          sc_certificate_file: scServerFileName,
-          income_certificate_file: incomeServerFileName,
-          eligibility_status: 'verified',
-          salary: extractedIncome || null,
+          sc_certificate_file: scServerFileName || null,
+          income_certificate_file: incomeServerFileName || null,
+          eligibility_status: isVerifiedStatus ? 'verified' : 'pending_manual_review',
+          salary: incomeNum,
           education_level: educationLevel,
-          trade_category: tradeCategory,
-          funding_bracket: fundingBracket,
+          trade_category: jobCategory,
+          job_business_other: jobCategory === 'other' ? jobBusinessOther.trim() : null,
+          funding_bracket: null,
           caste_category: 'SC',
         }),
       });
@@ -405,19 +412,20 @@ function RegisterContent() {
       localStorage.setItem('auth_user', JSON.stringify({
         ...completeData.user,
         education_level: educationLevel,
-        trade_category: tradeCategory,
-        funding_bracket: fundingBracket,
+        trade_category: jobCategory,
+        job_business_other: jobCategory === 'other' ? jobBusinessOther.trim() : null,
+        salary: incomeNum,
         caste_category: 'SC',
       }));
       localStorage.setItem('registration_summary', JSON.stringify({
         full_name: fullName,
         mobile,
-        salary: completeData.user?.salary || extractedIncome,
-        eligibility_status: 'verified',
+        salary: incomeNum,
+        eligibility_status: isVerifiedStatus ? 'verified' : 'pending_manual_review',
         education_level: educationLevel,
-        trade_category: tradeCategory,
-        funding_bracket: fundingBracket,
-        overall_confidence: 1, // Deterministic verification
+        trade_category: jobCategory,
+        job_business_other: jobCategory === 'other' ? jobBusinessOther.trim() : null,
+        overall_confidence: isVerifiedStatus ? 1 : 0.8,
       }));
 
       router.push('/register/summary');
@@ -536,6 +544,7 @@ function RegisterContent() {
 
   const isIdentityVerified = !!selfiePhoto;
   const isCertVerified = scStatus === 'VERIFIED' && incomeStatus === 'VERIFIED';
+  const canProceedToNext = !DOC_VERIFICATION_ENABLED || isCertVerified;
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f1f5f9' }}>
@@ -592,8 +601,8 @@ function RegisterContent() {
               {[
                 { step: '1', title: 'Personal Details', done: !!fullName && !!mobile && emailStep === 'verified' },
                 { step: '2', title: 'Security & Access', done: password.length >= 8 && password === confirmPassword },
-                { step: '3', title: 'Verification (OCR/Face)', done: isCertVerified && isIdentityVerified },
-                { step: '4', title: 'Scheme Goals', done: !!educationLevel && !!tradeCategory && !!fundingBracket },
+                { step: '3', title: DOC_VERIFICATION_ENABLED ? 'Verification (OCR/Face)' : 'Face Verification', done: DOC_VERIFICATION_ENABLED ? (isCertVerified && isIdentityVerified) : isIdentityVerified },
+                { step: '4', title: 'Livelihood & Goals', done: !!manualIncome && !!educationLevel && !!jobCategory && (jobCategory !== 'other' || !!jobBusinessOther.trim()) },
               ].map((s, idx) => (
                 <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div
@@ -698,7 +707,7 @@ function RegisterContent() {
                     <input style={inputStyle} type="text" required placeholder="As it appears on official documents" value={fullName} onChange={e => setFullName(e.target.value)} disabled={scStatus === 'VERIFIED' || incomeStatus === 'VERIFIED'} />
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label style={labelStyle}>Mobile Number <span style={{ color: '#ef4444' }}>*</span></label>
                       <input style={inputStyle} type="tel" required maxLength={10} placeholder="10-digit mobile" value={mobile} onChange={e => setMobile(e.target.value.replace(/\D/g, ''))} />
@@ -790,7 +799,7 @@ function RegisterContent() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label style={labelStyle}>Date of Birth <span style={{ color: '#ef4444' }}>*</span></label>
                       <input style={inputStyle} type="date" required value={dob} onChange={e => setDob(e.target.value)} />
@@ -820,11 +829,11 @@ function RegisterContent() {
                         <label style={labelStyle}>Address Line 2 <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
                         <input style={inputStyle} type="text" value={addressLine2} onChange={e => setAddressLine2(e.target.value)} />
                       </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div><label style={labelStyle}>City / Town / Village <span style={{ color: '#ef4444' }}>*</span></label><input style={inputStyle} type="text" required value={city} onChange={e => setCity(e.target.value)} /></div>
                         <div><label style={labelStyle}>District <span style={{ color: '#ef4444' }}>*</span></label><input style={inputStyle} type="text" required value={district} onChange={e => setDistrict(e.target.value)} /></div>
                       </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <label style={labelStyle}>State <span style={{ color: '#ef4444' }}>*</span></label>
                           <select style={inputStyle} required value={state} onChange={e => setState(e.target.value)}>
@@ -861,24 +870,61 @@ function RegisterContent() {
                   </section>
 
                   {/* ── SECTION 4: Certificate Verification ── */}
-                  <section style={sectionStyle}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '2px solid #f1f5f9', paddingBottom: 14, marginBottom: 24 }}>
+                  <section style={{
+                    ...sectionStyle,
+                    opacity: DOC_VERIFICATION_ENABLED ? 1 : 0.7,
+                    background: DOC_VERIFICATION_ENABLED ? '#ffffff' : '#f8fafc',
+                    border: DOC_VERIFICATION_ENABLED ? '1px solid #e2e8f0' : '1.5px dashed #cbd5e1',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '2px solid #f1f5f9', paddingBottom: 14, marginBottom: 20 }}>
                       <h2 style={{ ...sectionHeadingStyle, borderBottom: 'none', paddingBottom: 0, marginBottom: 0 }}>
                         4. Document Verification (Caste & Income OCR)
                       </h2>
-                      {scStatus === 'VERIFIED' && incomeStatus === 'VERIFIED' && (
+                      {DOC_VERIFICATION_ENABLED && scStatus === 'VERIFIED' && incomeStatus === 'VERIFIED' ? (
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: '#059669', background: '#ecfdf5', padding: '4px 12px', borderRadius: 20, border: '1px solid #a7f3d0' }}>
                           <CheckCircle2 size={16} /> Certificates Verified
                         </span>
-                      )}
+                      ) : !DOC_VERIFICATION_ENABLED ? (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: '#475569', background: '#f1f5f9', padding: '4px 12px', borderRadius: 20, border: '1px solid #cbd5e1' }}>
+                          Demo Mode — Verification Optional
+                        </span>
+                      ) : null}
                     </div>
+
+                    {!DOC_VERIFICATION_ENABLED && (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: 12,
+                          padding: '14px 18px',
+                          borderRadius: 10,
+                          background: '#f1f5f9',
+                          border: '1.5px solid #cbd5e1',
+                          marginBottom: 20,
+                        }}
+                      >
+                        <AlertTriangle size={20} color="#475569" style={{ flexShrink: 0, marginTop: 2 }} />
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <strong style={{ fontSize: 13.5, color: '#1e293b' }}>Development / Demo Environment</strong>
+                            <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: '#e2e8f0', color: '#475569' }}>
+                              Bypassed
+                            </span>
+                          </div>
+                          <p style={{ margin: '4px 0 0', fontSize: 12.5, color: '#475569', lineHeight: 1.45 }}>
+                            Document verification is temporarily disabled in the development/demo environment. Certificate verification will be enabled for production.
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
                     <p style={{ fontSize: 14, color: '#475569', marginBottom: 24 }}>
                       Please upload images (JPG/PNG) of your certificates containing a government QR code or official seal. 
                       Our system performs instant OCR to verify Scheduled Caste eligibility and confirm annual family income (&le; &#8377;5,00,000).
                     </p>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 32, pointerEvents: DOC_VERIFICATION_ENABLED ? 'auto' : 'none', opacity: DOC_VERIFICATION_ENABLED ? 1 : 0.6 }}>
                       
                       {/* Caste Certificate */}
                       <div>
@@ -920,25 +966,78 @@ function RegisterContent() {
                     </div>
                   </section>
 
-                  {/* ── SECTION 5: Goals & Educational Profile ── */}
-                  <section style={{ ...sectionStyle, opacity: isCertVerified ? 1 : 0.6, pointerEvents: isCertVerified ? 'auto' : 'none' }}>
+                  {/* ── SECTION 5: Socio-Economic Profile & Goals ── */}
+                  <section style={{ ...sectionStyle, opacity: canProceedToNext ? 1 : 0.6, pointerEvents: canProceedToNext ? 'auto' : 'none' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '2px solid #f1f5f9', paddingBottom: 14, marginBottom: 24 }}>
                       <h2 style={{ ...sectionHeadingStyle, borderBottom: 'none', paddingBottom: 0, marginBottom: 0 }}>
-                        5. Goals & Educational Background
+                        5. Socio-Economic Profile & Goals
                       </h2>
                       <span style={{ fontSize: 12.5, fontWeight: 700, color: '#0369a1', background: '#f0f9ff', padding: '4px 12px', borderRadius: 20, border: '1px solid #bae6fd' }}>
                         🎯 Pre-Qualifies Schemes
                       </span>
                     </div>
 
-                    {!isCertVerified ? (
+                    {!canProceedToNext ? (
                       <div style={{ padding: 24, background: '#f1f5f9', borderRadius: 12, textAlign: 'center', color: '#64748b' }}>
                         <p style={{ margin: 0, fontWeight: 600, fontSize: 15, color: '#334155' }}>🔒 Locked until certificates are verified.</p>
                         <p style={{ margin: '8px 0 0', fontSize: 14 }}>Please complete the Document Verification step above.</p>
                       </div>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-                        {/* 1. Education Level */}
+                        {/* 1. Manual Annual Family Income */}
+                        <div>
+                          <label style={{ ...labelStyle, marginBottom: 6 }}>
+                            Annual Family Income (in ₹) <span style={{ color: '#ef4444' }}>*</span>
+                          </label>
+                          <div style={{ position: 'relative' }}>
+                            <span style={{
+                              position: 'absolute',
+                              left: 16,
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                              fontSize: 16,
+                              fontWeight: 700,
+                              color: '#003366',
+                              pointerEvents: 'none',
+                            }}>
+                              ₹
+                            </span>
+                            <input
+                              type="number"
+                              min="1"
+                              step="1000"
+                              value={manualIncome}
+                              onChange={(e) => setManualIncome(e.target.value)}
+                              placeholder="e.g. 120000"
+                              style={{
+                                ...inputStyle,
+                                paddingLeft: 36,
+                              }}
+                              required
+                            />
+                          </div>
+                          {manualIncome && !isNaN(Number(manualIncome)) && Number(manualIncome) > 0 && (
+                            <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12.5 }}>
+                              <span style={{ color: '#0369a1', fontWeight: 600 }}>
+                                Stated Income: ₹{Number(manualIncome).toLocaleString('en-IN')} / year
+                              </span>
+                              {Number(manualIncome) > 500000 ? (
+                                <span style={{ color: '#dc2626', fontWeight: 600 }}>
+                                  ⚠️ Exceeds NSFDC statutory ceiling (≤ ₹5 Lakh)
+                                </span>
+                              ) : (
+                                <span style={{ color: '#166534', fontWeight: 600 }}>
+                                  ✓ Within scheme ceiling (≤ ₹5 Lakh)
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          <span style={{ fontSize: 11.5, color: '#64748b', marginTop: 4, display: 'block' }}>
+                            Self-declared annual family income used to calculate subsidy and loan eligibility.
+                          </span>
+                        </div>
+
+                        {/* 2. Education Level */}
                         <div>
                           <label style={{ ...labelStyle, marginBottom: 10 }}>
                             Highest Education Level <span style={{ color: '#ef4444' }}>*</span>
@@ -980,104 +1079,93 @@ function RegisterContent() {
                           </div>
                         </div>
 
-                        {/* 2. Trade / Venture Category */}
+                        {/* 3. Current Job / Business Dropdown */}
                         <div>
-                          <label style={{ ...labelStyle, marginBottom: 10 }}>
-                            Planned Business / Trade Category <span style={{ color: '#ef4444' }}>*</span>
+                          <label style={{ ...labelStyle, marginBottom: 6 }}>
+                            Current Job / Business <span style={{ color: '#ef4444' }}>*</span>
                           </label>
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
-                            {TRADE_CATEGORIES.map(cat => {
-                              const isSelected = tradeCategory === cat.id;
-                              return (
-                                <button
-                                  key={cat.id}
-                                  type="button"
-                                  onClick={() => setTradeCategory(cat.id)}
-                                  style={{
-                                    textAlign: 'left',
-                                    padding: '14px 16px',
-                                    borderRadius: 14,
-                                    border: isSelected ? '2px solid #0284c7' : '1.5px solid #e2e8f0',
-                                    background: isSelected ? '#f0f9ff' : '#f8fafc',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    gap: 4,
-                                    boxShadow: isSelected ? '0 4px 12px rgba(2, 132, 199, 0.12)' : 'none',
-                                  }}
-                                >
-                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                      <span style={{ fontSize: 18 }}>{cat.icon}</span>
-                                      <span style={{ fontSize: 14, fontWeight: 700, color: isSelected ? '#0369a1' : '#0f172a' }}>
-                                        {cat.label}
-                                      </span>
-                                    </div>
-                                    {isSelected && <CheckCircle2 size={18} color="#0284c7" />}
-                                  </div>
-                                  <span style={{ fontSize: 12, color: isSelected ? '#0284c7' : '#64748b', lineHeight: 1.4 }}>
-                                    {cat.desc}
-                                  </span>
-                                </button>
-                              );
-                            })}
+                          <div style={{ position: 'relative' }}>
+                            <select
+                              value={jobCategory}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setJobCategory(val);
+                                if (val !== 'other') {
+                                  setJobBusinessOther('');
+                                }
+                              }}
+                              style={{
+                                ...inputStyle,
+                                appearance: 'none',
+                                WebkitAppearance: 'none',
+                                cursor: 'pointer',
+                                paddingRight: 40,
+                                fontWeight: 600,
+                                color: jobCategory ? '#0f172a' : '#64748b',
+                                background: '#f8fafc',
+                              }}
+                              required
+                            >
+                              <option value="" disabled>-- Select Current Job / Business --</option>
+                              {JOB_CATEGORIES.map((grp) => (
+                                <optgroup key={grp.group} label={grp.group}>
+                                  {grp.options.map((opt) => (
+                                    <option key={opt.id} value={opt.id}>
+                                      {opt.label}
+                                    </option>
+                                  ))}
+                                </optgroup>
+                              ))}
+                            </select>
+                            <div
+                              style={{
+                                position: 'absolute',
+                                right: 16,
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                pointerEvents: 'none',
+                                color: '#64748b',
+                                fontSize: 12,
+                                fontWeight: 800,
+                              }}
+                            >
+                              ▼
+                            </div>
                           </div>
-                        </div>
+                          <span style={{ fontSize: 11.5, color: '#64748b', marginTop: 4, display: 'block' }}>
+                            Click to select your primary livelihood category from the official list.
+                          </span>
 
-                        {/* 3. Desired Funding Bracket */}
-                        <div>
-                          <label style={{ ...labelStyle, marginBottom: 10 }}>
-                            Desired Funding Bracket <span style={{ color: '#ef4444' }}>*</span>
-                          </label>
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
-                            {FUNDING_BRACKETS.map(bracket => {
-                              const isSelected = fundingBracket === bracket.id;
-                              return (
-                                <button
-                                  key={bracket.id}
-                                  type="button"
-                                  onClick={() => setFundingBracket(bracket.id)}
-                                  style={{
-                                    textAlign: 'left',
-                                    padding: '14px 16px',
-                                    borderRadius: 14,
-                                    border: isSelected ? '2px solid #d97706' : '1.5px solid #e2e8f0',
-                                    background: isSelected ? '#fffbeb' : '#f8fafc',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    gap: 4,
-                                    boxShadow: isSelected ? '0 4px 12px rgba(217, 119, 6, 0.12)' : 'none',
-                                  }}
-                                >
-                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                      <span style={{ fontSize: 18 }}>{bracket.icon}</span>
-                                      <span style={{ fontSize: 14, fontWeight: 700, color: isSelected ? '#92400e' : '#0f172a' }}>
-                                        {bracket.label}
-                                      </span>
-                                    </div>
-                                    {isSelected && <CheckCircle2 size={18} color="#d97706" />}
-                                  </div>
-                                  <span style={{ fontSize: 12, color: isSelected ? '#b45309' : '#64748b', lineHeight: 1.4 }}>
-                                    {bracket.desc}
-                                  </span>
-                                </button>
-                              );
-                            })}
-                          </div>
+                          {/* Dynamic "Please specify your current job / business" */}
+                          {jobCategory === 'other' && (
+                            <div style={{ marginTop: 14 }}>
+                              <label style={{ ...labelStyle, marginBottom: 6 }}>
+                                Please specify your current job / business <span style={{ color: '#ef4444' }}>*</span>
+                              </label>
+                              <input
+                                type="text"
+                                value={jobBusinessOther}
+                                onChange={(e) => setJobBusinessOther(e.target.value)}
+                                placeholder="e.g. Mobile repair shop, electrical contractor, freelance tutor"
+                                maxLength={100}
+                                style={inputStyle}
+                                required
+                              />
+                              <span style={{ fontSize: 11.5, color: '#64748b', marginTop: 4, display: 'block' }}>
+                                Enter specific details about your trade or occupation for tailored scheme matching.
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
                   </section>
 
                   {/* ── SECTION 6: Security ── */}
-                  <section style={{ ...sectionStyle, opacity: isCertVerified ? 1 : 0.6, pointerEvents: isCertVerified ? 'auto' : 'none' }}>
+                  <section style={{ ...sectionStyle, opacity: canProceedToNext ? 1 : 0.6, pointerEvents: canProceedToNext ? 'auto' : 'none' }}>
                     <h2 style={sectionHeadingStyle}>6. Set Your Password</h2>
 
-                    {!isCertVerified ? (
+                    {!canProceedToNext ? (
                        <div style={{ padding: 24, background: '#f1f5f9', borderRadius: 12, textAlign: 'center', color: '#64748b' }}>
                           <p style={{ margin: 0, fontWeight: 600, fontSize: 15, color: '#334155' }}>🔒 Locked until certificates are verified.</p>
                           <p style={{ margin: '8px 0 0', fontSize: 14 }}>Please complete the Document Verification step above.</p>

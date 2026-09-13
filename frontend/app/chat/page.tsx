@@ -74,6 +74,22 @@ function ChatPage() {
   const [migrationNotice, setMigrationNotice] = useState<string | null>(null);
 
   const queryParam = searchParams.get('q');
+  const inquiryIdParam = searchParams.get('inquiryId') || searchParams.get('nonce') || null;
+  const isInquiryParam = searchParams.get('inquiry') === '1' || (Boolean(queryParam) && !searchParams.get('chatId'));
+
+  const lastInquiryNonceRef = useRef<string | null>(inquiryIdParam);
+
+  const [instanceKey, setInstanceKey] = useState<string>(() => {
+    const q = searchParams.get('q');
+    const inq = searchParams.get('inquiry') === '1' || (Boolean(q) && !searchParams.get('chatId'));
+    const inqId = searchParams.get('inquiryId') || searchParams.get('nonce');
+    if (inq) {
+      return `inquiry-${inqId || 'init'}`;
+    }
+    const cid = searchParams.get('chatId');
+    if (cid) return `chat-${cid}`;
+    return `chat-root`;
+  });
 
   // Dismiss floating guest tooltips when clicking anywhere else
   useEffect(() => {
@@ -107,9 +123,32 @@ function ChatPage() {
     }
 
     const cid = searchParams.get('chatId');
-    if (cid) {
+    const q = searchParams.get('q');
+    const inq = searchParams.get('inquiry') === '1' || (Boolean(q) && !cid);
+    const inqId = searchParams.get('inquiryId') || searchParams.get('nonce') || '';
+
+    if (inq) {
+      // Whenever a user clicks Inquire for ANY scheme, start a fresh conversation for that inquiryId
+      if (inqId && inqId === lastInquiryNonceRef.current) {
+        // Already initialized THIS inquiryId! Do NOT re-initialize or wipe state!
+        return;
+      }
+      lastInquiryNonceRef.current = inqId || Date.now().toString(36);
+      if (typeof window !== 'undefined') {
+        try {
+          sessionStorage.removeItem('pradarshak_active_chat');
+        } catch {}
+      }
+      activeChatIdRef.current = null;
+      setChatId(null);
+      setInitialMessages([]);
+      setCurrentMessages([]);
+      setJourneyDone({});
+      setInstanceKey(`inquiry-${lastInquiryNonceRef.current}`);
+    } else if (cid) {
       if (cid !== activeChatIdRef.current) {
         activeChatIdRef.current = cid;
+        setInstanceKey(`chat-${cid}`);
         loadChat(cid, t || null);
       }
     } else if (activeChatIdRef.current !== null) {
@@ -119,6 +158,7 @@ function ChatPage() {
       setCurrentMessages([]);
       setJourneyDone({});
       setResetKey((k) => k + 1);
+      setInstanceKey(`new-${Date.now().toString(36)}`);
     }
   }, [searchParams]);
 
@@ -220,8 +260,11 @@ function ChatPage() {
 
   const handleNewChat = useCallback(() => {
     if (typeof window !== 'undefined') {
-      sessionStorage.removeItem('pradarshak_active_chat');
+      try {
+        sessionStorage.removeItem('pradarshak_active_chat');
+      } catch {}
     }
+    lastInquiryNonceRef.current = null;
     activeChatIdRef.current = null;
     setChatId(null);
     setInitialMessages([]);
@@ -233,11 +276,14 @@ function ChatPage() {
     setGuestSharePrompt(false);
     setEmptyShareNotice(false);
     setResetKey((k) => k + 1);
+    setInstanceKey(`new-${Date.now().toString(36)}`);
     router.replace(basePath);
   }, [basePath, router]);
 
   const handleChatSelect = useCallback((id: string) => {
+    lastInquiryNonceRef.current = null;
     activeChatIdRef.current = id;
+    setInstanceKey(`chat-${id}`);
     loadChat(id, token);
   }, [token]);
 
@@ -737,6 +783,7 @@ function ChatPage() {
         <main className="flex-1 flex flex-col overflow-hidden bg-slate-50 w-full min-w-0">
           {tab === 'chat' && (
             <ChatInterface
+              key={instanceKey}
               chatId={chatId}
               resetKey={resetKey}
               token={token}
@@ -751,6 +798,8 @@ function ChatPage() {
               }}
               initialMessages={initialMessages}
               initialQuery={queryParam}
+              inquiryId={inquiryIdParam}
+              isNewInquiry={isInquiryParam}
               category={searchParams.get('category')}
             />
           )}

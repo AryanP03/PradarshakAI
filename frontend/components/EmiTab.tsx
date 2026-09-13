@@ -770,12 +770,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
 
       {/* ── Main Two-Column Layout ─────────────────────────────────────────── */}
       <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1.15fr 1fr',
-          gap: 28,
-          alignItems: 'start',
-        }}
+        className="grid grid-cols-1 lg:grid-cols-[1.15fr_1fr] gap-7 items-start"
       >
         {/* ── Left Column: Interactive Sliders & Inputs ─────────────────────── */}
         <div

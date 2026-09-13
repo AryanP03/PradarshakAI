@@ -42,6 +42,21 @@ app.use(cors({
       return;
     }
 
+    // Allow local network IP addresses (e.g. 192.168.x.x, 10.x.x.x, 172.16-31.x.x) on port 3000 / 3001 / 3002
+    try {
+      const parsed = new URL(origin);
+      if (
+        parsed.hostname === 'localhost' ||
+        parsed.hostname === '127.0.0.1' ||
+        /^192\.168\.\d{1,3}\.\d{1,3}$/.test(parsed.hostname) ||
+        /^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(parsed.hostname) ||
+        /^172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}$/.test(parsed.hostname)
+      ) {
+        callback(null, true);
+        return;
+      }
+    } catch {}
+
     callback(new Error(`Origin ${origin} not allowed by CORS`));
   },
   credentials: true,

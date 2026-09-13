@@ -33,6 +33,7 @@ export interface UserProfileContext {
   pincode?: string | null;
   education_level?: string | null;
   trade_category?: string | null;
+  job_business_other?: string | null;
   funding_bracket?: string | null;
   caste_category?: string | null;
 }
@@ -49,7 +50,7 @@ export interface ConversationFacts {
   category_hint?: string;        // 'business_loan' | 'education_loan' | 'general'
   education_level?: string;
   course?: string;
-  last_recommended_schemes?: { name: string; code?: string; max_loan_lakh?: number }[];
+  last_recommended_schemes?: { id?: number; name: string; code?: string; category?: string; max_loan_lakh?: number }[];
   selected_scheme?: { name: string; code?: string; id?: number };
 }
 
@@ -214,6 +215,14 @@ export function extractAndUpdateFacts(
     if (!isNaN(val) && val > 0 && val <= 50) {
       facts.family_income_rs = Math.round(val * 100000);
     }
+  }
+
+  // 6. Reset selected_scheme if user asks for broad recommendation or alternatives
+  if (
+    /which scheme is (?:better|best)|show (?:me )?(?:other|more) schemes|alternatives?|compare|any other schemes?|all schemes|what (?:loan )?schemes are available|suggest schemes/i.test(lowerMsg) ||
+    /अन्य योजना|इतर योजना|विकल्प|तुलना|સરખામણી/i.test(lowerMsg)
+  ) {
+    facts.selected_scheme = undefined;
   }
 
   return facts;

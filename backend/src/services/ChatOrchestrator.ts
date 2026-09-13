@@ -3,8 +3,8 @@ import type { Language } from './IntentClassifier';
 import { getOrCreate, updateSession, extractAndUpdateFacts } from './ConversationSession';
 import type { Session, UserProfileContext, ConversationFacts } from './ConversationSession';
 import { TOOL_DEFS, executeTool } from './Tools';
-import { fetchSchemeById, fetchSchemeByName, fetchActiveSchemes, normalizeSchemeText } from './SchemeEngine';
-import type { Scheme } from './SchemeEngine';
+import { fetchSchemeById, fetchSchemeByName, fetchActiveSchemes, normalizeSchemeText, identifySpecificScheme } from './SchemeEngine';
+import type { Scheme, ScoredScheme } from './SchemeEngine';
 import { llmChat } from '../lib/openrouter';
 import type { ChatMessage } from '../lib/openrouter';
 import { getLanguageConfig } from '../config/languages';
@@ -170,7 +170,7 @@ SELECTED CARD CATEGORY CONTEXT & MISMATCH ACKNOWLEDGMENT:
   }
   if (userContext?.gender) userProfileLines.push(`- Gender: ${userContext.gender}`);
   if (userContext?.education_level) userProfileLines.push(`- Education Level: ${userContext.education_level}`);
-  if (userContext?.trade_category) userProfileLines.push(`- Registered Trade / Venture Category: ${userContext.trade_category}`);
+  if (userContext?.trade_category) userProfileLines.push(`- Registered Current Job / Business: ${userContext.trade_category}`);
   if (userContext?.funding_bracket) userProfileLines.push(`- Target Funding Bracket: ${userContext.funding_bracket}`);
 
   const verifiedLocation = userContext?.district || userContext?.city || '';
@@ -184,7 +184,7 @@ CRITICAL ZERO-REDUNDANCY DIRECTIVES:
 - The beneficiary's profile is PRE-VERIFIED. NEVER ask the user what their salary, income, location, city, district, gender, education, or business trade is!
 ${salaryNum != null ? `- Verified Annual Income is ₹${salaryNum.toLocaleString('en-IN')}. Automatically use this figure when checking scheme eligibility (ceiling ≤ ₹5,00,000) or evaluating repayment capacity.` : ''}
 ${verifiedLocation ? `- Verified Location is ${verifiedLocation}. When the user asks "Where is the nearest branch?", "find partners", or "where to apply", NEVER prompt for their city/location — IMMEDIATELY call find_partners with location: "${verifiedLocation}".` : ''}
-${userContext?.trade_category ? `- Target Trade is "${userContext.trade_category}". Automatically recommend schemes matching this trade.` : ''}
+${userContext?.trade_category ? `- Target Trade / Business is "${userContext.trade_category}". Automatically recommend schemes matching this livelihood.` : ''}
 `
     : '';
 
@@ -219,9 +219,10 @@ CONVERSATIONAL INTEGRITY & ZERO-REDUNDANCY MANDATE:
   * If the user asks "how much money do I need actually" or asks for an estimate for their tailoring business, explain that ₹1 Lakh is a realistic starting estimate covering an industrial sewing machine, shop security/furnishing, and fabric working capital.
   * Highlight that Micro Credit Finance (MCF) supports small projects up to ₹1.40 Lakh at 6.5% interest, making it an ideal match.
 - STANDARDIZED POST-RECOMMENDATION CTA:
-  * Whenever you present or recommend schemes to the user, conclude your response with this exact offer:
+  * Whenever you present or recommend multiple schemes to the user (via recommend_schemes), conclude your response with this exact offer:
     "${POST_RECOMMENDATION_CTA[langCode] || POST_RECOMMENDATION_CTA.en}"
   * This offer MUST appear strictly AFTER the scheme recommendations, never before them.
+  * For a single-scheme query (via get_scheme_details), focus on answering specifically about that scheme and invite questions about that scheme (e.g. documents, EMI, or channel partners to apply).
 `
     : '';
 
@@ -244,11 +245,12 @@ NUMERICAL FACT SAFETY (critical):
 - If the user asks for a specific loan amount (e.g. ₹3 Lakh), state their requested figure accurately. If the scheme ceiling is lower (e.g. ₹2.5 Lakh), explicitly contrast their request with the scheme maximum (e.g. "You requested ₹3 Lakh, while this scheme provides up to ₹2.5 Lakh"). Never silently change their requested amount to match the ceiling.
 
 TOOLS & GROUNDING (critical):
-- You have tools that return REAL data from the database and real financial math: recommend_schemes, calculate_emi, find_partners, get_required_documents, compare_schemes.
+- You have tools that return REAL data from the database and real financial math: get_scheme_details, recommend_schemes, calculate_emi, find_partners, get_required_documents, compare_schemes.
 - NEVER invent or guess interest rates, loan limits, moratorium periods, EMI figures, partner names, addresses, or distances. Any time you need one of these, call the matching tool and use ONLY what it returns.
 - Tool Selection Rules:
-  * Call recommend_schemes when the user describes a business/education plan OR asks for details about a single scheme (e.g. "Tell me more about SUY", "What is GBS", "Explain MCF").
-  * Call compare_schemes ONLY when the user explicitly asks to compare two or more distinct schemes (e.g. "Compare SUY and VETLS"). Never call compare_schemes for a single scheme detail query.
+  * Call get_scheme_details when the user asks about ONE specific scheme by name, acronym, or follow-up question (e.g. "Tell me about MSY", "What is the interest rate of MSY?", "Who is eligible for Mahila Samriddhi Yojana?", "What are the rules for MCF?"). In your response, explain ONLY that specific scheme and do NOT suggest or list alternative schemes unless explicitly requested.
+  * Call recommend_schemes when the user describes a business/education plan, asks for suggestions/options, or asks open-ended discovery questions (e.g. "Which scheme is best for me?", "What loan schemes are available for women?", "I need ₹2 lakh for a tailoring business").
+  * Call compare_schemes ONLY when the user explicitly asks to compare two or more distinct schemes (e.g. "Compare SUY and VETLS", "Compare MSY with other schemes"). Never call compare_schemes for a single scheme query.
 - If a tool needs information you don't have anywhere in this conversation, do NOT call it with a guessed value — instead, ask the user ONE short, warm, specific question to get exactly that missing piece, in ${langName}. Do not list multiple questions at once.
 - If you already have enough from earlier in the conversation (including any "Known context" note or "STRUCTURED CONVERSATION CONTEXT" above), go ahead and call the tool — NEVER re-ask for something already given.
 - Application process steps and general NSFDC background are safe to explain directly without a tool call — they aren't scheme-specific numbers.
@@ -271,6 +273,7 @@ INSTITUTIONAL JURISDICTION (GRAM PANCHAYAT vs. NSFDC CHANNELS):
 // ── Type/intent inference from which tool ran ──────────────────────────────────
 
 const TOOL_TO_TYPE: Record<string, ChatApiResponse['type']> = {
+  get_scheme_details: 'schemes',
   recommend_schemes: 'schemes',
   calculate_emi: 'emi',
   find_partners: 'partners',
@@ -279,6 +282,7 @@ const TOOL_TO_TYPE: Record<string, ChatApiResponse['type']> = {
 };
 
 const TOOL_TO_INTENT: Record<string, string> = {
+  get_scheme_details: 'specific_scheme_query',
   recommend_schemes: 'scheme_recommendation',
   calculate_emi: 'emi_calculation',
   find_partners: 'partner_locator',
@@ -625,6 +629,14 @@ export async function process(
     });
   }
 
+  // Active selected scheme from earlier in this conversation for follow-up questions
+  if (session.knownFacts?.selected_scheme) {
+    messages.push({
+      role: 'system',
+      content: `CURRENT ACTIVE SELECTED SCHEME IN THIS CONVERSATION: ${session.knownFacts.selected_scheme.name} (ID: ${session.knownFacts.selected_scheme.id}). When the user asks follow-up questions like "What is its interest rate?", "What documents are needed?", or references "this scheme", answer specifically about this scheme using get_scheme_details.`,
+    });
+  }
+
   // Bound conversation history to last 10 turns to avoid token inflation
   const historySlice = session.conversationHistory.slice(-10);
   for (const turn of historySlice) {
@@ -861,6 +873,22 @@ Explain clearly and warmly that during the ${morat}-month moratorium no principa
       finalText = getComparisonSummaryText(directCompareSchemes, session.language);
       lastToolData.speechText = speechText;
     } else {
+      // 2. High-priority specific scheme query detection
+      const allActiveSchemes = await fetchActiveSchemes();
+      const specificSchemeRes = identifySpecificScheme(
+        message,
+        allActiveSchemes,
+        session.knownFacts?.selected_scheme
+      );
+
+      if (specificSchemeRes.isSpecificSchemeQuery && specificSchemeRes.scheme) {
+        console.log(`[ROUTER] Specific scheme identified with high priority: "${specificSchemeRes.scheme.name}" (id: ${specificSchemeRes.scheme.id}, focus: ${specificSchemeRes.queryFocus})`);
+        session.knownFacts.selected_scheme = {
+          id: specificSchemeRes.scheme.id,
+          name: specificSchemeRes.scheme.name,
+        };
+      }
+
       try {
         for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
           const assistantMsg = await llmChat({ messages, tools: TOOL_DEFS, maxTokens: 700 });
@@ -877,49 +905,70 @@ Explain clearly and warmly that during the ${morat}-month moratorium no principa
                 args = {};
               }
 
-              // Pre-populate missing or enrich tool arguments from verified profile & known conversation facts
-              if (call.function.name === 'recommend_schemes') {
-                if (!args.purpose) {
-                  args.purpose = session.knownFacts?.purpose || session.knownFacts?.business_type || effectiveUserContext?.trade_category;
-                } else if (session.knownFacts?.business_type && !String(args.purpose).toLowerCase().includes(session.knownFacts.business_type.toLowerCase())) {
-                  args.purpose = `${session.knownFacts.business_type} - ${args.purpose}`;
+              // Handle get_scheme_details & priority routing
+              if (call.function.name === 'get_scheme_details') {
+                if (!args.scheme_name && !args.scheme_id && specificSchemeRes.scheme) {
+                  args.scheme_id = specificSchemeRes.scheme.id;
+                  args.scheme_name = specificSchemeRes.scheme.name;
                 }
-
-                if (!args.query) {
-                  args.query = session.knownFacts?.business_type || message;
-                } else if (session.knownFacts?.business_type && !String(args.query).toLowerCase().includes(session.knownFacts.business_type.toLowerCase())) {
-                  args.query = `${session.knownFacts.business_type} ${args.query}`;
+                if (!args.query_focus && specificSchemeRes.queryFocus) {
+                  args.query_focus = specificSchemeRes.queryFocus;
                 }
-
-                if (args.loan_amount_rs == null && session.knownFacts?.loan_amount_rs != null) {
-                  args.loan_amount_rs = session.knownFacts.loan_amount_rs;
-                }
-
-                if (args.family_income_rs == null) {
-                  if (session.knownFacts?.family_income_rs != null) {
-                    args.family_income_rs = session.knownFacts.family_income_rs;
-                  } else if (effectiveUserContext?.salary != null) {
-                    args.family_income_rs = Number(effectiveUserContext.salary);
+              } else if (call.function.name === 'recommend_schemes') {
+                // If user's intent is clearly a specific scheme and NOT an alternative/comparison request,
+                // intercept and route to get_scheme_details to prevent broad recommendation fan-out
+                if (specificSchemeRes.isSpecificSchemeQuery && specificSchemeRes.scheme) {
+                  console.log(`[ROUTER] Intercepting recommend_schemes -> redirecting to get_scheme_details for "${specificSchemeRes.scheme.name}"`);
+                  call.function.name = 'get_scheme_details';
+                  args = {
+                    scheme_id: specificSchemeRes.scheme.id,
+                    scheme_name: specificSchemeRes.scheme.name,
+                    query_focus: specificSchemeRes.queryFocus || 'overview',
+                  };
+                } else {
+                  // Pre-populate missing or enrich tool arguments from verified profile & known conversation facts
+                  if (!args.purpose) {
+                    args.purpose = session.knownFacts?.purpose || session.knownFacts?.business_type || effectiveUserContext?.trade_category;
+                  } else if (session.knownFacts?.business_type && !String(args.purpose).toLowerCase().includes(session.knownFacts.business_type.toLowerCase())) {
+                    args.purpose = `${session.knownFacts.business_type} - ${args.purpose}`;
                   }
-                }
 
-                if (!args.location) {
-                  args.location = session.knownFacts?.location || effectiveUserContext?.district || effectiveUserContext?.city;
-                }
+                  if (!args.query) {
+                    args.query = session.knownFacts?.business_type || message;
+                  } else if (session.knownFacts?.business_type && !String(args.query).toLowerCase().includes(session.knownFacts.business_type.toLowerCase())) {
+                    args.query = `${session.knownFacts.business_type} ${args.query}`;
+                  }
 
-                if (!args.gender && effectiveUserContext?.gender) {
-                  args.gender = effectiveUserContext.gender.toLowerCase();
-                }
+                  if (args.loan_amount_rs == null && session.knownFacts?.loan_amount_rs != null) {
+                    args.loan_amount_rs = session.knownFacts.loan_amount_rs;
+                  }
 
-                if (!args.education_level && (session.knownFacts?.education_level || effectiveUserContext?.education_level)) {
-                  args.education_level = session.knownFacts?.education_level || effectiveUserContext?.education_level;
-                }
+                  if (args.family_income_rs == null) {
+                    if (session.knownFacts?.family_income_rs != null) {
+                      args.family_income_rs = session.knownFacts.family_income_rs;
+                    } else if (effectiveUserContext?.salary != null) {
+                      args.family_income_rs = Number(effectiveUserContext.salary);
+                    }
+                  }
 
-                if (!args.category_hint) {
-                  if (session.knownFacts?.business_type) {
-                    args.category_hint = 'business_loan';
-                  } else if (session.knownFacts?.education_level) {
-                    args.category_hint = 'education_loan';
+                  if (!args.location) {
+                    args.location = session.knownFacts?.location || effectiveUserContext?.district || effectiveUserContext?.city;
+                  }
+
+                  if (!args.gender && effectiveUserContext?.gender) {
+                    args.gender = effectiveUserContext.gender.toLowerCase();
+                  }
+
+                  if (!args.education_level && (session.knownFacts?.education_level || effectiveUserContext?.education_level)) {
+                    args.education_level = session.knownFacts?.education_level || effectiveUserContext?.education_level;
+                  }
+
+                  if (!args.category_hint) {
+                    if (session.knownFacts?.business_type) {
+                      args.category_hint = 'business_loan';
+                    } else if (session.knownFacts?.education_level) {
+                      args.category_hint = 'education_loan';
+                    }
                   }
                 }
               } else if (call.function.name === 'find_partners') {
@@ -947,8 +996,22 @@ Explain clearly and warmly that during the ${morat}-month moratorium no principa
               lastToolName = result.toolName;
               lastToolData = result.data;
 
-              // Cache top recommended schemes in session knownFacts for pronoun & follow-up resolution
-              if (result.toolName === 'recommend_schemes' && Array.isArray(result.data?.schemes)) {
+              // Cache specific scheme or recommended schemes in session knownFacts
+              if (result.toolName === 'get_scheme_details') {
+                const targetScheme = (result.data.scheme as Scheme) || (Array.isArray(result.data.schemes) ? (result.data.schemes[0] as Scheme) : null);
+                if (targetScheme) {
+                  session.knownFacts.selected_scheme = {
+                    id: targetScheme.id,
+                    name: targetScheme.name,
+                  };
+                  session.knownFacts.last_recommended_schemes = [{
+                    id: targetScheme.id,
+                    name: targetScheme.name,
+                    category: targetScheme.category,
+                    max_loan_lakh: targetScheme.max_loan_lakh,
+                  }];
+                }
+              } else if (result.toolName === 'recommend_schemes' && Array.isArray(result.data?.schemes)) {
                 session.knownFacts.last_recommended_schemes = (result.data.schemes as Scheme[]).slice(0, 5).map((s) => ({
                   id: s.id,
                   name: s.name,
@@ -993,32 +1056,85 @@ Explain clearly and warmly that during the ${morat}-month moratorium no principa
 
           finalText = assistantMsg.content || '';
           console.log(`[ROUTER] LLM round ${round}: no tool call, finalText=${finalText ? 'present (' + finalText.length + ' chars)' : 'EMPTY'}`);
+          if (specificSchemeRes.isSpecificSchemeQuery && specificSchemeRes.scheme && !lastToolName) {
+            const singleScheme: ScoredScheme = {
+              ...specificSchemeRes.scheme,
+              score: 100,
+              tier: 'ELIGIBLE_OPTIMAL',
+              matchReasons: ['Official NSFDC Concessional Scheme Guidelines'],
+              warnings: [],
+            };
+            lastToolName = 'get_scheme_details';
+            lastToolData = {
+              scheme: singleScheme,
+              schemes: [singleScheme],
+              isSpecificScheme: true,
+              queryFocus: specificSchemeRes.queryFocus || 'overview',
+            };
+            session.knownFacts.selected_scheme = {
+              id: singleScheme.id,
+              name: singleScheme.name,
+            };
+            session.knownFacts.last_recommended_schemes = [{
+              id: singleScheme.id,
+              name: singleScheme.name,
+              category: singleScheme.category,
+              max_loan_lakh: singleScheme.max_loan_lakh,
+            }];
+          }
           break;
         }
       } catch (llmErr) {
         console.warn('[ChatOrchestrator] LLM call fallback triggered:', (llmErr as Error)?.message);
-        const fallbackResult = await executeTool('recommend_schemes', {
-          query: session.knownFacts?.business_type || message,
-          loan_amount_rs: session.knownFacts?.loan_amount_rs,
-          purpose: session.knownFacts?.purpose || session.knownFacts?.business_type,
-          family_income_rs: session.knownFacts?.family_income_rs || (effectiveUserContext?.salary ? Number(effectiveUserContext.salary) : undefined),
-          location: session.knownFacts?.location || effectiveUserContext?.district || effectiveUserContext?.city,
-          category_hint: session.knownFacts?.business_type ? 'business_loan' : undefined,
-        });
-        lastToolName = fallbackResult.toolName;
-        lastToolData = fallbackResult.data;
-        finalText = session.language === 'hi'
-          ? 'आपकी आवश्यकता के अनुसार उपयुक्त योजनाएं नीचे प्रदर्शित की गई हैं।'
-          : session.language === 'mr'
-          ? 'तुमच्या गरजेनुसार योग्य योजना खाली दाखवल्या आहेत.'
-          : 'Here are the recommended schemes matching your inquiry.';
+        if (specificSchemeRes.isSpecificSchemeQuery && specificSchemeRes.scheme) {
+          const fallbackResult = await executeTool('get_scheme_details', {
+            scheme_id: specificSchemeRes.scheme.id,
+            scheme_name: specificSchemeRes.scheme.name,
+            query_focus: specificSchemeRes.queryFocus || 'overview',
+          });
+          lastToolName = fallbackResult.toolName;
+          lastToolData = fallbackResult.data;
+          finalText = session.language === 'hi'
+            ? `${specificSchemeRes.scheme.name} का विवरण नीचे दिया गया है।`
+            : session.language === 'mr'
+            ? `${specificSchemeRes.scheme.name} चा तपशील खाली दिला आहे.`
+            : `Here are the details for ${specificSchemeRes.scheme.name}.`;
+          speechText = finalText;
+        } else {
+          const fallbackResult = await executeTool('recommend_schemes', {
+            query: session.knownFacts?.business_type || message,
+            loan_amount_rs: session.knownFacts?.loan_amount_rs,
+            purpose: session.knownFacts?.purpose || session.knownFacts?.business_type,
+            family_income_rs: session.knownFacts?.family_income_rs || (effectiveUserContext?.salary ? Number(effectiveUserContext.salary) : undefined),
+            location: session.knownFacts?.location || effectiveUserContext?.district || effectiveUserContext?.city,
+            category_hint: session.knownFacts?.business_type ? 'business_loan' : undefined,
+          });
+          lastToolName = fallbackResult.toolName;
+          lastToolData = fallbackResult.data;
+          finalText = session.language === 'hi'
+            ? 'आपकी आवश्यकता के अनुसार उपयुक्त योजनाएं नीचे प्रदर्शित की गई हैं।'
+            : session.language === 'mr'
+            ? 'तुमच्या गरजेनुसार योग्य योजना खाली दाखवल्या आहेत.'
+            : 'Here are the recommended schemes matching your inquiry.';
+          speechText = finalText;
+        }
       }
     }
   }
 
   // Safety net: Never produce generic fallback if a tool succeeded with real data
   if (!finalText) {
-    if (lastToolName === 'compare_schemes' && lastToolData?.schemes) {
+    if (lastToolName === 'get_scheme_details' && lastToolData?.scheme) {
+      const s = (lastToolData.scheme as Scheme);
+      finalText = session.language === 'hi'
+        ? `${s.name} की जानकारी नीचे दी गई है।`
+        : session.language === 'mr'
+        ? `${s.name} ची माहिती खाली दिली आहे.`
+        : session.language === 'bn'
+        ? `${s.name}-এর বিবরণ নীচে দেওয়া হলো।`
+        : `Here are the details for ${s.name}.`;
+      speechText = finalText;
+    } else if (lastToolName === 'compare_schemes' && lastToolData?.schemes) {
       finalText = getComparisonSummaryText(lastToolData.schemes as Scheme[], session.language);
       speechText = generateComparisonSpeechText(lastToolData.schemes as Scheme[], session.language);
     } else if (lastToolName === 'calculate_emi' && lastToolData?.emi) {
@@ -1050,60 +1166,90 @@ Explain clearly and warmly that during the ${morat}-month moratorium no principa
         : 'Here are the recommended schemes matching your inquiry.';
       speechText = finalText;
     } else {
-      // ── SMART FALLBACK: detect scheme-related queries and call recommend_schemes directly ──
-      const lowerMsg = message.toLowerCase();
-      const isSchemeRelated =
-        session.knownFacts?.business_type ||
-        session.knownFacts?.category_hint ||
-        session.knownFacts?.purpose ||
-        /scheme|loan|business|education|tailoring|shop|college|school|money|fund|assist|help|available|suggest|recommend|emi|partner|योजना|ऋण|ऋण|कर्ज|व्यवसाय|शिक्षा/i.test(lowerMsg);
+      // ── SMART FALLBACK ──
+      const allActiveSchemes = await fetchActiveSchemes();
+      const specificSchemeRes = identifySpecificScheme(
+        message,
+        allActiveSchemes,
+        session.knownFacts?.selected_scheme
+      );
 
-      if (isSchemeRelated) {
-        console.log('[ROUTER] Smart fallback: LLM returned empty, but message is scheme-related. Calling recommend_schemes directly.');
+      if (specificSchemeRes.isSpecificSchemeQuery && specificSchemeRes.scheme) {
+        console.log(`[ROUTER] Smart fallback: Calling get_scheme_details directly for "${specificSchemeRes.scheme.name}"`);
         try {
-          const smartFallbackResult = await executeTool('recommend_schemes', {
-            query: message,
-            purpose: session.knownFacts?.purpose || session.knownFacts?.business_type || message,
-            loan_amount_rs: session.knownFacts?.loan_amount_rs,
-            family_income_rs: session.knownFacts?.family_income_rs || (effectiveUserContext?.salary ? Number(effectiveUserContext.salary) : undefined),
-            location: session.knownFacts?.location || effectiveUserContext?.district || effectiveUserContext?.city,
-            gender: session.knownFacts?.gender || effectiveUserContext?.gender?.toLowerCase(),
-            category_hint: session.knownFacts?.category_hint,
+          const smartFallbackResult = await executeTool('get_scheme_details', {
+            scheme_id: specificSchemeRes.scheme.id,
+            scheme_name: specificSchemeRes.scheme.name,
+            query_focus: specificSchemeRes.queryFocus || 'overview',
           });
           lastToolName = smartFallbackResult.toolName;
           lastToolData = smartFallbackResult.data;
-
-          // Cache recommended schemes
-          if (Array.isArray(smartFallbackResult.data?.schemes)) {
-            session.knownFacts.last_recommended_schemes = (smartFallbackResult.data.schemes as Scheme[]).slice(0, 5).map((s) => ({
-              id: s.id,
-              name: s.name,
-              category: s.category,
-              max_loan_lakh: s.max_loan_lakh,
-            }));
-          }
-
-          const schemeCount = Array.isArray(smartFallbackResult.data?.schemes) ? (smartFallbackResult.data.schemes as any[]).length : 0;
-          console.log(`[RESPONSE] Smart fallback returned ${schemeCount} schemes`);
-
           finalText = session.language === 'hi'
-            ? 'आपकी आवश्यकता के अनुसार उपयुक्त योजनाएं नीचे प्रदर्शित की गई हैं।'
+            ? `${specificSchemeRes.scheme.name} की जानकारी नीचे दी गई है।`
             : session.language === 'mr'
-            ? 'तुमच्या गरजेनुसार योग्य योजना खाली दाखवल्या आहेत.'
-            : session.language === 'bn'
-            ? 'আপনার প্রয়োজনীয়তা অনুযায়ী উপযুক্ত প্রকল্পগুলি নীচে প্রদর্শিত হয়েছে।'
-            : 'Here are the recommended schemes matching your inquiry.';
+            ? `${specificSchemeRes.scheme.name} ची माहिती खाली दिली आहे.`
+            : `Here are the details for ${specificSchemeRes.scheme.name}.`;
           speechText = finalText;
-        } catch (fallbackErr) {
-          console.error('[ROUTER] Smart fallback also failed:', (fallbackErr as Error)?.message);
+        } catch (fbErr) {
+          console.error('[ROUTER] Smart fallback for specific scheme failed:', fbErr);
           finalText = LOCALIZED_ERROR_MESSAGES[session.language] || LOCALIZED_ERROR_MESSAGES.en;
           speechText = finalText;
         }
       } else {
-        // Truly unrecognizable query — give a graceful error, not "rephrase"
-        console.log('[ROUTER] No scheme-related signal in message, returning graceful error.');
-        finalText = LOCALIZED_ERROR_MESSAGES[session.language] || LOCALIZED_ERROR_MESSAGES.en;
-        speechText = finalText;
+        const lowerMsg = message.toLowerCase();
+        const isSchemeRelated =
+          session.knownFacts?.business_type ||
+          session.knownFacts?.category_hint ||
+          session.knownFacts?.purpose ||
+          /scheme|loan|business|education|tailoring|shop|college|school|money|fund|assist|help|available|suggest|recommend|emi|partner|योजना|ऋण|ऋण|कर्ज|व्यवसाय|शिक्षा/i.test(lowerMsg);
+
+        if (isSchemeRelated) {
+          console.log('[ROUTER] Smart fallback: LLM returned empty, but message is scheme-related. Calling recommend_schemes directly.');
+          try {
+            const smartFallbackResult = await executeTool('recommend_schemes', {
+              query: message,
+              purpose: session.knownFacts?.purpose || session.knownFacts?.business_type || message,
+              loan_amount_rs: session.knownFacts?.loan_amount_rs,
+              family_income_rs: session.knownFacts?.family_income_rs || (effectiveUserContext?.salary ? Number(effectiveUserContext.salary) : undefined),
+              location: session.knownFacts?.location || effectiveUserContext?.district || effectiveUserContext?.city,
+              gender: session.knownFacts?.gender || effectiveUserContext?.gender?.toLowerCase(),
+              category_hint: session.knownFacts?.category_hint,
+            });
+            lastToolName = smartFallbackResult.toolName;
+            lastToolData = smartFallbackResult.data;
+
+            // Cache recommended schemes
+            if (Array.isArray(smartFallbackResult.data?.schemes)) {
+              session.knownFacts.last_recommended_schemes = (smartFallbackResult.data.schemes as Scheme[]).slice(0, 5).map((s) => ({
+                id: s.id,
+                name: s.name,
+                category: s.category,
+                max_loan_lakh: s.max_loan_lakh,
+              }));
+            }
+
+            const schemeCount = Array.isArray(smartFallbackResult.data?.schemes) ? (smartFallbackResult.data.schemes as any[]).length : 0;
+            console.log(`[RESPONSE] Smart fallback returned ${schemeCount} schemes`);
+
+            finalText = session.language === 'hi'
+              ? 'आपकी आवश्यकता के अनुसार उपयुक्त योजनाएं नीचे प्रदर्शित की गई हैं।'
+              : session.language === 'mr'
+              ? 'तुमच्या गरजेनुसार योग्य योजना खाली दाखवल्या आहेत.'
+              : session.language === 'bn'
+              ? 'আপনার প্রয়োজনীয়তা অনুযায়ী উপযুক্ত প্রকল্পগুলি নীচে প্রদর্শিত হয়েছে।'
+              : 'Here are the recommended schemes matching your inquiry.';
+            speechText = finalText;
+          } catch (fallbackErr) {
+            console.error('[ROUTER] Smart fallback also failed:', (fallbackErr as Error)?.message);
+            finalText = LOCALIZED_ERROR_MESSAGES[session.language] || LOCALIZED_ERROR_MESSAGES.en;
+            speechText = finalText;
+          }
+        } else {
+          // Truly unrecognizable query — give a graceful error, not "rephrase"
+          console.log('[ROUTER] No scheme-related signal in message, returning graceful error.');
+          finalText = LOCALIZED_ERROR_MESSAGES[session.language] || LOCALIZED_ERROR_MESSAGES.en;
+          speechText = finalText;
+        }
       }
     }
   }
@@ -1139,6 +1285,15 @@ Explain clearly and warmly that during the ${morat}-month moratorium no principa
   session.lastIntent = intent;
   session.conversationHistory.push({ role: 'assistant', content: finalText });
   updateSession(session);
+
+  const resultCount = Array.isArray(lastToolData?.schemes)
+    ? (lastToolData.schemes as unknown[]).length
+    : lastToolData?.scheme
+    ? 1
+    : 0;
+  console.log(
+    `[ROUTER] query="${message.substring(0, 80)}" → intent=${intent} | scheme="${session.knownFacts?.selected_scheme?.name || 'none'}" | tool=${lastToolName} | resultsCount=${resultCount} | mode=${type}`
+  );
 
   const response: ChatApiResponse = {
     sessionId: session.id,

@@ -31,12 +31,7 @@ export default function Footer() {
       >
         {/* ── Top Multi-Column Grid ────────────────────────────────────────── */}
         <div
-          className="footer-grid"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1.8fr 1fr 1.2fr 1.2fr',
-            gap: 36,
-          }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
         >
           {/* Column 1: Brand & Purpose */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -182,12 +177,10 @@ export default function Footer() {
 
         {/* ── Bottom Copyright Bar ─────────────────────────────────────────── */}
         <div
+          className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left"
           style={{
             borderTop: '1px solid rgba(255, 255, 255, 0.1)',
             paddingTop: 24,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
             fontSize: 12,
             color: '#64748b',
           }}
@@ -195,7 +188,7 @@ export default function Footer() {
           <span>
             © {new Date().getFullYear()} {t('footer.portal_title', 'National SC Financial Assistance Portal')} • {t('brand.name', 'PradarshakAI')}. {t('footer.rights_reserved', 'All Rights Reserved.')}
           </span>
-          <div style={{ display: 'flex', gap: 16 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 16 }}>
             <span>{t('footer.privacy', 'Privacy Policy')}</span>
             <span>{t('footer.terms', 'Terms of Service')}</span>
             <span>{t('footer.accessibility', 'Accessibility Statement (WCAG 2.1 AA)')}</span>

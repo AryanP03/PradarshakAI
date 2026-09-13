@@ -30,6 +30,7 @@ import {
   Layers,
   Lock,
 } from 'lucide-react';
+import { JOB_CATEGORIES, getJobCategoryLabel } from '@/lib/jobCategories';
 
 const STATES_LIST = [
   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana',
@@ -176,6 +177,7 @@ export default function ProfilePage() {
       pincode: profile.pincode || '',
       education_level: profile.education_level || '',
       trade_category: profile.trade_category || '',
+      job_business_other: profile.job_business_other || '',
       funding_bracket: profile.funding_bracket || '',
       salary: profile.salary || '',
     });
@@ -190,8 +192,13 @@ export default function ProfilePage() {
     setSaving(true);
     setEditError(null);
 
+    const payload = {
+      ...editForm,
+      job_business_other: editForm.trade_category === 'other' ? (editForm.job_business_other || '').trim() : null,
+    };
+
     try {
-      const res = await updateUserProfile(token, editForm);
+      const res = await updateUserProfile(token, payload);
       if (res.user) {
         setProfile(res.user);
         localStorage.setItem('auth_user', JSON.stringify(res.user));
@@ -602,7 +609,7 @@ export default function ProfilePage() {
               </div>
 
               {/* ── 2x2 MAIN DASHBOARD GRID ── */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 20 }}>
 
                 {/* 1. PERSONAL INFORMATION CARD */}
                 <div
@@ -628,7 +635,7 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div>
                       <span style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
                         {t('profile.lbl_fullname', 'Full Name')}
@@ -717,9 +724,9 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     {(profile.address_line1 || profile.address_line2) && (
-                      <div style={{ gridColumn: 'span 2' }}>
+                      <div className="sm:col-span-2">
                         <span style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
                           {t('profile.lbl_address1', 'Residential Address')}
                         </span>
@@ -793,7 +800,7 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div>
                       <span style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
                         {t('profile.lbl_caste', 'Category')}
@@ -823,12 +830,10 @@ export default function ProfilePage() {
 
                     <div style={{ gridColumn: 'span 2' }}>
                       <span style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
-                        {t('profile.lbl_trade', 'Trade / Occupation')}
+                        {t('profile.lbl_trade', 'Current Job / Business')}
                       </span>
                       <p style={{ margin: '2px 0 0', fontSize: 14, fontWeight: 600, color: '#0f172a' }}>
-                        {profile.trade_category
-                          ? `${TRADE_OPTIONS[profile.trade_category]?.icon || '💼'} ${TRADE_OPTIONS[profile.trade_category]?.label || profile.trade_category}`
-                          : t('profile.not_provided', 'Not provided')}
+                        {getJobCategoryLabel(profile.trade_category, profile.job_business_other)}
                       </p>
                     </div>
 
@@ -1192,19 +1197,46 @@ export default function ProfilePage() {
 
                     <div style={{ gridColumn: 'span 2' }}>
                       <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
-                        {t('profile.lbl_trade', 'Trade / Occupation')}
+                        {t('profile.lbl_trade', 'Current Job / Business')}
                       </label>
                       <select
                         value={editForm.trade_category || ''}
-                        onChange={(e) => setEditForm({ ...editForm, trade_category: e.target.value })}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setEditForm({
+                            ...editForm,
+                            trade_category: val,
+                            ...(val !== 'other' ? { job_business_other: '' } : {})
+                          });
+                        }}
                         style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid #cbd5e1', fontSize: 13.5, background: '#fff' }}
                       >
-                        <option value="">Select Trade / Occupation</option>
-                        {Object.entries(TRADE_OPTIONS).map(([k, v]) => (
-                          <option key={k} value={k}>{v.icon} {v.label}</option>
+                        <option value="">Select Current Job / Business</option>
+                        {JOB_CATEGORIES.map((grp) => (
+                          <optgroup key={grp.group} label={grp.group}>
+                            {grp.options.map((opt) => (
+                              <option key={opt.id} value={opt.id}>{opt.label}</option>
+                            ))}
+                          </optgroup>
                         ))}
                       </select>
                     </div>
+
+                    {editForm.trade_category === 'other' && (
+                      <div style={{ gridColumn: 'span 2' }}>
+                        <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                          {t('register.lbl_job_other', 'Please specify your current job / business')} *
+                        </label>
+                        <input
+                          type="text"
+                          value={editForm.job_business_other || ''}
+                          onChange={(e) => setEditForm({ ...editForm, job_business_other: e.target.value })}
+                          placeholder="e.g. Mobile repair shop, electrical contractor"
+                          style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid #cbd5e1', fontSize: 13.5, background: '#fff' }}
+                          required
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Form Actions */}

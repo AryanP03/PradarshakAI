@@ -118,7 +118,8 @@ router.get('/me', optionalUser, async (req: UserAuthRequest, res: Response) => {
       `SELECT id, name, email, phone, salary, city, district, state, pincode,
               address_line1, address_line2, dob, gender, education_level, trade_category,
               funding_bracket, caste_category, aadhaar, mobile_verified, email_verified,
-              eligibility_status, registration_complete, created_at, updated_at
+              eligibility_status, registration_complete, created_at, updated_at,
+              job_business_other
        FROM users WHERE id = $1`,
       [req.userId]
     );
@@ -135,7 +136,8 @@ router.patch('/me', requireUser, async (req: UserAuthRequest, res: Response) => 
   const allowedFields = [
     'name', 'phone', 'dob', 'gender',
     'address_line1', 'address_line2', 'city', 'district', 'state', 'pincode',
-    'education_level', 'trade_category', 'funding_bracket', 'salary'
+    'education_level', 'trade_category', 'funding_bracket', 'salary',
+    'job_business_other'
   ];
 
   const updates: string[] = [];
@@ -166,7 +168,8 @@ router.patch('/me', requireUser, async (req: UserAuthRequest, res: Response) => 
       RETURNING id, name, email, phone, salary, city, district, state, pincode,
                 address_line1, address_line2, dob, gender, education_level, trade_category,
                 funding_bracket, caste_category, aadhaar, mobile_verified, email_verified,
-                eligibility_status, registration_complete, created_at, updated_at
+                eligibility_status, registration_complete, created_at, updated_at,
+                job_business_other
     `;
     const { rows } = await pool.query(query, values);
     if (rows.length === 0) {
