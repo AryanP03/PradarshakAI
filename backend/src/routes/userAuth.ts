@@ -1,6 +1,8 @@
 import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import path from 'path';
+import fs from 'fs';
 import { pool } from '../db/pool';
 import { optionalUser, requireUser, UserAuthRequest } from '../middleware/userAuthMiddleware';
 import {
@@ -180,6 +182,64 @@ router.patch('/me', requireUser, async (req: UserAuthRequest, res: Response) => 
   } catch (err) {
     console.error('[User Profile Update Error]', err);
     res.status(500).json({ error: 'Failed to update user profile' });
+  }
+});
+
+// DELETE /api/users/me — permanently delete user account, all chats, messages, and uploaded files
+router.delete('/me', requireUser, async (req: UserAuthRequest, res: Response): Promise<void> => {
+  const userId = req.userId;
+  if (!userId) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+
+  try {
+    // 1. Fetch file references to safely clean up physical storage
+    const { rows: files } = await pool.query(
+      'SELECT selfie_image, sc_certificate_file, income_certificate_file FROM users WHERE id = $1',
+      [userId]
+    );
+
+    if (files.length > 0) {
+      const u = files[0];
+      const uploadsDir = path.join(__dirname, '../../uploads');
+      const docList = [u.selfie_image, u.sc_certificate_file, u.income_certificate_file].filter(Boolean);
+      for (const fileName of docList) {
+        try {
+          const filePath = path.join(uploadsDir, fileName);
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+          }
+        } catch (fErr) {
+          console.warn('[Delete Account] Could not delete file:', fileName, fErr);
+        }
+      }
+    }
+
+    // 2. Explicitly wipe messages belonging to the user's chats
+    await pool.query(
+      'DELETE FROM chat_messages WHERE chat_id IN (SELECT id FROM chats WHERE user_id = $1)',
+      [userId]
+    );
+
+    // 3. Delete all chats belonging to the user
+    await pool.query('DELETE FROM chats WHERE user_id = $1', [userId]);
+
+    // 4. Delete the user row
+    const { rowCount } = await pool.query('DELETE FROM users WHERE id = $1', [userId]);
+
+    if (!rowCount || rowCount === 0) {
+      res.status(404).json({ error: 'User account not found' });
+      return;
+    }
+
+    res.json({
+      success: true,
+      message: 'Account, all conversations, and associated data have been permanently deleted.'
+    });
+  } catch (err: any) {
+    console.error('[Delete Account Error]', err);
+    res.status(500).json({ error: 'Failed to delete account', detail: err.message });
   }
 });
 

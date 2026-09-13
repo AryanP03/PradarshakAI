@@ -313,6 +313,24 @@ export async function updateUserProfile(
   return data;
 }
 
+export async function deleteUserProfile(token: string): Promise<{ success: boolean; message: string }> {
+  const res = await fetch(`${BASE}/users/me`, {
+    method: 'DELETE',
+    headers: userHeaders(token),
+  });
+  const data = await res.json().catch(() => ({ error: 'Failed to delete account' }));
+  if (!res.ok) {
+    throw new Error(data.error || 'Failed to delete account');
+  }
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
+    localStorage.removeItem('registration_summary');
+    localStorage.removeItem('guest_chat_messages');
+  }
+  return data;
+}
+
 // ── Chat history ──────────────────────────────────────────────────────────────
 
 export async function listChats(token: string): Promise<ChatSummary[]> {

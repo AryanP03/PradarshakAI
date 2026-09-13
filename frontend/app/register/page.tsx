@@ -1009,7 +1009,8 @@ function RegisterContent() {
                             <input
                               type="number"
                               min="1"
-                              step="1000"
+                              step="1"
+                              inputMode="numeric"
                               value={manualIncome}
                               onChange={(e) => setManualIncome(e.target.value)}
                               placeholder="e.g. 120000"

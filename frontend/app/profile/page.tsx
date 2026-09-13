@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import EmblemOfIndia from '@/components/EmblemOfIndia';
-import { getUserProfile, updateUserProfile, UserProfile } from '@/lib/api';
+import { getUserProfile, updateUserProfile, deleteUserProfile, UserProfile } from '@/lib/api';
 import { useLanguage } from '@/context/LanguageContext';
 import {
   User,
@@ -29,6 +29,8 @@ import {
   Sparkles,
   Layers,
   Lock,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react';
 import { JOB_CATEGORIES, getJobCategoryLabel } from '@/lib/jobCategories';
 
@@ -109,6 +111,12 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Account deletion state
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const fetchUser = useCallback(async (authToken: string) => {
     setLoading(true);
@@ -212,6 +220,42 @@ export default function ProfilePage() {
       setEditError(err.message || 'Failed to save changes. Please verify input fields.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText.trim().toUpperCase() !== 'DELETE') return;
+    if (!token) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      if (typeof deleteUserProfile === 'function') {
+        await deleteUserProfile(token);
+      } else {
+        // Fallback for bundler/Turbopack HMR cache lag
+        const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000/api';
+        const res = await fetch(`${apiBase}/users/me`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json().catch(() => ({ error: 'Failed to delete account' }));
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to delete account');
+        }
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('auth_user');
+          localStorage.removeItem('registration_summary');
+          localStorage.removeItem('guest_chat_messages');
+        }
+      }
+      router.push('/auth?deleted=true');
+    } catch (err: any) {
+      setDeleteError(err.message || 'Failed to delete account. Please try again.');
+      setDeleting(false);
     }
   };
 
@@ -958,7 +1002,247 @@ export default function ProfilePage() {
                 </div>
 
               </div>
+
+              {/* ── DANGER ZONE / ACCOUNT DELETION ── */}
+              <div
+                style={{
+                  background: '#ffffff',
+                  borderRadius: 16,
+                  border: '1.5px solid #fee2e2',
+                  padding: 24,
+                  boxShadow: '0 2px 8px rgba(220, 38, 38, 0.04)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: 16,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+                  <div
+                    style={{
+                      width: 42,
+                      height: 42,
+                      borderRadius: 10,
+                      background: '#fef2f2',
+                      color: '#dc2626',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Trash2 size={20} />
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: 16, fontWeight: 800, color: '#991b1b', margin: 0 }}>
+                      Delete Beneficiary Account
+                    </h3>
+                    <p style={{ margin: '4px 0 0', fontSize: 13, color: '#64748b', lineHeight: 1.5, maxWidth: 620 }}>
+                      Permanently delete your user profile, all saved scheme advisory chats, uploaded verification documents, and calculation history from the database. This action cannot be reversed.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeleteConfirmText('');
+                    setDeleteError(null);
+                    setIsDeleteModalOpen(true);
+                  }}
+                  style={{
+                    padding: '10px 20px',
+                    borderRadius: 10,
+                    background: '#fee2e2',
+                    color: '#dc2626',
+                    border: '1.5px solid #fca5a5',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    transition: 'all 150ms ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#dc2626';
+                    e.currentTarget.style.color = '#ffffff';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#fee2e2';
+                    e.currentTarget.style.color = '#dc2626';
+                  }}
+                >
+                  <Trash2 size={15} />
+                  <span>Delete Account</span>
+                </button>
+              </div>
             </>
+          )}
+
+          {/* ── DELETE ACCOUNT CONFIRMATION MODAL ── */}
+          {isDeleteModalOpen && (
+            <div
+              style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: 9999,
+                background: 'rgba(0, 30, 64, 0.65)',
+                backdropFilter: 'blur(4px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 16,
+              }}
+              onClick={() => !deleting && setIsDeleteModalOpen(false)}
+            >
+              <div
+                style={{
+                  background: '#ffffff',
+                  borderRadius: 20,
+                  width: '100%',
+                  maxWidth: '520px',
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                  border: '1.5px solid #fecaca',
+                  overflow: 'hidden',
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Modal Header */}
+                <div
+                  style={{
+                    padding: '18px 24px',
+                    background: '#dc2626',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <AlertTriangle size={20} color="#ffffff" />
+                    <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: '#ffffff' }}>
+                      Permanent Account Deletion
+                    </h3>
+                  </div>
+                  {!deleting && (
+                    <button
+                      type="button"
+                      onClick={() => setIsDeleteModalOpen(false)}
+                      style={{ background: 'transparent', border: 'none', color: '#ffffff', cursor: 'pointer' }}
+                    >
+                      <X size={20} color="#ffffff" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Modal Body */}
+                <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <p style={{ margin: 0, fontSize: 14, color: '#334155', lineHeight: 1.6 }}>
+                    Are you sure you want to permanently delete your account, <strong>{profile?.name}</strong>?
+                  </p>
+
+                  <div
+                    style={{
+                      background: '#fef2f2',
+                      border: '1px solid #fecaca',
+                      borderRadius: 10,
+                      padding: '12px 16px',
+                      fontSize: 13,
+                      color: '#991b1b',
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    <strong>This will permanently and immediately erase:</strong>
+                    <ul style={{ margin: '8px 0 0', paddingLeft: 20 }}>
+                      <li>Your citizen profile, registration details & contact info</li>
+                      <li>All your scheme advisory chats, questions, and chat history</li>
+                      <li>All uploaded certificate files & selfie verification records</li>
+                      <li>Saved loan calculation scenarios and financial plans</li>
+                    </ul>
+                  </div>
+
+                  {deleteError && (
+                    <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', padding: '10px 14px', borderRadius: 8, fontSize: 13 }}>
+                      {deleteError}
+                    </div>
+                  )}
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
+                      To confirm, please type <strong style={{ color: '#dc2626' }}>DELETE</strong> below:
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Type DELETE to confirm"
+                      value={deleteConfirmText}
+                      onChange={(e) => setDeleteConfirmText(e.target.value)}
+                      disabled={deleting}
+                      style={{
+                        width: '100%',
+                        padding: '10px 14px',
+                        borderRadius: 8,
+                        border: '1.5px solid #cbd5e1',
+                        fontSize: 14,
+                        fontWeight: 600,
+                        color: '#0f172a',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
+
+                  {/* Modal Actions */}
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 8 }}>
+                    <button
+                      type="button"
+                      disabled={deleting}
+                      onClick={() => {
+                        setIsDeleteModalOpen(false);
+                        setDeleteConfirmText('');
+                        setDeleteError(null);
+                      }}
+                      style={{
+                        padding: '10px 18px',
+                        borderRadius: 8,
+                        background: '#f1f5f9',
+                        color: '#475569',
+                        fontSize: 13.5,
+                        fontWeight: 700,
+                        border: 'none',
+                        cursor: deleting ? 'not-allowed' : 'pointer',
+                      }}
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={deleteConfirmText.trim().toUpperCase() !== 'DELETE' || deleting}
+                      onClick={handleDeleteAccount}
+                      style={{
+                        padding: '10px 22px',
+                        borderRadius: 8,
+                        background: deleteConfirmText.trim().toUpperCase() === 'DELETE' && !deleting ? '#dc2626' : '#fca5a5',
+                        color: '#ffffff',
+                        fontSize: 13.5,
+                        fontWeight: 700,
+                        border: 'none',
+                        cursor: deleteConfirmText.trim().toUpperCase() === 'DELETE' && !deleting ? 'pointer' : 'not-allowed',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        boxShadow: deleteConfirmText.trim().toUpperCase() === 'DELETE' ? '0 2px 8px rgba(220, 38, 38, 0.3)' : 'none',
+                      }}
+                    >
+                      {deleting && <RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }} />}
+                      <span>{deleting ? 'Deleting All Data…' : 'Permanently Delete'}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* ── EDIT PROFILE MODAL ── */}
