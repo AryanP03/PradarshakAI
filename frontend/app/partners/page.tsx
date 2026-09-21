@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -26,6 +26,14 @@ import { useLanguage } from '@/context/LanguageContext';
 import { API_BASE } from '@/lib/apiBase';
 
 const BASE = API_BASE;
+
+export type LocationMode = 'city' | 'gps';
+
+export interface ActiveLocation {
+  mode: LocationMode;
+  label: string;
+  coords: { lat: number; lng: number } | null;
+}
 
 // Dynamic import for Leaflet map component (SSR disabled)
 const LeafletMap = dynamic(() => import('@/components/Map'), {
@@ -54,8 +62,15 @@ const POPULAR_CITIES = ['Mumbai', 'Pune', 'Nagpur', 'Nashik', 'Delhi', 'Jaipur',
 function PartnersContent() {
   const searchParams = useSearchParams();
   const { t } = useLanguage();
-  const [city, setCity] = useState('');
+
+  // Single Source of Truth for Active Location Context
+  const [activeLocation, setActiveLocation] = useState<ActiveLocation>({
+    mode: 'city',
+    label: '',
+    coords: null,
+  });
   const [inputCity, setInputCity] = useState('');
+  const [isLocatingGPS, setIsLocatingGPS] = useState(false);
   const [partners, setPartners] = useState<PartnerCardData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -67,6 +82,9 @@ function PartnersContent() {
   const [escalationNotice, setEscalationNotice] = useState<string | null>(null);
   const [advisoryCode, setAdvisoryCode] = useState<string | null>(null);
 
+  // Monotonic request counter for race-condition prevention
+  const reqIdRef = useRef(0);
+
   // Sync category filtering
   const filteredPartners = typeFilter === 'All'
     ? partners
@@ -76,12 +94,12 @@ function PartnersContent() {
         return false;
       });
 
-  async function fetchPartners(
-    searchCity?: string,
-    coords?: { lat: number; lng: number },
+  async function fetchPartnersForLocation(
+    loc: ActiveLocation,
     categoryId = typeFilter,
     overrideRadius?: number
   ) {
+    const reqId = ++reqIdRef.current;
     setLoading(true);
     setError('');
     setSelectedPartner(null);
@@ -93,14 +111,11 @@ function PartnersContent() {
 
     try {
       const params = new URLSearchParams();
-      if (searchCity) {
-        params.set('city', searchCity);
-        setCity(searchCity);
-      }
-      if (coords) {
-        params.set('lat', String(coords.lat));
-        params.set('lng', String(coords.lng));
-        setUserLocation(coords);
+      if (loc.mode === 'city' && loc.label && loc.label.trim().toLowerCase() !== 'current location') {
+        params.set('city', loc.label.trim());
+      } else if (loc.coords) {
+        params.set('lat', String(loc.coords.lat));
+        params.set('lng', String(loc.coords.lng));
       }
       if (categoryId && categoryId !== 'All') {
         params.set('category', categoryId);
@@ -108,12 +123,19 @@ function PartnersContent() {
       params.set('radiusKm', String(activeRadius));
 
       const res = await fetch(`${BASE}/partners/nearby?${params}`);
+      if (reqId !== reqIdRef.current) {
+        console.log(`[PartnerLocator] Discarding stale response #${reqId} for "${loc.label}" (latest is #${reqIdRef.current})`);
+        return;
+      }
+
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.error || 'Could not locate channel partners');
       }
 
       const data = await res.json();
+      if (reqId !== reqIdRef.current) return;
+
       const results: PartnerCardData[] = data.partners || [];
       setPartners(results);
       setDegradedState(Boolean(data.degradedState));
@@ -121,47 +143,100 @@ function PartnersContent() {
       setAdvisoryCode(data.advisoryCode || null);
 
       if (data.location && data.location.lat && data.location.lng) {
-        setUserLocation({ lat: data.location.lat, lng: data.location.lng });
+        const pt = { lat: data.location.lat, lng: data.location.lng };
+        setUserLocation(pt);
+        if (loc.mode === 'city') {
+          setActiveLocation((prev) => (prev.mode === 'city' && prev.label === loc.label ? { ...prev, coords: pt } : prev));
+        }
+      } else if (loc.coords) {
+        setUserLocation(loc.coords);
       }
 
       if (results.length > 0) {
         setSelectedPartner(results[0]);
       }
+
+      console.log('[PartnerLocator] SYNC UPDATE SUCCESS:', {
+        mode: loc.mode,
+        label: loc.label,
+        resultsCount: results.length,
+        reqId,
+      });
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed to search channel partners.');
+      if (reqId === reqIdRef.current) {
+        setError(e instanceof Error ? e.message : 'Failed to search channel partners.');
+      }
     } finally {
-      setLoading(false);
+      if (reqId === reqIdRef.current) {
+        setLoading(false);
+      }
     }
   }
 
-  // Handle GPS location search
+  function selectCity(c: string) {
+    setInputCity(c);
+    setIsLocatingGPS(false);
+    const newLoc: ActiveLocation = { mode: 'city', label: c, coords: null };
+    setActiveLocation(newLoc);
+    fetchPartnersForLocation(newLoc, typeFilter, radius);
+  }
+
   function locateUserGPS() {
     if (!navigator.geolocation) {
       setError('Geolocation is not supported by your browser.');
       return;
     }
+
+    setIsLocatingGPS(true);
     setLoading(true);
     setError('');
+
+    // Pre-emptively transition UI context to GPS mode so stale city is removed immediately
+    const prevLocation = activeLocation;
+    setInputCity('Current Location');
+    const tentativeGpsLoc: ActiveLocation = { mode: 'gps', label: 'Current Location', coords: null };
+    setActiveLocation(tentativeGpsLoc);
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        const finalGpsLoc: ActiveLocation = { mode: 'gps', label: 'Current Location', coords };
+        setActiveLocation(finalGpsLoc);
         setUserLocation(coords);
-        setInputCity('Current Location');
-        fetchPartners(undefined, coords);
+        setIsLocatingGPS(false);
+        fetchPartnersForLocation(finalGpsLoc, typeFilter, radius);
       },
-      () => {
-        setError('Location access denied. Please enter your city name manually.');
+      (geoErr) => {
+        setIsLocatingGPS(false);
         setLoading(false);
-      }
+        setError('Location access denied or unavailable. Please enter your city name manually.');
+        // Cleanly restore previous city context if GPS fails
+        if (prevLocation.mode === 'city') {
+          setInputCity(prevLocation.label);
+          setActiveLocation(prevLocation);
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
     );
+  }
+
+  function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const query = inputCity.trim();
+    if (!query) return;
+
+    if (query.toLowerCase() === 'current location') {
+      locateUserGPS();
+    } else {
+      selectCity(query);
+    }
   }
 
   useEffect(() => {
     const initCity = searchParams.get('city') || searchParams.get('location') || searchParams.get('q');
     if (initCity && initCity.trim()) {
       const queryCity = initCity.trim();
-      setInputCity(queryCity);
-      fetchPartners(queryCity);
+      selectCity(queryCity);
       return;
     }
 
@@ -186,17 +261,9 @@ function PartnersContent() {
     }
 
     const defaultLocation = profileLocation || 'Pune, Maharashtra';
-    setInputCity(defaultLocation);
-    fetchPartners(defaultLocation);
+    selectCity(defaultLocation);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
-
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (inputCity.trim()) {
-      fetchPartners(inputCity.trim());
-    }
-  }
 
   const TABS = [
     { id: 'chat', label: t('chat.tab_ai', 'AI Scheme Assistant'), href: '/chat', Icon: Bot },
@@ -367,23 +434,25 @@ function PartnersContent() {
             <button
               type="button"
               onClick={locateUserGPS}
+              disabled={isLocatingGPS}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 6,
                 padding: '12px 16px',
                 borderRadius: 12,
-                background: '#f1f5f9',
-                border: '1.5px solid #cbd5e1',
-                color: '#0b1f3a',
+                background: activeLocation.mode === 'gps' ? '#eff6ff' : '#f1f5f9',
+                border: activeLocation.mode === 'gps' ? '1.5px solid #2563eb' : '1.5px solid #cbd5e1',
+                color: activeLocation.mode === 'gps' ? '#1d4ed8' : '#0b1f3a',
                 fontSize: 13.5,
                 fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'background-color 150ms ease, border-color 150ms ease, color 150ms ease',
+                cursor: isLocatingGPS ? 'wait' : 'pointer',
+                boxShadow: activeLocation.mode === 'gps' ? '0 1px 4px rgba(37, 99, 235, 0.15)' : 'none',
+                transition: 'all 150ms ease',
               }}
             >
-              <LocateFixed size={16} color="#e87722" />
-              <span>Use GPS</span>
+              <LocateFixed size={16} color={activeLocation.mode === 'gps' ? '#2563eb' : '#e87722'} />
+              <span>{isLocatingGPS ? 'Getting location…' : 'Use GPS'}</span>
             </button>
 
             {/* Radius Selector */}
@@ -394,7 +463,7 @@ function PartnersContent() {
                 onChange={(e) => {
                   const r = Number(e.target.value);
                   setRadius(r);
-                  fetchPartners(city || inputCity.trim(), userLocation || undefined, typeFilter, r);
+                  fetchPartnersForLocation(activeLocation, typeFilter, r);
                 }}
                 style={{
                   background: 'transparent',
@@ -448,14 +517,11 @@ function PartnersContent() {
               {t('partners.popular', 'Popular Cities:')}
             </span>
             {POPULAR_CITIES.map((c) => {
-              const active = city.toLowerCase() === c.toLowerCase();
+              const active = activeLocation.mode === 'city' && activeLocation.label.trim().toLowerCase() === c.toLowerCase();
               return (
                 <button
                   key={c}
-                  onClick={() => {
-                    setInputCity(c);
-                    fetchPartners(c);
-                  }}
+                  onClick={() => selectCity(c)}
                   style={{
                     fontSize: 12,
                     fontWeight: active ? 700 : 500,
@@ -495,7 +561,7 @@ function PartnersContent() {
                 key={cat.id}
                 onClick={() => {
                   setTypeFilter(cat.id);
-                  if (city) fetchPartners(city, userLocation || undefined, cat.id);
+                  fetchPartnersForLocation(activeLocation, cat.id, radius);
                 }}
                 style={{
                   whiteSpace: 'nowrap',
@@ -536,7 +602,7 @@ function PartnersContent() {
           >
             <div className="h-[280px] sm:h-[360px] lg:h-[520px] w-full">
               <LeafletMap
-                userLocation={userLocation}
+                userLocation={activeLocation.coords || userLocation}
                 partners={filteredPartners as unknown as MapPartner[]}
                 selectedPartner={selectedPartner as unknown as MapPartner}
                 onPartnerClick={(p) => {
@@ -578,8 +644,18 @@ function PartnersContent() {
             
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 4 }}>
               <span style={{ fontSize: 14, fontWeight: 800, color: '#0b1f3a' }}>
-                {filteredPartners.length} verified branches found
-                {city ? ` near "${city}"` : ''}
+                {isLocatingGPS ? (
+                  'Locating partner branches near your current position…'
+                ) : (
+                  <>
+                    {filteredPartners.length} {t('partners.branches_found', 'verified branches found')}{' '}
+                    {activeLocation.mode === 'gps'
+                      ? 'near your Current Location'
+                      : activeLocation.label
+                      ? `near "${activeLocation.label}"`
+                      : ''}
+                  </>
+                )}
               </span>
             </div>
 
