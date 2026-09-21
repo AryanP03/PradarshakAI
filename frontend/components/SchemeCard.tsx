@@ -86,38 +86,38 @@ export default function SchemeCard({ scheme, onSelect, selected }: Props) {
             </span>
           </div>
 
-          <h3 className="font-bold mt-1 text-base leading-tight text-primary">
+          <h3 className="font-bold mt-1 text-base leading-tight text-primary break-words">
             {localizedName || scheme.name}
           </h3>
         </div>
         {selected && <CheckCircle className="w-5 h-5 flex-shrink-0" style={{ color: catInfo.color }} />}
       </div>
 
-      <div className="grid grid-cols-3 gap-2 my-3.5 p-2.5 rounded-lg bg-surface-container border border-outline-variant/30">
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-1 mb-0.5">
-            <IndianRupee className="w-3 h-3 text-muted" />
-            <span className="text-xs text-muted">{t('schemes.max_loan', 'Max Loan')}</span>
+      <div className="grid grid-cols-3 gap-1.5 sm:gap-2 my-3.5 p-2 rounded-lg bg-surface-container border border-outline-variant/30">
+        <div className="text-center min-w-0">
+          <div className="flex items-center justify-center gap-1 mb-0.5 min-w-0">
+            <IndianRupee className="w-3 h-3 text-muted flex-shrink-0" />
+            <span className="text-[11px] leading-tight text-muted truncate">{t('schemes.max_loan', 'Max Loan')}</span>
           </div>
-          <span className="text-sm font-bold text-on-surface">
+          <span className="text-sm font-bold text-on-surface block">
             ₹{scheme.max_loan_lakh}L
           </span>
         </div>
-        <div className="text-center border-x border-outline-variant/30">
-          <div className="flex items-center justify-center gap-1 mb-0.5">
-            <TrendingUp className="w-3 h-3 text-muted" />
-            <span className="text-xs text-muted">{t('schemes.interest', 'Interest')}</span>
+        <div className="text-center border-x border-outline-variant/30 min-w-0">
+          <div className="flex items-center justify-center gap-1 mb-0.5 min-w-0">
+            <TrendingUp className="w-3 h-3 text-muted flex-shrink-0" />
+            <span className="text-[11px] leading-tight text-muted truncate">{t('schemes.interest', 'Interest')}</span>
           </div>
-          <span className="text-sm font-bold text-success">
+          <span className="text-sm font-bold text-success block">
             {scheme.interest_rate_min}–{scheme.interest_rate_max}%
           </span>
         </div>
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-1 mb-0.5">
-            <Clock className="w-3 h-3 text-muted" />
-            <span className="text-xs text-muted">{t('schemes.tenure', 'Tenure')}</span>
+        <div className="text-center min-w-0">
+          <div className="flex items-center justify-center gap-1 mb-0.5 min-w-0">
+            <Clock className="w-3 h-3 text-muted flex-shrink-0" />
+            <span className="text-[11px] leading-tight text-muted truncate">{t('schemes.tenure', 'Tenure')}</span>
           </div>
-          <span className="text-sm font-bold text-on-surface">
+          <span className="text-sm font-bold text-on-surface block">
             {Math.round(scheme.max_tenure_months / 12)}yr
           </span>
         </div>
@@ -128,7 +128,7 @@ export default function SchemeCard({ scheme, onSelect, selected }: Props) {
       </p>
 
       {scheme.coverage_percent > 0 && (
-        <div className="mt-3 pt-2.5 border-t border-border flex items-center justify-between text-xs text-muted">
+        <div className="mt-3 pt-2.5 border-t border-border flex flex-wrap items-center justify-between gap-1.5 text-xs text-muted">
           <span>{t('schemes.project_coverage', 'Project Coverage:')} <strong className="text-primary font-semibold">Up to {scheme.coverage_percent}%</strong></span>
           {scheme.moratorium_months_max > 0 && (
             <span>{t('schemes.moratorium', 'Moratorium:')} <strong className="text-primary font-semibold">{scheme.moratorium_months_max}m</strong></span>

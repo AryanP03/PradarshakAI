@@ -8,6 +8,7 @@ import { verifyCasteCertificate, verifyIncomeCertificate } from '../services/Cer
 import { getRegistrationSession, clearRegistrationSession } from '../services/RegistrationSessionService';
 import { sendOtp, verifyOtp, isEmailVerified, clearVerification } from '../services/OtpService';
 import { sendRegistrationSuccessEmail } from '../services/EmailService';
+import { setAuthCookie } from '../utils/authCookies';
 import jwt from 'jsonwebtoken';
 
 const router = Router();
@@ -244,6 +245,7 @@ router.post('/complete', async (req: Request, res: Response): Promise<void> => {
       console.error('[PradarshakAI EmailService] Background email sending error:', emailErr?.message || emailErr);
     });
 
+    setAuthCookie(res, token);
     res.status(201).json({ token, user });
   } catch (err: any) {
     const msg = (err as Error).message || '';

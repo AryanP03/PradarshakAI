@@ -509,9 +509,9 @@ export default function SchemesPage() {
             <button
               onClick={() => setTypeFilter('financing')}
               style={{
-                fontSize: 13,
+                fontSize: 'clamp(12px, 1.1vw, 13px)',
                 fontWeight: typeFilter === 'financing' ? 800 : 600,
-                padding: '8px 16px',
+                padding: '8px 14px',
                 borderRadius: 12,
                 border: '1.5px solid',
                 borderColor: typeFilter === 'financing' ? '#059669' : '#cbd5e1',
@@ -526,9 +526,9 @@ export default function SchemesPage() {
             <button
               onClick={() => setTypeFilter('informational')}
               style={{
-                fontSize: 13,
+                fontSize: 'clamp(12px, 1.1vw, 13px)',
                 fontWeight: typeFilter === 'informational' ? 800 : 600,
-                padding: '8px 16px',
+                padding: '8px 14px',
                 borderRadius: 12,
                 border: '1.5px solid',
                 borderColor: typeFilter === 'informational' ? '#2563eb' : '#cbd5e1',
@@ -630,7 +630,7 @@ export default function SchemesPage() {
             </div>
 
             {/* Gender Toggle & Reset */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', background: '#f1f5f9', padding: '3px', borderRadius: 10 }}>
                 <button
                   onClick={() => setGenderFilter('all')}

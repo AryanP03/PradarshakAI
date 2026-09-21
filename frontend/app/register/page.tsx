@@ -381,6 +381,7 @@ function RegisterContent() {
       setStatusText('Creating your account...');
       const completeRes = await fetch(`${BACKEND}/api/registration/complete`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           full_name: fullName,
@@ -412,7 +413,8 @@ function RegisterContent() {
       const completeData = await completeRes.json();
       if (!completeRes.ok) throw new Error(completeData.error || 'Registration failed');
 
-      localStorage.setItem('auth_token', completeData.token);
+      // Primary auth credential established via secure HttpOnly cookie
+      localStorage.removeItem('auth_token');
       localStorage.setItem('auth_user', JSON.stringify({
         ...completeData.user,
         education_level: educationLevel,
@@ -598,17 +600,16 @@ function RegisterContent() {
               padding: '14px 18px',
               marginBottom: 28,
               boxShadow: '0 2px 6px rgba(0, 30, 64, 0.03)',
-              overflowX: 'auto',
             }}
           >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(130px, 1fr))', gap: 12, minWidth: 560 }}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 w-full">
               {[
                 { step: '1', title: 'Personal Details', done: !!fullName && !!mobile && emailStep === 'verified' },
                 { step: '2', title: 'Security & Access', done: password.length >= 8 && password === confirmPassword },
                 { step: '3', title: DOC_VERIFICATION_ENABLED ? 'Verification (OCR/Face)' : 'Face Verification', done: DOC_VERIFICATION_ENABLED ? (isCertVerified && isIdentityVerified) : isIdentityVerified },
                 { step: '4', title: 'Livelihood & Goals', done: !!manualIncome && !!educationLevel && !!jobCategory && (jobCategory !== 'other' || !!jobBusinessOther.trim()) },
               ].map((s, idx) => (
-                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
                   <div
                     style={{
                       width: 26,
@@ -626,11 +627,11 @@ function RegisterContent() {
                   >
                     {s.done ? '✓' : s.step}
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                     <span style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>
                       Step {s.step}
                     </span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap' }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#0f172a', lineHeight: 1.25 }}>
                       {s.title}
                     </span>
                   </div>

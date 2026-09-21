@@ -79,12 +79,12 @@ export default function PortalOverviewPage() {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F5F6F8', color: '#1e293b' }}>
       <NavBar />
 
-      {/* ── CLEAN OFFICIAL HERO SECTION WITH VISUAL STORYTELLING ────────── */}
+      {/* ── 1. CLEAN OFFICIAL HERO SECTION WITH VISUAL STORYTELLING ────── */}
       <section
         style={{
           background: '#ffffff',
           borderBottom: '1px solid #e2e8f0',
-          padding: '16px 0 10px',
+          padding: '24px 0 32px',
           textAlign: 'center',
           display: 'flex',
           flexDirection: 'column',
@@ -95,23 +95,23 @@ export default function PortalOverviewPage() {
       >
         <div
           style={{
-            maxWidth: 840,
+            maxWidth: 920,
             margin: '0 auto',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            padding: '0 16px',
+            padding: '0 24px',
           }}
         >
           {/* Hero Heading */}
           <h1
             style={{
-              fontSize: 'clamp(22px, 2.6vw, 32px)',
+              fontSize: 'clamp(24px, 2.8vw, 34px)',
               fontWeight: 800,
               color: '#003366',
-              lineHeight: 1.2,
+              lineHeight: 1.25,
               letterSpacing: '-0.02em',
-              margin: '0 0 6px 0',
+              margin: '0 0 8px 0',
             }}
           >
             {t('home.hero_title', 'Find the Right Government Financial Scheme')}
@@ -125,17 +125,17 @@ export default function PortalOverviewPage() {
               alignItems: 'center',
               justifyContent: 'center',
               width: '100%',
-              maxWidth: 720,
+              maxWidth: 760,
               padding: '0 16px',
             }}
           >
             <p
               style={{
-                fontSize: 'clamp(13.5px, 1.5vw, 15.5px)',
+                fontSize: 'clamp(14px, 1.5vw, 16px)',
                 fontWeight: 500,
                 color: '#0b5a8f',
                 margin: 0,
-                lineHeight: 1.35,
+                lineHeight: 1.4,
                 textAlign: 'center',
                 opacity: fade ? 1 : 0,
                 transform: fade ? 'translateY(0)' : 'translateY(2px)',
@@ -148,34 +148,88 @@ export default function PortalOverviewPage() {
         </div>
 
         {/* ── 7-IMAGE STORYTELLING CAROUSEL ── */}
-        <div style={{ width: '100%', marginTop: '8px' }}>
+        <div style={{ width: '100%', marginTop: '16px' }}>
           <StorytellingCarousel />
         </div>
       </section>
 
-      {/* ── QUICK SERVICES SECTION ────────────────────────────────────────── */}
-      <section className="py-10 md:py-14 px-4 sm:px-6" style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <h2 style={{ fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: 800, color: '#003366', margin: '0 0 12px 0' }}>
+      {/* ── 2. QUICK SERVICES SECTION ("What would you like to do?") ───── */}
+      <section
+        className="home-services-section"
+        style={{
+          maxWidth: 1200,
+          margin: '0 auto',
+          width: '100%',
+          padding: '52px 24px 56px',
+        }}
+      >
+        <div style={{ textAlign: 'center', marginBottom: 36 }}>
+          <h2
+            style={{
+              fontSize: 'clamp(22px, 2.6vw, 30px)',
+              fontWeight: 800,
+              color: '#003366',
+              margin: '0 0 10px 0',
+              letterSpacing: '-0.015em',
+            }}
+          >
             {t('home.services_title', 'What would you like to do?')}
           </h2>
-          <p style={{ fontSize: 'clamp(14px, 1.8vw, 16px)', color: '#64748b', margin: 0 }}>
+          <p
+            style={{
+              fontSize: 'clamp(14px, 1.5vw, 16px)',
+              color: '#64748b',
+              margin: 0,
+              maxWidth: 620,
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              lineHeight: 1.5,
+            }}
+          >
             {t('home.services_sub', t('home.services_subtitle', 'Select an option below to get started with PradarshakAI'))}
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: 20 }}>
+        <div className="action-cards-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 24 }}>
           {/* Card 1: Explore Schemes */}
-          <Link href="/schemes" style={{ textDecoration: 'none' }}>
-            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, padding: '28px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.03)', height: '100%' }}>
-              <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Layers size={32} color="#003366" />
+          <Link href="/schemes" style={{ textDecoration: 'none' }} className="action-card-link">
+            <div
+              className="action-card-inner"
+              style={{
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: 12,
+                padding: '32px 22px 28px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                gap: 16,
+                boxShadow: '0 2px 8px rgba(0, 30, 64, 0.04)',
+                height: '100%',
+                transition: 'all 200ms ease',
+              }}
+            >
+              <div
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: '50%',
+                  background: '#eff6ff',
+                  border: '1px solid #dbeafe',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Layers size={30} color="#003366" />
               </div>
-              <div>
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#003366', margin: '0 0 8px 0' }}>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#003366', margin: '0 0 8px 0', lineHeight: 1.3 }}>
                   {t('home.services_schemes_title', t('home.card_explore_title', t('nav.schemes', 'Explore Schemes')))}
                 </h3>
-                <p style={{ fontSize: 14, color: '#475569', margin: 0 }}>
+                <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.5 }}>
                   {t('home.services_schemes_desc', t('home.card_explore_desc', 'View available concessional loan schemes'))}
                 </p>
               </div>
@@ -183,16 +237,44 @@ export default function PortalOverviewPage() {
           </Link>
 
           {/* Card 2: Check Eligibility */}
-          <Link href="/chat" style={{ textDecoration: 'none' }}>
-            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, padding: '28px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.03)', height: '100%' }}>
-              <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <ShieldCheck size={32} color="#003366" />
+          <Link href="/chat" style={{ textDecoration: 'none' }} className="action-card-link">
+            <div
+              className="action-card-inner"
+              style={{
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: 12,
+                padding: '32px 22px 28px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                gap: 16,
+                boxShadow: '0 2px 8px rgba(0, 30, 64, 0.04)',
+                height: '100%',
+                transition: 'all 200ms ease',
+              }}
+            >
+              <div
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: '50%',
+                  background: '#eef2ff',
+                  border: '1px solid #e0e7ff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <ShieldCheck size={30} color="#3730a3" />
               </div>
-              <div>
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#003366', margin: '0 0 8px 0' }}>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#003366', margin: '0 0 8px 0', lineHeight: 1.3 }}>
                   {t('home.services_eligibility_title', t('home.card_eligibility_title', 'Check Eligibility'))}
                 </h3>
-                <p style={{ fontSize: 14, color: '#475569', margin: 0 }}>
+                <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.5 }}>
                   {t('home.services_eligibility_desc', t('home.card_eligibility_desc', 'Find schemes you may be eligible for'))}
                 </p>
               </div>
@@ -200,16 +282,44 @@ export default function PortalOverviewPage() {
           </Link>
 
           {/* Card 3: Calculate EMI */}
-          <Link href="/chat?tab=emi" style={{ textDecoration: 'none' }}>
-            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, padding: '28px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.03)', height: '100%' }}>
-              <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Calculator size={32} color="#d97706" />
+          <Link href="/chat?tab=emi" style={{ textDecoration: 'none' }} className="action-card-link">
+            <div
+              className="action-card-inner"
+              style={{
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: 12,
+                padding: '32px 22px 28px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                gap: 16,
+                boxShadow: '0 2px 8px rgba(0, 30, 64, 0.04)',
+                height: '100%',
+                transition: 'all 200ms ease',
+              }}
+            >
+              <div
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: '50%',
+                  background: '#fef3c7',
+                  border: '1px solid #fde68a',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Calculator size={30} color="#d97706" />
               </div>
-              <div>
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#003366', margin: '0 0 8px 0' }}>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#003366', margin: '0 0 8px 0', lineHeight: 1.3 }}>
                   {t('home.services_emi_title', t('home.card_emi_title', 'Calculate EMI'))}
                 </h3>
-                <p style={{ fontSize: 14, color: '#475569', margin: 0 }}>
+                <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.5 }}>
                   {t('home.services_emi_desc', t('home.card_emi_desc', 'Estimate your monthly repayment'))}
                 </p>
               </div>
@@ -217,16 +327,44 @@ export default function PortalOverviewPage() {
           </Link>
 
           {/* Card 4: Find a Partner */}
-          <Link href="/partners" style={{ textDecoration: 'none' }}>
-            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, padding: '28px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.03)', height: '100%' }}>
-              <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <MapPin size={32} color="#15803d" />
+          <Link href="/partners" style={{ textDecoration: 'none' }} className="action-card-link">
+            <div
+              className="action-card-inner"
+              style={{
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: 12,
+                padding: '32px 22px 28px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                gap: 16,
+                boxShadow: '0 2px 8px rgba(0, 30, 64, 0.04)',
+                height: '100%',
+                transition: 'all 200ms ease',
+              }}
+            >
+              <div
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: '50%',
+                  background: '#dcfce7',
+                  border: '1px solid #bbf7d0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <MapPin size={30} color="#15803d" />
               </div>
-              <div>
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#003366', margin: '0 0 8px 0' }}>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#003366', margin: '0 0 8px 0', lineHeight: 1.3 }}>
                   {t('home.services_partner_title', t('home.card_partner_title', 'Find a Partner'))}
                 </h3>
-                <p style={{ fontSize: 14, color: '#475569', margin: 0 }}>
+                <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.5 }}>
                   {t('home.services_partner_desc', t('home.card_partner_desc', 'Locate nearby channel partners'))}
                 </p>
               </div>
@@ -235,121 +373,418 @@ export default function PortalOverviewPage() {
         </div>
       </section>
 
-      {/* ── FEATURED SCHEMES ────────────────────────────────────────────── */}
-      <section className="py-12 md:py-16 px-4 sm:px-6" style={{ background: '#ffffff', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 40, flexWrap: 'wrap', gap: 16 }}>
-            <div>
-              <h2 style={{ fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: 800, color: '#003366', margin: '0 0 12px 0' }}>
-                {t('home.featured_title', 'Featured Schemes')}
-              </h2>
-              <p style={{ fontSize: 'clamp(14px, 1.8vw, 16px)', color: '#64748b', margin: 0 }}>
-                {t('home.featured_sub', t('home.featured_subtitle', 'Popular concessional loan programs'))}
-              </p>
+      {/* ── 3. FEATURED SCHEMES ─────────────────────────────────────────── */}
+      <section
+        className="home-featured-section"
+        style={{
+          background: '#ffffff',
+          borderTop: '1px solid #e2e8f0',
+          borderBottom: '1px solid #e2e8f0',
+          padding: '56px 24px 64px',
+          width: '100%',
+        }}
+      >
+        <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
+          {/* Section Header (Centered) */}
+          <div
+            style={{
+              textAlign: 'center',
+              marginBottom: 36,
+              maxWidth: 720,
+              marginLeft: 'auto',
+              marginRight: 'auto',
+            }}
+          >
+            <div
+              style={{
+                display: 'inline-block',
+                fontSize: 11,
+                fontWeight: 700,
+                color: '#b45309',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                marginBottom: 8,
+              }}
+            >
+              {t('home.featured_badge', 'OFFICIAL NSFDC CONCESSIONAL CREDIT')}
             </div>
-            <Link href="/schemes" style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#0B5A8F', fontWeight: 600, textDecoration: 'none' }}>
+            <h2
+              style={{
+                fontSize: 'clamp(22px, 2.6vw, 30px)',
+                fontWeight: 800,
+                color: '#003366',
+                margin: '0 0 8px 0',
+                letterSpacing: '-0.015em',
+              }}
+            >
+              {t('home.featured_title', 'Featured Schemes')}
+            </h2>
+            <p style={{ fontSize: 'clamp(14px, 1.5vw, 16px)', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+              {t('home.featured_sub', t('home.featured_subtitle', 'Popular concessional loan programs'))}
+            </p>
+          </div>
+
+          {/* Centered 3-Card Grid */}
+          <div
+            className="featured-schemes-grid"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+              gap: 24,
+            }}
+          >
+            {featuredSchemes.map((scheme, idx) => (
+              <div
+                key={idx}
+                className="featured-scheme-card"
+                style={{
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 12,
+                  padding: '28px 24px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 16,
+                  background: '#ffffff',
+                  boxShadow: '0 2px 8px rgba(0, 30, 64, 0.04)',
+                  transition: 'all 200ms ease',
+                  height: '100%',
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      display: 'inline-block',
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: '#b45309',
+                      backgroundColor: '#fffbeb',
+                      border: '1px solid #fde68a',
+                      borderRadius: 4,
+                      padding: '3px 8px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.04em',
+                      marginBottom: 8,
+                    }}
+                  >
+                    {scheme.category}
+                  </div>
+                  <h3
+                    style={{
+                      fontSize: 19,
+                      fontWeight: 700,
+                      color: '#003366',
+                      margin: 0,
+                      lineHeight: 1.35,
+                      minHeight: 52,
+                    }}
+                  >
+                    {scheme.title}
+                  </h3>
+                </div>
+
+                {/* Key Financial Parameters Box */}
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: 16,
+                    padding: '14px 16px',
+                    borderRadius: 8,
+                    background: '#f8fafc',
+                    border: '1px solid #edf2f7',
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.04em', marginBottom: 2 }}>
+                      {t('home.max_assistance', 'Max Assistance')}
+                    </div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: '#003366' }}>{scheme.maxLoan}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.04em', marginBottom: 2 }}>
+                      {t('schemes.interest_rate', t('home.interest_rate', 'Interest Rate'))}
+                    </div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: '#15803d' }}>{scheme.rate}</div>
+                  </div>
+                </div>
+
+                <p
+                  style={{
+                    fontSize: 14,
+                    color: '#475569',
+                    margin: 0,
+                    lineHeight: 1.55,
+                    flex: 1,
+                  }}
+                >
+                  {scheme.desc}
+                </p>
+
+                <div style={{ marginTop: 'auto', paddingTop: 14, borderTop: '1px solid #f1f5f9' }}>
+                  <Link
+                    href="/schemes"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      color: '#003366',
+                      fontWeight: 700,
+                      fontSize: 14,
+                      textDecoration: 'none',
+                    }}
+                  >
+                    <span>{t('home.view_details', 'View Details')}</span>
+                    <ArrowRight size={15} />
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* View All Schemes Button - Centered Below 3 Cards */}
+          <div style={{ marginTop: 36, textAlign: 'center' }}>
+            <Link
+              href="/schemes"
+              className="featured-view-all-link"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                color: '#003366',
+                fontWeight: 700,
+                fontSize: 15,
+                textDecoration: 'none',
+                padding: '11px 24px',
+                borderRadius: 8,
+                backgroundColor: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+                transition: 'all 180ms ease',
+              }}
+            >
               <span>{t('home.view_all_schemes', 'View All Schemes')}</span>
               <ArrowRight size={16} />
             </Link>
           </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 24 }}>
-            {featuredSchemes.map((scheme, idx) => (
-              <div key={idx} style={{ border: '1px solid #e2e8f0', borderRadius: 8, padding: '24px', display: 'flex', flexDirection: 'column', gap: 16, background: '#F5F6F8' }}>
-                <div>
-                  <h3 style={{ fontSize: 20, fontWeight: 700, color: '#003366', margin: '0 0 4px 0' }}>{scheme.title}</h3>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: '#F58220', textTransform: 'uppercase' }}>{scheme.category}</span>
-                </div>
-                
-                <div style={{ display: 'flex', alignItems: 'center', gap: 24, padding: '12px 0', borderTop: '1px solid #cbd5e1', borderBottom: '1px solid #cbd5e1' }}>
-                  <div>
-                    <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>
-                      {t('home.max_assistance', 'Max Assistance')}
-                    </div>
-                    <div style={{ fontSize: 16, fontWeight: 700, color: '#0B5A8F' }}>{scheme.maxLoan}</div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>
-                      {t('schemes.interest_rate', t('home.interest_rate', 'Interest Rate'))}
-                    </div>
-                    <div style={{ fontSize: 16, fontWeight: 700, color: '#15803d' }}>{scheme.rate}</div>
-                  </div>
-                </div>
-
-                <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.5, flex: 1 }}>
-                  {scheme.desc}
-                </p>
-
-                <Link href="/schemes" style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#003366', fontWeight: 700, textDecoration: 'none', marginTop: 8 }}>
-                  <span>{t('home.view_details', 'View Details')}</span>
-                  <ArrowRight size={16} />
-                </Link>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
-      {/* ── SIMPLE 3-STEP PROCESS ────────────────────────────────────────── */}
-      <section style={{ padding: '64px 24px', maxWidth: 1000, margin: '0 auto', width: '100%', textAlign: 'center' }}>
-        <h2 style={{ fontSize: 28, fontWeight: 800, color: '#003366', margin: '0 0 40px 0' }}>
-          {t('home.how_helps_title', 'How PradarshakAI Helps')}
-        </h2>
-        
-        <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 32, justifyContent: 'center' }}>
-          <div style={{ flex: '1 1 250px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-            <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#003366', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 800 }}>1</div>
-            <h3 style={{ fontSize: 18, fontWeight: 700, color: '#0B5A8F', margin: 0 }}>
+      {/* ── 4. HOW PRADARSHAKAI HELPS (Simple 3-Step Process) ──────────── */}
+      <section
+        className="home-how-section"
+        style={{
+          padding: '52px 24px 56px',
+          maxWidth: 1200,
+          margin: '0 auto',
+          width: '100%',
+          textAlign: 'center',
+        }}
+      >
+        <div style={{ marginBottom: 36 }}>
+          <h2
+            style={{
+              fontSize: 'clamp(22px, 2.6vw, 30px)',
+              fontWeight: 800,
+              color: '#003366',
+              margin: '0 0 10px 0',
+              letterSpacing: '-0.015em',
+            }}
+          >
+            {t('home.how_helps_title', 'How PradarshakAI Helps')}
+          </h2>
+          <p
+            style={{
+              fontSize: 'clamp(14px, 1.5vw, 16px)',
+              color: '#64748b',
+              margin: 0,
+              maxWidth: 620,
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              lineHeight: 1.5,
+            }}
+          >
+            {t('home.how_helps_sub', 'Three simple steps to discover, evaluate, and apply for government financial assistance')}
+          </p>
+        </div>
+
+        <div
+          className="how-steps-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: 24,
+            textAlign: 'center',
+          }}
+        >
+          {/* Step 1 */}
+          <div
+            className="how-step-card"
+            style={{
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: 12,
+              padding: '32px 24px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 16,
+              boxShadow: '0 2px 8px rgba(0, 30, 64, 0.03)',
+              transition: 'all 200ms ease',
+            }}
+          >
+            <div
+              style={{
+                width: 52,
+                height: 52,
+                borderRadius: '50%',
+                background: '#003366',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 22,
+                fontWeight: 800,
+                boxShadow: '0 4px 12px rgba(0, 51, 102, 0.2)',
+                flexShrink: 0,
+              }}
+            >
+              1
+            </div>
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: '#003366', margin: 0 }}>
               {t('home.step1_title', t('home.how_step1_title', 'Check Eligibility'))}
             </h3>
-            <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.5 }}>
+            <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.55 }}>
               {t('home.step1_desc', t('home.how_step1_desc', 'Provide your project purpose and income to instantly verify your eligibility.'))}
             </p>
           </div>
-          <div style={{ flex: '1 1 250px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-            <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#003366', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 800 }}>2</div>
-            <h3 style={{ fontSize: 18, fontWeight: 700, color: '#0B5A8F', margin: 0 }}>
+
+          {/* Step 2 */}
+          <div
+            className="how-step-card"
+            style={{
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: 12,
+              padding: '32px 24px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 16,
+              boxShadow: '0 2px 8px rgba(0, 30, 64, 0.03)',
+              transition: 'all 200ms ease',
+            }}
+          >
+            <div
+              style={{
+                width: 52,
+                height: 52,
+                borderRadius: '50%',
+                background: '#003366',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 22,
+                fontWeight: 800,
+                boxShadow: '0 4px 12px rgba(0, 51, 102, 0.2)',
+                flexShrink: 0,
+              }}
+            >
+              2
+            </div>
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: '#003366', margin: 0 }}>
               {t('home.step2_title', t('home.how_step2_title', 'Find a Suitable Scheme'))}
             </h3>
-            <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.5 }}>
+            <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.55 }}>
               {t('home.step2_desc', t('home.how_step2_desc', 'Our system identifies the best concessional programs with the lowest subsidized interest rates.'))}
             </p>
           </div>
-          <div style={{ flex: '1 1 250px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-            <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#003366', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 800 }}>3</div>
-            <h3 style={{ fontSize: 18, fontWeight: 700, color: '#0B5A8F', margin: 0 }}>
+
+          {/* Step 3 */}
+          <div
+            className="how-step-card"
+            style={{
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: 12,
+              padding: '32px 24px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 16,
+              boxShadow: '0 2px 8px rgba(0, 30, 64, 0.03)',
+              transition: 'all 200ms ease',
+            }}
+          >
+            <div
+              style={{
+                width: 52,
+                height: 52,
+                borderRadius: '50%',
+                background: '#003366',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 22,
+                fontWeight: 800,
+                boxShadow: '0 4px 12px rgba(0, 51, 102, 0.2)',
+                flexShrink: 0,
+              }}
+            >
+              3
+            </div>
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: '#003366', margin: 0 }}>
               {t('home.step3_title', t('home.how_step3_title', 'Connect & Apply'))}
             </h3>
-            <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.5 }}>
+            <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.55 }}>
               {t('home.step3_desc', t('home.how_step3_desc', 'Connect directly to your nearest State Channelising Agency or nominated bank branch.'))}
             </p>
           </div>
         </div>
       </section>
 
-      {/* ── HELP / AI ASSISTANT SECTION ───────────────────────────────────── */}
-      <section style={{ padding: '0 24px 64px' }}>
-        <div style={{ maxWidth: 1000, margin: '0 auto', background: '#003366', borderRadius: 12, padding: '40px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 20, boxShadow: '0 10px 25px rgba(0, 51, 102, 0.15)' }}>
-          <h2 style={{ fontSize: 28, fontWeight: 800, color: '#ffffff', margin: 0 }}>
+      {/* ── 5. NEED HELP / AI ASSISTANT SECTION ────────────────────────── */}
+      <section style={{ padding: '8px 24px 60px', width: '100%' }}>
+        <div
+          style={{
+            maxWidth: 1200,
+            margin: '0 auto',
+            background: 'linear-gradient(135deg, #002244 0%, #003366 100%)',
+            borderRadius: 16,
+            padding: '44px 32px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center',
+            gap: 18,
+            boxShadow: '0 10px 30px rgba(0, 51, 102, 0.12)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+          }}
+        >
+          <h2 style={{ fontSize: 'clamp(22px, 2.6vw, 30px)', fontWeight: 800, color: '#ffffff', margin: 0, letterSpacing: '-0.015em' }}>
             {t('home.need_help_title', 'Need Help?')}
           </h2>
-          <p style={{ fontSize: 16, color: '#cbd5e1', margin: 0, maxWidth: 600, lineHeight: 1.5 }}>
+          <p style={{ fontSize: 'clamp(14px, 1.5vw, 16px)', color: '#cbd5e1', margin: 0, maxWidth: 620, lineHeight: 1.55 }}>
             {t('home.need_help_desc', 'Get assistance finding schemes, understanding eligibility, or calculating your repayment.')}
           </p>
           <Link
             href="/chat"
+            className="need-help-chat-btn"
             style={{
               background: '#F58220',
               color: '#ffffff',
-              padding: '12px 24px',
-              borderRadius: 6,
+              padding: '12px 28px',
+              borderRadius: 8,
               fontWeight: 700,
               fontSize: 16,
               textDecoration: 'none',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
               gap: 8,
-              marginTop: 8,
+              marginTop: 6,
+              boxShadow: '0 4px 14px rgba(245, 130, 32, 0.35)',
+              transition: 'all 180ms ease',
             }}
           >
             <MessageCircle size={18} />
@@ -359,10 +794,84 @@ export default function PortalOverviewPage() {
         </div>
       </section>
 
-      {/* ── Key Leadership ──────────────────────────────────────────────────── */}
+      {/* ── 6. KEY LEADERSHIP ───────────────────────────────────────────── */}
       <KeyLeadership />
 
       <Footer />
+
+      <style jsx>{`
+        :global(.action-card-inner:hover) {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 24px rgba(0, 51, 102, 0.08) !important;
+          border-color: #cbd5e1 !important;
+        }
+
+        :global(.featured-scheme-card:hover) {
+          transform: translateY(-4px);
+          box-shadow: 0 10px 24px rgba(0, 51, 102, 0.08) !important;
+          border-color: #cbd5e1 !important;
+        }
+
+        :global(.how-step-card:hover) {
+          transform: translateY(-3px);
+          box-shadow: 0 8px 20px rgba(0, 51, 102, 0.06) !important;
+          border-color: #cbd5e1 !important;
+        }
+
+        :global(.featured-view-all-link:hover) {
+          background-color: #003366 !important;
+          color: #ffffff !important;
+          border-color: #003366 !important;
+        }
+
+        :global(.need-help-chat-btn:hover) {
+          background-color: #ea580c !important;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 18px rgba(245, 130, 32, 0.45) !important;
+        }
+
+        @media (min-width: 1024px) {
+          :global(.action-cards-grid) {
+            grid-template-columns: repeat(4, 1fr) !important;
+          }
+          :global(.featured-schemes-grid) {
+            grid-template-columns: repeat(3, 1fr) !important;
+          }
+          :global(.how-steps-grid) {
+            grid-template-columns: repeat(3, 1fr) !important;
+          }
+        }
+
+        @media (min-width: 640px) and (max-width: 1023px) {
+          :global(.action-cards-grid) {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          :global(.featured-schemes-grid) {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          :global(.how-steps-grid) {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+        }
+
+        @media (max-width: 639px) {
+          :global(.action-cards-grid) {
+            grid-template-columns: 1fr !important;
+          }
+          :global(.featured-schemes-grid) {
+            grid-template-columns: 1fr !important;
+          }
+          :global(.how-steps-grid) {
+            grid-template-columns: 1fr !important;
+          }
+          :global(.home-services-section),
+          :global(.home-featured-section),
+          :global(.home-how-section) {
+            padding-left: 16px !important;
+            padding-right: 16px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

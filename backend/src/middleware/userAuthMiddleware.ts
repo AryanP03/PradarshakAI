@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { pool } from '../db/pool';
+import { AUTH_COOKIE_NAME } from '../utils/authCookies';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'nsfdc-dev-secret-change-in-production';
 
@@ -9,14 +10,35 @@ export interface UserAuthRequest extends Request {
   userEmail?: string;
 }
 
-export async function requireUser(req: UserAuthRequest, res: Response, next: NextFunction): Promise<void> {
+function extractToken(req: Request): string | null {
+  // 1. Primary secure mechanism: HttpOnly cookie
+  if (req.cookies && req.cookies[AUTH_COOKIE_NAME]) {
+    const cookieToken = req.cookies[AUTH_COOKIE_NAME];
+    if (typeof cookieToken === 'string' && cookieToken.trim().length > 0) {
+      return cookieToken.trim();
+    }
+  }
+
+  // 2. Backward-compatible fallback: Authorization Bearer header
   const auth = req.headers.authorization;
-  if (!auth?.startsWith('Bearer ')) {
+  if (auth && auth.startsWith('Bearer ')) {
+    const headerToken = auth.slice(7).trim();
+    if (headerToken.length > 0) {
+      return headerToken;
+    }
+  }
+
+  return null;
+}
+
+export async function requireUser(req: UserAuthRequest, res: Response, next: NextFunction): Promise<void> {
+  const token = extractToken(req);
+  if (!token) {
     res.status(401).json({ error: 'Authorization required' });
     return;
   }
   try {
-    const payload = jwt.verify(auth.slice(7), JWT_SECRET) as { userId: number; email: string };
+    const payload = jwt.verify(token, JWT_SECRET) as { userId: number; email: string };
     if (!payload?.userId) {
       res.status(401).json({ error: 'Invalid token payload' });
       return;
@@ -35,10 +57,10 @@ export async function requireUser(req: UserAuthRequest, res: Response, next: Nex
 }
 
 export async function optionalUser(req: UserAuthRequest, _res: Response, next: NextFunction): Promise<void> {
-  const auth = req.headers.authorization;
-  if (auth?.startsWith('Bearer ')) {
+  const token = extractToken(req);
+  if (token) {
     try {
-      const payload = jwt.verify(auth.slice(7), JWT_SECRET) as { userId: number; email: string };
+      const payload = jwt.verify(token, JWT_SECRET) as { userId: number; email: string };
       if (payload?.userId) {
         const { rows } = await pool.query('SELECT id, email FROM users WHERE id = $1', [payload.userId]);
         if (rows.length > 0) {
@@ -50,3 +72,4 @@ export async function optionalUser(req: UserAuthRequest, _res: Response, next: N
   }
   next();
 }
+

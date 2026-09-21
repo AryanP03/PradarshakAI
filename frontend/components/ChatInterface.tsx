@@ -2495,11 +2495,12 @@ export default function ChatInterface({
               <p
                 style={{
                   margin: 0,
-                  fontSize: 'clamp(13px, 1.8vw, 14.5px)',
+                  fontSize: 'clamp(12px, 1.3vw, 13.5px)',
                   fontWeight: 500,
                   color: '#475569',
                   letterSpacing: '0.01em',
-                  lineHeight: 1.45,
+                  lineHeight: 1.35,
+                  maxWidth: 580,
                 }}
               >
                 {t(
@@ -2660,10 +2661,11 @@ export default function ChatInterface({
                   background: '#ffffff',
                   border: '1.5px solid #cbd5e1',
                   borderRadius: 18,
-                  padding: '8px 16px 8px 10px',
+                  padding: '8px 14px 8px 10px',
                   boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
                   cursor: 'pointer',
                   flexShrink: 0,
+                  maxWidth: 'clamp(180px, 32vw, 240px)',
                   transition: 'all 200ms ease',
                 }}
                 title={t('voice.tap_to_start', 'Tap to start voice conversation with PradarshakAI')}
@@ -2693,7 +2695,16 @@ export default function ChatInterface({
                 >
                   <AudioWaveformIcon state="IDLE" />
                 </div>
-                <span className="voice-idle-text" style={{ fontSize: 13.5, fontWeight: 700, color: '#0b1f3a', whiteSpace: 'nowrap' }}>
+                <span
+                  className="voice-idle-text"
+                  style={{
+                    fontSize: 'clamp(11.5px, 1.2vw, 13px)',
+                    fontWeight: 700,
+                    color: '#0b1f3a',
+                    lineHeight: 1.2,
+                    textAlign: 'left',
+                  }}
+                >
                   {t('voice.talk_to_pradarshak', 'Talk to PradarshakAI')}
                 </span>
               </button>

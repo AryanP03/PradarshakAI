@@ -1,7 +1,11 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { LanguageProvider } from '@/context/LanguageContext';
 
+export const viewport: Viewport = {
+  colorScheme: 'light',
+  themeColor: '#00132b',
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -46,8 +50,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen" suppressHydrationWarning>
+    <html lang="en" className="light" style={{ colorScheme: 'light' }}>
+      <body className="min-h-screen" suppressHydrationWarning style={{ colorScheme: 'light' }}>
         <LanguageProvider>
           {children}
         </LanguageProvider>

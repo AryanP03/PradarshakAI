@@ -105,9 +105,10 @@ function AuthContent() {
     setLoading(true);
     try {
       const result = await userLogin(cleanEmail, password);
-      localStorage.setItem('auth_token', result.token);
+      // Primary auth credential is now the secure HttpOnly cookie set by backend.
+      localStorage.removeItem('auth_token');
       localStorage.setItem('auth_user', JSON.stringify(result.user));
-      const returnUrl = searchParams.get('returnUrl') || '/';
+      const returnUrl = searchParams.get('returnUrl') || searchParams.get('redirect') || '/';
       router.push(returnUrl);
     } catch (err) {
       setError((err as Error).message);
@@ -197,13 +198,14 @@ function AuthContent() {
       const res = await resetPassword(resetToken, newPassword, confirmPassword);
       setSuccessMsg(res.message || 'Password reset successfully. You are now signed in.');
       
-      // Auto login: store authenticated session
-      localStorage.setItem('auth_token', res.token);
+      // Auto login: authenticated session established via secure HttpOnly cookie
+      localStorage.removeItem('auth_token');
       localStorage.setItem('auth_user', JSON.stringify(res.user));
 
       // Redirect smoothly to the main application
       setTimeout(() => {
-        router.push('/');
+        const returnUrl = searchParams.get('returnUrl') || searchParams.get('redirect') || '/';
+        router.push(returnUrl);
       }, 1200);
     } catch (err: any) {
       setError(err.message || 'Failed to reset password. Please try again.');

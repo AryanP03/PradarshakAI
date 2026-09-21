@@ -286,7 +286,7 @@ export default function SchemeResultCard({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 110px), 1fr))',
           gap: 8,
           paddingTop: 12,
           borderTop: '1.5px solid #e2e8f0',
@@ -301,15 +301,16 @@ export default function SchemeResultCard({
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 6,
-              padding: '9px 12px',
+              gap: 5,
+              padding: '8px 10px',
               borderRadius: 8,
               border: '1.5px solid #0284c7',
               background: '#f0f9ff',
               color: '#0369a1',
-              fontSize: 12.5,
+              fontSize: 'clamp(11.5px, 1.1vw, 12.5px)',
               fontWeight: 700,
               cursor: 'pointer',
+              minWidth: 0,
               transition: 'all 150ms ease',
             }}
             onMouseEnter={(e) => {
@@ -321,8 +322,8 @@ export default function SchemeResultCard({
               (e.currentTarget as HTMLElement).style.color = '#0369a1';
             }}
           >
-            <BookOpen size={14} />
-            <span>{t('scheme.action_know_more')}</span>
+            <BookOpen size={14} style={{ flexShrink: 0 }} />
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t('scheme.action_know_more')}</span>
           </button>
         )}
 
@@ -334,15 +335,16 @@ export default function SchemeResultCard({
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 6,
-              padding: '9px 12px',
+              gap: 5,
+              padding: '8px 10px',
               borderRadius: 8,
               border: '1.5px solid #059669',
               background: '#ecfdf5',
               color: '#065f46',
-              fontSize: 12.5,
+              fontSize: 'clamp(11.5px, 1.1vw, 12.5px)',
               fontWeight: 700,
               cursor: 'pointer',
+              minWidth: 0,
               transition: 'all 150ms ease',
             }}
             onMouseEnter={(e) => {
@@ -354,8 +356,8 @@ export default function SchemeResultCard({
               (e.currentTarget as HTMLElement).style.color = '#065f46';
             }}
           >
-            <FileText size={14} />
-            <span>{t('scheme.action_documents')}</span>
+            <FileText size={14} style={{ flexShrink: 0 }} />
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t('scheme.action_documents')}</span>
           </button>
         )}
 
@@ -367,15 +369,16 @@ export default function SchemeResultCard({
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 6,
-              padding: '9px 12px',
+              gap: 5,
+              padding: '8px 10px',
               borderRadius: 8,
-              border: '1.5px solid #ea580c',
+              border: '1.5px solid #e87722',
               background: '#fff7ed',
-              color: '#9a3412',
-              fontSize: 12.5,
+              color: '#c2410c',
+              fontSize: 'clamp(11.5px, 1.1vw, 12.5px)',
               fontWeight: 700,
               cursor: 'pointer',
+              minWidth: 0,
               transition: 'all 150ms ease',
             }}
             onMouseEnter={(e) => {

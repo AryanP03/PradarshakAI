@@ -117,6 +117,7 @@ export async function sendChat(
 ): Promise<ChatResponse> {
   const res = await fetch(`${BASE}/chat`, {
     method: 'POST',
+    credentials: 'include',
     headers: userHeaders(token),
     body: JSON.stringify({
       message,
@@ -134,8 +135,8 @@ export async function sendChat(
   });
   if (!res.ok) {
     if (res.status === 401 && typeof window !== 'undefined') {
-      localStorage.removeItem('auth_token');
       localStorage.removeItem('auth_user');
+      localStorage.removeItem('auth_token');
     }
     const err = await res.json().catch(() => ({ error: 'Network error' })) as { error?: string; detail?: string };
     throw new Error(err.detail || err.error || 'Chat request failed');
@@ -144,19 +145,19 @@ export async function sendChat(
 }
 
 export async function fetchSchemes(): Promise<any[]> {
-  const res = await fetch(`${BASE}/schemes`);
+  const res = await fetch(`${BASE}/schemes`, { credentials: 'include' });
   if (!res.ok) throw new Error('Failed to fetch schemes');
   return res.json();
 }
 
 export async function fetchSchemeById(id: number): Promise<any> {
-  const res = await fetch(`${BASE}/schemes/${id}`);
+  const res = await fetch(`${BASE}/schemes/${id}`, { credentials: 'include' });
   if (!res.ok) throw new Error('Failed to fetch scheme');
   return res.json();
 }
 
 export async function compareSchemesApi(ids: number[]): Promise<any[]> {
-  const res = await fetch(`${BASE}/schemes/compare?ids=${ids.join(',')}`);
+  const res = await fetch(`${BASE}/schemes/compare?ids=${ids.join(',')}`, { credentials: 'include' });
   if (!res.ok) throw new Error('Failed to compare schemes');
   return res.json();
 }
@@ -213,11 +214,14 @@ export async function transcribeAudio(
 
 // ── User auth ─────────────────────────────────────────────────────────────────
 
+// ── User auth ─────────────────────────────────────────────────────────────────
+
 export async function userRegister(data: {
   name?: string; email: string; phone: string; password: string; salary?: number;
 }): Promise<{ token: string; user: UserProfile }> {
   const res = await fetch(`${BASE}/users/register`, {
     method: 'POST',
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
@@ -231,6 +235,7 @@ export async function userRegister(data: {
 export async function userLogin(email: string, password: string): Promise<{ token: string; user: UserProfile }> {
   const res = await fetch(`${BASE}/users/login`, {
     method: 'POST',
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   });
@@ -244,6 +249,7 @@ export async function userLogin(email: string, password: string): Promise<{ toke
 export async function forgotPasswordSendOtp(email: string): Promise<{ success: boolean; message: string }> {
   const res = await fetch(`${BASE}/users/forgot-password/send-otp`, {
     method: 'POST',
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email }),
   });
@@ -257,6 +263,7 @@ export async function forgotPasswordSendOtp(email: string): Promise<{ success: b
 export async function forgotPasswordVerifyOtp(email: string, otp: string): Promise<{ success: boolean; resetToken: string; message: string }> {
   const res = await fetch(`${BASE}/users/forgot-password/verify-otp`, {
     method: 'POST',
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, otp }),
   });
@@ -274,6 +281,7 @@ export async function resetPassword(
 ): Promise<{ success: boolean; message: string; token: string; user: UserProfile }> {
   const res = await fetch(`${BASE}/users/reset-password`, {
     method: 'POST',
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ resetToken, newPassword, confirmPassword }),
   });
@@ -284,13 +292,15 @@ export async function resetPassword(
   return data;
 }
 
-
-export async function getUserProfile(token: string): Promise<UserProfile> {
-  const res = await fetch(`${BASE}/users/me`, { headers: userHeaders(token) });
+export async function getUserProfile(token?: string | null): Promise<UserProfile> {
+  const res = await fetch(`${BASE}/users/me`, {
+    credentials: 'include',
+    headers: userHeaders(token),
+  });
   if (!res.ok) {
     if (res.status === 401 && typeof window !== 'undefined') {
-      localStorage.removeItem('auth_token');
       localStorage.removeItem('auth_user');
+      localStorage.removeItem('auth_token');
     }
     throw new Error('Not authenticated');
   }
@@ -298,11 +308,23 @@ export async function getUserProfile(token: string): Promise<UserProfile> {
 }
 
 export async function updateUserProfile(
-  token: string,
-  payload: Partial<UserProfile>
+  arg1: string | null | undefined | Partial<UserProfile>,
+  arg2?: Partial<UserProfile> | string | null
 ): Promise<{ success: boolean; user: UserProfile }> {
+  let token: string | null = null;
+  let payload: Partial<UserProfile> = {};
+
+  if (typeof arg1 === 'string' || arg1 === null || arg1 === undefined) {
+    token = arg1 || null;
+    payload = (arg2 as Partial<UserProfile>) || {};
+  } else {
+    payload = arg1;
+    token = typeof arg2 === 'string' ? arg2 : null;
+  }
+
   const res = await fetch(`${BASE}/users/me`, {
     method: 'PATCH',
+    credentials: 'include',
     headers: userHeaders(token),
     body: JSON.stringify(payload),
   });
@@ -313,9 +335,10 @@ export async function updateUserProfile(
   return data;
 }
 
-export async function deleteUserProfile(token: string): Promise<{ success: boolean; message: string }> {
+export async function deleteUserProfile(token?: string | null): Promise<{ success: boolean; message: string }> {
   const res = await fetch(`${BASE}/users/me`, {
     method: 'DELETE',
+    credentials: 'include',
     headers: userHeaders(token),
   });
   const data = await res.json().catch(() => ({ error: 'Failed to delete account' }));
@@ -327,14 +350,36 @@ export async function deleteUserProfile(token: string): Promise<{ success: boole
     localStorage.removeItem('auth_user');
     localStorage.removeItem('registration_summary');
     localStorage.removeItem('guest_chat_messages');
+    sessionStorage.removeItem('pradarshak_active_chat');
   }
   return data;
 }
 
+export async function logoutUser(): Promise<{ success: boolean }> {
+  try {
+    await fetch(`${BASE}/users/logout`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (err) {
+    console.warn('[Logout] Failed to call logout endpoint:', err);
+  }
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('auth_user');
+    localStorage.removeItem('auth_token');
+    sessionStorage.removeItem('pradarshak_active_chat');
+  }
+  return { success: true };
+}
+
 // ── Chat history ──────────────────────────────────────────────────────────────
 
-export async function listChats(token: string): Promise<ChatSummary[]> {
-  const res = await fetch(`${BASE}/chats`, { headers: userHeaders(token) });
+export async function listChats(token?: string | null): Promise<ChatSummary[]> {
+  const res = await fetch(`${BASE}/chats`, {
+    credentials: 'include',
+    headers: userHeaders(token),
+  });
   if (!res.ok) {
     if (res.status === 401 && typeof window !== 'undefined') {
       localStorage.removeItem('auth_token');
@@ -345,8 +390,11 @@ export async function listChats(token: string): Promise<ChatSummary[]> {
   return res.json() as Promise<ChatSummary[]>;
 }
 
-export async function getChat(id: string, token: string): Promise<{ chat: ChatSummary; messages: ChatMessage[] }> {
-  const res = await fetch(`${BASE}/chats/${id}`, { headers: userHeaders(token) });
+export async function getChat(id: string, token?: string | null): Promise<{ chat: ChatSummary; messages: ChatMessage[] }> {
+  const res = await fetch(`${BASE}/chats/${id}`, {
+    credentials: 'include',
+    headers: userHeaders(token),
+  });
   if (!res.ok) {
     if (res.status === 401 && typeof window !== 'undefined') {
       localStorage.removeItem('auth_token');
@@ -357,8 +405,12 @@ export async function getChat(id: string, token: string): Promise<{ chat: ChatSu
   return res.json() as Promise<{ chat: ChatSummary; messages: ChatMessage[] }>;
 }
 
-export async function deleteChat(id: string, token: string): Promise<void> {
-  const res = await fetch(`${BASE}/chats/${id}`, { method: 'DELETE', headers: userHeaders(token) });
+export async function deleteChat(id: string, token?: string | null): Promise<void> {
+  const res = await fetch(`${BASE}/chats/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+    headers: userHeaders(token),
+  });
   if (!res.ok) throw new Error('Failed to delete chat');
 }
 
@@ -375,11 +427,12 @@ export async function importGuestChat(
     disclaimer?: string;
     speechText?: string;
   }>,
-  token: string,
+  token?: string | null,
   title?: string
 ): Promise<{ id: string; title: string; ok: boolean; alreadyImported?: boolean }> {
   const res = await fetch(`${BASE}/chats/import`, {
     method: 'POST',
+    credentials: 'include',
     headers: userHeaders(token),
     body: JSON.stringify({ clientChatId, messages, title }),
   });
@@ -392,10 +445,11 @@ export async function importGuestChat(
 
 export async function shareChat(
   id: string,
-  token: string
+  token?: string | null
 ): Promise<{ ok: boolean; shareId: string; chatId: string }> {
   const res = await fetch(`${BASE}/chats/${id}/share`, {
     method: 'POST',
+    credentials: 'include',
     headers: userHeaders(token),
   });
   if (!res.ok) {
@@ -412,6 +466,7 @@ export async function getSharedChat(
   messages: ChatMessage[];
 }> {
   const res = await fetch(`${BASE}/chats/shared/${encodeURIComponent(shareId)}`, {
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
   });
   if (!res.ok) {
@@ -494,6 +549,7 @@ export async function emiCalculate(params: {
 }) {
   const res = await fetch(`${BASE}/emi/calculate`, {
     method: 'POST',
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(params),
   });
@@ -508,7 +564,7 @@ export async function findPartners(lat: number, lng: number, category?: string, 
     ...(category && { category }),
     ...(radiusKm && { radiusKm: String(radiusKm) }),
   });
-  const res = await fetch(`${BASE}/partners/nearby?${params}`);
+  const res = await fetch(`${BASE}/partners/nearby?${params}`, { credentials: 'include' });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }

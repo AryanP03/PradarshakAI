@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 
+import { getUserProfile } from '@/lib/api';
+
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -14,13 +16,19 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const token = localStorage.getItem('auth_token');
-    if (!token) {
-      setAuthorized(false);
-      router.push('/auth');
-    } else {
-      setAuthorized(true);
-    }
+    getUserProfile()
+      .then((user) => {
+        if (user && !user.guest) {
+          setAuthorized(true);
+        } else {
+          setAuthorized(false);
+          router.push(`/auth?redirect=${encodeURIComponent(pathname)}`);
+        }
+      })
+      .catch(() => {
+        setAuthorized(false);
+        router.push(`/auth?redirect=${encodeURIComponent(pathname)}`);
+      });
   }, [pathname, router]);
 
   if (!authorized && !pathname.startsWith('/auth') && !pathname.startsWith('/register') && !pathname.startsWith('/admin')) {

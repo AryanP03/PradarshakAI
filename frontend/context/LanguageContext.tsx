@@ -26,36 +26,75 @@ const LanguageContext = createContext<LanguageContextType>({
   t: (key: string, fallback?: string) => fallback || key,
 });
 
+function getLanguageCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]*)'));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
+function setLanguageCookie(name: string, value: string): void {
+  if (typeof document === 'undefined') return;
+  // 1-year expiration, SameSite=Lax, Path=/
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=31536000; SameSite=Lax`;
+}
+
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Language>('en');
   const [selectedMode, setSelectedMode] = useState<LanguageMode>('en');
 
   useEffect(() => {
-    const savedMode = localStorage.getItem('app_lang_mode') as LanguageMode | null;
-    const savedLang = localStorage.getItem('app_lang') as Language | null;
+    // 1. Check cookies first (SSR / pre-hydration source of truth)
+    const cookieMode = getLanguageCookie('app_lang_mode') as LanguageMode | null;
+    const cookieLang = getLanguageCookie('app_lang') as Language | null;
+
+    // 2. Check localStorage fallback
+    const savedMode = (cookieMode && isValidLanguageCode(cookieMode))
+      ? cookieMode
+      : (localStorage.getItem('app_lang_mode') as LanguageMode | null);
+
+    const savedLang = (cookieLang && isValidLanguageCode(cookieLang))
+      ? cookieLang
+      : (localStorage.getItem('app_lang') as Language | null);
 
     if (savedMode && isValidLanguageCode(savedMode)) {
       setSelectedMode(savedMode);
-      setLangState(getLanguageConfig(savedMode).id);
+      const resolved = getLanguageConfig(savedMode).id;
+      setLangState(resolved);
+      setLanguageCookie('app_lang_mode', savedMode);
+      setLanguageCookie('app_lang', resolved);
     } else if (savedLang && isValidLanguageCode(savedLang)) {
       setSelectedMode(savedLang);
-      setLangState(getLanguageConfig(savedLang).id);
+      const resolved = getLanguageConfig(savedLang).id;
+      setLangState(resolved);
+      setLanguageCookie('app_lang_mode', savedLang);
+      setLanguageCookie('app_lang', resolved);
     } else {
       setSelectedMode('en');
       setLangState('en');
+      setLanguageCookie('app_lang_mode', 'en');
+      setLanguageCookie('app_lang', 'en');
     }
   }, []);
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = lang;
+      document.documentElement.setAttribute('data-lang', lang);
+    }
+  }, [lang]);
 
   const isAuto = selectedMode === 'auto';
 
   const setLang = useCallback((newMode: LanguageMode) => {
     setSelectedMode(newMode);
     localStorage.setItem('app_lang_mode', newMode);
+    setLanguageCookie('app_lang_mode', newMode);
 
     if (newMode !== 'auto') {
       const cfg = getLanguageConfig(newMode);
       setLangState(cfg.id);
       localStorage.setItem('app_lang', cfg.id);
+      setLanguageCookie('app_lang', cfg.id);
     }
     window.dispatchEvent(new Event('app_language_changed'));
   }, []);
@@ -70,6 +109,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       setSelectedMode(cfg.id);
       localStorage.setItem('app_lang_mode', cfg.id);
       localStorage.setItem('app_lang', cfg.id);
+      setLanguageCookie('app_lang_mode', cfg.id);
+      setLanguageCookie('app_lang', cfg.id);
       setLangState((prev) => {
         if (prev !== cfg.id) {
           window.dispatchEvent(new Event('app_language_changed'));

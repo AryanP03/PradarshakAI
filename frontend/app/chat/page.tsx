@@ -10,7 +10,8 @@ import EmiTab from '@/components/EmiTab';
 import PartnersTab from '@/components/PartnersTab';
 import ShareModal from '@/components/ShareModal';
 import type { UserProfile, ChatMessage } from '@/lib/api';
-import { getChat, shareChat, importGuestChat } from '@/lib/api';
+import { getChat, shareChat, importGuestChat, getUserProfile } from '@/lib/api';
+import { getOrCreateGuestSessionId } from '@/lib/guestSession';
 import {
   MessageSquare,
   Calculator,
@@ -103,14 +104,32 @@ function ChatPage() {
   }, []);
 
   useEffect(() => {
-    const t = localStorage.getItem('auth_token');
+    // 1. Maintain lightweight guest_session_id cookie for anonymous chat correlation
+    getOrCreateGuestSessionId();
+
+    // 2. Read display user from cache for immediate layout
     const u = localStorage.getItem('auth_user');
-    if (t) setToken(t);
     if (u) {
       try {
         setUser(JSON.parse(u) as UserProfile);
       } catch {}
     }
+
+    // 3. Verify session truth via backend cookie
+    getUserProfile()
+      .then((profile) => {
+        if (profile && !profile.guest) {
+          setUser(profile);
+          setToken('cookie_session');
+        } else {
+          setUser(null);
+          setToken(null);
+        }
+      })
+      .catch(() => {
+        setUser(null);
+        setToken(null);
+      });
 
     const tabParam = searchParams.get('tab');
     if (tabParam === 'emi') {
@@ -149,7 +168,7 @@ function ChatPage() {
       if (cid !== activeChatIdRef.current) {
         activeChatIdRef.current = cid;
         setInstanceKey(`chat-${cid}`);
-        loadChat(cid, t || null);
+        loadChat(cid);
       }
     } else if (activeChatIdRef.current !== null) {
       activeChatIdRef.current = null;
@@ -212,10 +231,9 @@ function ChatPage() {
     }
   }, [token, router]);
 
-  async function loadChat(id: string, t: string | null) {
-    if (!t) return;
+  async function loadChat(id: string, authToken?: string | null) {
     try {
-      const data = await getChat(id, t);
+      const data = await getChat(id, authToken);
       activeChatIdRef.current = id;
       setChatId(id);
       setInitialMessages(data.messages || []);

@@ -5,6 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import { pool } from '../db/pool';
 import { optionalUser, requireUser, UserAuthRequest } from '../middleware/userAuthMiddleware';
+import { setAuthCookie, clearAuthCookie } from '../utils/authCookies';
 import {
   sendPasswordResetOtp,
   verifyPasswordResetOtp,
@@ -76,6 +77,7 @@ router.post('/register', async (req: Request, res: Response) => {
     );
     const user = rows[0] as { id: number; name: string; email: string; phone: string; salary: number | null };
     const token = issueToken(user.id, user.email);
+    setAuthCookie(res, token);
     res.status(201).json({ token, user: { id: user.id, name: user.name, email: user.email, phone: user.phone, salary: user.salary } });
   } catch (err) {
     const msg = (err as Error).message;
@@ -101,6 +103,7 @@ router.post('/login', async (req: Request, res: Response) => {
     if (!valid) { res.status(401).json({ error: 'Invalid email or password' }); return; }
 
     const token = issueToken(user.id, user.email);
+    setAuthCookie(res, token);
     res.json({ token, user: { id: user.id, name: user.name, email: user.email, phone: user.phone, salary: user.salary, city: user.city, state: user.state, district: user.district, pincode: user.pincode } });
   } catch (err) {
     console.error('[Login Error]', err);
@@ -402,6 +405,7 @@ router.post('/reset-password', async (req: Request, res: Response) => {
 
     // Automatically create authenticated session
     const token = issueToken(user.id, user.email);
+    setAuthCookie(res, token);
 
     res.json({
       success: true,
@@ -423,6 +427,12 @@ router.post('/reset-password', async (req: Request, res: Response) => {
     console.error('[Reset Password DB Error]', err);
     res.status(500).json({ error: 'Failed to update password. Please try again later.' });
   }
+});
+
+// POST /api/users/logout — securely clear auth cookie
+router.post('/logout', (req: Request, res: Response) => {
+  clearAuthCookie(res);
+  res.json({ success: true, message: 'Logged out successfully' });
 });
 
 export default router;

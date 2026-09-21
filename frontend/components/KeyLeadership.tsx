@@ -44,26 +44,66 @@ export default function KeyLeadership() {
   const { t } = useLanguage();
 
   return (
-    <section className="py-12 md:py-20 px-4 sm:px-6" style={{ backgroundColor: '#071326', width: '100%', position: 'relative', zIndex: 10 }}>
-      <div style={{ maxWidth: '1152px', margin: '0 auto', textAlign: 'center' }}>
+    <section
+      className="key-leadership-section"
+      style={{
+        backgroundColor: '#071326',
+        width: '100%',
+        position: 'relative',
+        zIndex: 10,
+        padding: '72px 24px 84px',
+      }}
+    >
+      <div style={{ maxWidth: 1200, margin: '0 auto', textAlign: 'center', width: '100%' }}>
         
-        {/* BADGE */}
-        <div style={{ display: 'inline-block', padding: '6px 16px', borderRadius: '9999px', backgroundColor: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', color: '#fbbf24', fontSize: '12px', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '16px' }}>
+        {/* BADGE — Clear separation from Need Help section above */}
+        <div
+          style={{
+            display: 'inline-block',
+            padding: '7px 18px',
+            borderRadius: '9999px',
+            backgroundColor: 'rgba(245, 158, 11, 0.12)',
+            border: '1px solid rgba(245, 158, 11, 0.35)',
+            color: '#fbbf24',
+            fontSize: '12px',
+            fontWeight: 700,
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+            marginBottom: '20px',
+          }}
+        >
           {t('leadership.badge', 'MINISTRY OF SOCIAL JUSTICE & EMPOWERMENT')}
         </div>
 
         {/* HEADING */}
-        <h2 style={{ fontSize: 'clamp(26px, 4vw, 36px)', fontWeight: 800, color: '#ffffff', marginBottom: '12px', lineHeight: 1.2 }}>
+        <h2
+          style={{
+            fontSize: 'clamp(26px, 3.5vw, 36px)',
+            fontWeight: 800,
+            color: '#ffffff',
+            margin: '0 0 14px 0',
+            lineHeight: 1.25,
+            letterSpacing: '-0.02em',
+          }}
+        >
           {t('leadership.title', 'Key Leadership')}
         </h2>
 
-        {/* SUBTITLE */}
-        <p className="mb-14 sm:mb-20 text-sm sm:text-base" style={{ color: '#94a3b8', maxWidth: '640px', margin: '0 auto 4rem auto', lineHeight: 1.6 }}>
+        {/* SUBTITLE — 60px margin before cards grid gives full clearance for 48px avatar offset */}
+        <p
+          style={{
+            color: '#94a3b8',
+            maxWidth: '680px',
+            margin: '0 auto 64px auto',
+            lineHeight: 1.6,
+            fontSize: 'clamp(14px, 1.5vw, 15.5px)',
+          }}
+        >
           {t('leadership.subtitle', 'Distinguished leadership steering national affirmative action, concessional financial assistance, and socioeconomic empowerment.')}
         </p>
 
         {/* CARDS GRID */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '48px 24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '56px 24px', justifyContent: 'center' }}>
           
           {/* CARD 1 */}
           <div style={{ maxWidth: '320px', margin: '0 auto', position: 'relative', backgroundColor: 'rgba(15, 23, 42, 0.8)', border: '1px solid rgba(51, 65, 85, 0.8)', borderRadius: '16px', paddingTop: '56px', paddingBottom: '18px', paddingLeft: '20px', paddingRight: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>

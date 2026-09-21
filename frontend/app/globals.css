@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: light;
   /* ── Stitch Design Tokens (Bharat Digital Service Guidelines) ── */
   --primary: #001e40;
   --primary-container: #003366;
@@ -88,13 +89,20 @@
 }
 
 html, body {
+  color-scheme: light;
   background: var(--background);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Inter', 'Segoe UI', Roboto, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Nirmala UI', 'Noto Sans', 'Inter', 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
   font-size: 14px;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+main, section, header, footer {
+  max-width: 100%;
 }
 
 /* ── Refined Institutional Action Physics ───────────────────────────────────── */
@@ -397,53 +405,15 @@ p {
   border: 1px solid #bfdbfe;
 }
 
-/* ── Dark Mode Tokens ──────────────────────────────────────────────────────── */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0b1320;
-    --surface: #131d2e;
-    --surface-low: #0f1826;
-    --surface-container: #172439;
-    --surface-high: #1e2e47;
-    --surface-highest: #243754;
-    --surface-alt: #162234;
-
-    --border: #23354f;
-    --border-dark: #334a6e;
-    --outline: #94a3b8;
-    --outline-variant: #475569;
-
-    --text: #f8fafc;
-    --text-secondary: #94a3b8;
-    --muted: #64748b;
-    --accent: #38bdf8;
-
-    --primary-light: #16253c;
-    --secondary-light: #2c1e14;
-  }
-}
-
-.dark {
-  --background: #0b1320;
-  --surface: #131d2e;
-  --surface-low: #0f1826;
-  --surface-container: #172439;
-  --surface-high: #1e2e47;
-  --surface-highest: #243754;
-  --surface-alt: #162234;
-
-  --border: #23354f;
-  --border-dark: #334a6e;
-  --outline: #94a3b8;
-  --outline-variant: #475569;
-
-  --text: #f8fafc;
-  --text-secondary: #94a3b8;
-  --muted: #64748b;
-  --accent: #38bdf8;
-
-  --primary-light: #16253c;
-  --secondary-light: #2c1e14;
+/* ── Permanent Institutional Light Theme ─────────────────────────────────────
+   The approved light appearance is the permanent, single source of truth
+   across all devices, operating systems, and browser preferences.
+────────────────────────────────────────────────────────────────────────────── */
+:root,
+.light,
+.dark,
+[data-theme='dark'] {
+  color-scheme: light;
 }
 
 /* ── Comparison Component Design System (Theme-Aware Contrast) ───────────── */
@@ -920,7 +890,20 @@ p {
   }
 }
 
-@media (max-width: 640px) {
+.voice-idle-widget {
+  max-width: 240px;
+}
+
+.voice-idle-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.18;
+  max-width: 175px;
+}
+
+@media (max-width: 768px) {
   .voice-idle-text {
     display: none;
   }
@@ -1092,30 +1075,59 @@ html, body {
   display: block;
 }
 
+.navbar-nav-link {
+  min-width: 0;
+  max-width: 240px;
+}
+
+.navbar-nav-link span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Content-aware collapse state (when long translated links exceed available container width) */
+.navbar-collapsed-mode .navbar-desktop-nav {
+  display: none !important;
+}
+
+.navbar-collapsed-mode .navbar-desktop-auth {
+  display: none !important;
+}
+
+.navbar-collapsed-mode .navbar-hamburger-btn {
+  display: flex !important;
+}
+
+.navbar-collapsed-mode .navbar-mobile-drawer-root {
+  display: block;
+}
+
 /* On Desktop / Laptop screens where full navbar fits comfortably (>= 1024px) */
 @media (min-width: 1024px) {
-  .navbar-desktop-nav {
+  .material-toolbar:not(.navbar-collapsed-mode) .navbar-desktop-nav {
     display: flex !important;
   }
 
-  .navbar-desktop-auth {
+  .material-toolbar:not(.navbar-collapsed-mode) .navbar-desktop-auth {
     display: flex !important;
   }
 
-  .navbar-hamburger-btn {
+  .material-toolbar:not(.navbar-collapsed-mode) .navbar-hamburger-btn {
     display: none !important;
   }
 
-  .navbar-mobile-drawer-root {
+  .material-toolbar:not(.navbar-collapsed-mode) .navbar-mobile-drawer-root {
     display: none !important;
   }
 }
 
-/* Compact spacing for 1024px to 1279px to prevent cramped layout or text wrapping */
-@media (min-width: 1024px) and (max-width: 1279px) {
+/* Compact spacing for 1024px to 1366px to prevent cramped layout or text wrapping */
+@media (min-width: 1024px) and (max-width: 1366px) {
   .navbar-nav-link {
-    padding: 6px 9px !important;
-    font-size: 12.5px !important;
-    gap: 5px !important;
+    padding: 6px 8px !important;
+    font-size: 12px !important;
+    gap: 4px !important;
+    max-width: 180px;
   }
 }

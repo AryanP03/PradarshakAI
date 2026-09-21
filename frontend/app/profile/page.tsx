@@ -100,7 +100,6 @@ export default function ProfilePage() {
   const router = useRouter();
   const { t } = useLanguage();
 
-  const [token, setToken] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -118,16 +117,17 @@ export default function ProfilePage() {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const fetchUser = useCallback(async (authToken: string) => {
+  const fetchUser = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getUserProfile(authToken);
+      const data = await getUserProfile();
       if (data.guest) {
         setProfile(null);
+        router.push('/auth?redirect=/profile');
       } else {
         setProfile(data);
-        // Sync to localStorage
+        // Sync non-sensitive display info to localStorage
         localStorage.setItem('auth_user', JSON.stringify(data));
       }
     } catch (err: any) {
@@ -136,18 +136,10 @@ export default function ProfilePage() {
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [t, router]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedToken = localStorage.getItem('auth_token');
-      setToken(storedToken);
-      if (storedToken) {
-        fetchUser(storedToken);
-      } else {
-        setLoading(false);
-      }
-    }
+    fetchUser();
   }, [fetchUser]);
 
   // Profile completion score calculator
@@ -196,7 +188,7 @@ export default function ProfilePage() {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token) return;
+    if (!profile) return;
     setSaving(true);
     setEditError(null);
 
@@ -206,7 +198,7 @@ export default function ProfilePage() {
     };
 
     try {
-      const res = await updateUserProfile(token, payload);
+      const res = await updateUserProfile(payload);
       if (res.user) {
         setProfile(res.user);
         localStorage.setItem('auth_user', JSON.stringify(res.user));
@@ -225,33 +217,11 @@ export default function ProfilePage() {
 
   const handleDeleteAccount = async () => {
     if (deleteConfirmText.trim().toUpperCase() !== 'DELETE') return;
-    if (!token) return;
+    if (!profile) return;
     setDeleting(true);
     setDeleteError(null);
     try {
-      if (typeof deleteUserProfile === 'function') {
-        await deleteUserProfile(token);
-      } else {
-        // Fallback for bundler/Turbopack HMR cache lag
-        const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000/api';
-        const res = await fetch(`${apiBase}/users/me`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const data = await res.json().catch(() => ({ error: 'Failed to delete account' }));
-        if (!res.ok) {
-          throw new Error(data.error || 'Failed to delete account');
-        }
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('auth_user');
-          localStorage.removeItem('registration_summary');
-          localStorage.removeItem('guest_chat_messages');
-        }
-      }
+      await deleteUserProfile();
       router.push('/auth?deleted=true');
     } catch (err: any) {
       setDeleteError(err.message || 'Failed to delete account. Please try again.');
@@ -387,12 +357,12 @@ export default function ProfilePage() {
                   {error}
                 </h2>
                 <p style={{ fontSize: 13, color: '#64748b', margin: 0 }}>
-                  Please verify your network connection or session token.
+                  Please verify your network connection or login session.
                 </p>
               </div>
               <button
                 type="button"
-                onClick={() => token && fetchUser(token)}
+                onClick={() => fetchUser()}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',

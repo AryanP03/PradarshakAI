@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -16,7 +16,7 @@ import {
   ShieldCheck,
   LogOut,
 } from 'lucide-react';
-import type { UserProfile } from '@/lib/api';
+import { UserProfile, getUserProfile, logoutUser } from '@/lib/api';
 import { useLanguage } from '@/context/LanguageContext';
 import { SUPPORTED_LANGUAGES, getLanguageConfig } from '@/lib/languages';
 import EmblemOfIndia from './EmblemOfIndia';
@@ -31,13 +31,35 @@ function NavBarContent() {
   const [langOpen, setLangOpen] = useState(false);
 
   useEffect(() => {
+    // 1. Initial render from cached display user to prevent visual layout shifts
     const u = localStorage.getItem('auth_user');
     if (u) {
       try {
         setUser(JSON.parse(u) as UserProfile);
       } catch {}
     }
-  }, []);
+
+    // 2. Validate session truth via backend cookie
+    getUserProfile()
+      .then((profile) => {
+        if (profile && !profile.guest) {
+          setUser(profile);
+          localStorage.setItem('auth_user', JSON.stringify({
+            id: profile.id,
+            name: profile.name,
+            email: profile.email,
+            phone: profile.phone,
+          }));
+        } else {
+          setUser(null);
+          localStorage.removeItem('auth_user');
+        }
+      })
+      .catch(() => {
+        setUser(null);
+        localStorage.removeItem('auth_user');
+      });
+  }, [pathname]);
 
   useEffect(() => {
     if (langOpen) {
@@ -74,9 +96,8 @@ function NavBarContent() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  function logout() {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
+  async function logout() {
+    await logoutUser();
     setUser(null);
     router.push('/');
   }
@@ -94,18 +115,64 @@ function NavBarContent() {
 
   const currentLangObj = getLanguageConfig(lang) || SUPPORTED_LANGUAGES[0];
 
-  const navLinks = [
+  const navLinks = useMemo(() => [
     { label: t('nav.schemes', 'Explore Schemes'), href: '/schemes', icon: Layers },
     { label: t('nav.chat', 'Scheme Advisory'), href: '/chat', icon: MessageSquare },
     { label: t('nav.emi', 'EMI Calculator'), href: '/chat?tab=emi', icon: Calculator },
     { label: t('nav.partners', 'Partner Locator'), href: '/partners', icon: MapPin },
-  ];
+  ], [t]);
+
+  const [isNavOverflowing, setIsNavOverflowing] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+  const brandRef = useRef<HTMLAnchorElement>(null);
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const lastNavWidthRef = useRef<number>(0);
+
+  useEffect(() => {
+    // English, Hindi, and Marathi strictly preserve their existing approved layout
+    if (lang === 'en' || lang === 'hi' || lang === 'mr') {
+      setIsNavOverflowing((prev) => (prev ? false : prev));
+      return;
+    }
+
+    const checkFit = () => {
+      const container = containerRef.current;
+      const nav = navRef.current;
+      const brand = brandRef.current;
+      const controls = controlsRef.current;
+
+      if (!container || !brand || !controls) return;
+
+      if (nav && nav.offsetWidth > 0) {
+        lastNavWidthRef.current = nav.scrollWidth;
+      }
+
+      const estimatedNavWidth = navLinks.reduce(
+        (sum, l) => sum + l.label.length * 8.5 + 38,
+        0
+      );
+      const effectiveNavWidth = Math.max(lastNavWidthRef.current, estimatedNavWidth);
+
+      const containerWidth = container.clientWidth;
+      const brandWidth = brand.offsetWidth || 210;
+      const controlsWidth = controls.offsetWidth || 220;
+      const totalNeeded = brandWidth + controlsWidth + effectiveNavWidth + 36;
+      const shouldOverflow = totalNeeded > containerWidth;
+
+      setIsNavOverflowing((prev) => (prev !== shouldOverflow ? shouldOverflow : prev));
+    };
+
+    checkFit();
+    window.addEventListener('resize', checkFit);
+    return () => window.removeEventListener('resize', checkFit);
+  }, [lang, navLinks]);
 
   return (
     <header className="w-full sticky top-0 z-50">
       {/* ── Main Clean Blue Navbar (Matching Footer #00132b) ─────────── */}
       <div
-        className="material-toolbar"
+        className={`material-toolbar ${isNavOverflowing ? 'navbar-collapsed-mode' : ''}`}
         style={{
           background: '#00132b',
           borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
@@ -115,6 +182,7 @@ function NavBarContent() {
         }}
       >
         <div
+          ref={containerRef}
           style={{
             maxWidth: 1360,
             margin: '0 auto',
@@ -128,6 +196,7 @@ function NavBarContent() {
         >
           {/* ── Brand Emblem & Title ───────────────────────────────────────── */}
           <Link
+            ref={brandRef}
             href="/home"
             style={{
               display: 'flex',
@@ -188,7 +257,7 @@ function NavBarContent() {
           </Link>
 
           {/* ── Desktop Navigation Tabs (Light-on-Dark Theme) ──────────────── */}
-          <nav className="navbar-desktop-nav items-center gap-1" style={{ marginLeft: 8 }}>
+          <nav ref={navRef} className="navbar-desktop-nav items-center gap-1" style={{ marginLeft: 8 }}>
             {navLinks.map((link) => {
               const Icon = link.icon;
               const active = isActive(link.href);
@@ -200,10 +269,10 @@ function NavBarContent() {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 6,
-                    padding: '8px 12px',
+                    gap: 5,
+                    padding: '7px clamp(8px, 1vw, 12px)',
                     borderRadius: 6,
-                    fontSize: 13,
+                    fontSize: 'clamp(12px, 1.1vw, 13px)',
                     fontWeight: active ? 700 : 500,
                     color: active ? '#ffffff' : '#cbd5e1',
                     background: active ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
@@ -224,7 +293,7 @@ function NavBarContent() {
                     }
                   }}
                 >
-                  <Icon size={15} color={active ? '#ffffff' : '#94a3b8'} />
+                  <Icon size={15} color={active ? '#ffffff' : '#94a3b8'} style={{ flexShrink: 0 }} />
                   <span>{link.label}</span>
                 </Link>
               );
@@ -232,7 +301,7 @@ function NavBarContent() {
           </nav>
 
           {/* ── Right Controls: Language Selector & User Auth ───────────────── */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          <div ref={controlsRef} style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
             {/* Single Global Language Selector Dropdown */}
             <div style={{ position: 'relative' }}>
               <button
@@ -259,7 +328,7 @@ function NavBarContent() {
                 aria-label="Select language"
               >
                 <Globe size={13} color="#ffdcc2" />
-                <span className="max-w-[70px] sm:max-w-none truncate">{currentLangObj.nativeName}</span>
+                <span className="max-w-[75px] md:max-w-[110px] truncate">{currentLangObj.nativeName}</span>
                 <ChevronDown size={12} style={{ transform: langOpen ? 'rotate(180deg)' : 'none', transition: 'transform 150ms' }} />
               </button>
 
