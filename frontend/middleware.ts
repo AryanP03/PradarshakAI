@@ -2,20 +2,10 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  // Protected user routes requiring authenticated session
-  if (pathname.startsWith('/profile')) {
-    const token = request.cookies.get('auth_token')?.value;
-
-    if (!token) {
-      const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = '/auth';
-      loginUrl.searchParams.set('redirect', pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-  }
-
+  // In production (cross-domain), the Next.js server cannot read the HttpOnly 
+  // auth_token cookie because it is bound to the backend API domain.
+  // We rely on client-side routing in /profile/page.tsx to redirect guests, 
+  // which works robustly by calling the backend API.
   return NextResponse.next();
 }
 
