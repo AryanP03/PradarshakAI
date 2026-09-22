@@ -269,15 +269,16 @@ router.post('/forgot-password/send-otp', async (req: Request, res: Response) => 
     if (rows.length > 0) {
       // User exists -> generate and send OTP
       await sendPasswordResetOtp(cleanEmail);
+      res.json({
+        success: true,
+        message: 'OTP sent successfully to your email address.',
+      });
     } else {
       console.log(`[Forgot Password] Requested email ${cleanEmail} not found in database. Suppressing OTP generation.`);
+      res.status(404).json({ 
+        error: 'No account was found with this email address. Please check the email or register for a new account.' 
+      });
     }
-
-    // Security convention: return generic safe confirmation
-    res.json({
-      success: true,
-      message: 'If an account exists for this email, a verification OTP has been sent.',
-    });
   } catch (err: any) {
     if (err.message && err.message.includes('Please wait')) {
       res.status(429).json({ error: err.message });

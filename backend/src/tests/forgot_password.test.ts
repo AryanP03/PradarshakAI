@@ -80,10 +80,9 @@ async function runTests() {
       email: nonExistentEmail,
     });
     logTest(
-      unknownRes.status === 200 &&
-      unknownRes.data?.success === true &&
-      unknownRes.data?.message?.includes('If an account exists'),
-      'Returns generic safe message for non-existent email',
+      unknownRes.status === 404 &&
+      unknownRes.data?.error?.includes('No account was found'),
+      'Returns explicit error for non-existent email',
       JSON.stringify(unknownRes.data)
     );
 
