@@ -427,39 +427,29 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
     >
       {/* ── Section Header ────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div
-            style={{
-              width: 34,
-              height: 34,
-              borderRadius: 10,
-              background: '#fff7ed',
-              border: '1px solid #fed7aa',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Calculator size={18} color="#ea580c" />
-          </div>
-          <span
-            style={{
-              fontSize: 11,
-              fontWeight: 800,
-              color: '#c2410c',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-            }}
-          >
-            {t('emi.badge', 'NSFDC Financial Math Engine • Dual-Mode')}
-          </span>
+        {/* Eyebrow */}
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            width: 'fit-content',
+            color: '#0369a1',
+            fontSize: 12,
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+          }}
+        >
+          <Calculator size={13.5} strokeWidth={2.2} style={{ color: '#0284c7', flexShrink: 0 }} />
+          <span>{t('emi.badge', 'EMI Calculator')}</span>
         </div>
 
-        <h1 style={{ fontSize: 26, fontWeight: 800, color: '#0b1f3a', margin: 0, letterSpacing: '-0.02em' }}>
-          {t('emi.title', 'Precision EMI, Moratorium & MSME Financial Planner')}
+        <h1 style={{ fontSize: 28, fontWeight: 900, color: '#0b1f3a', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.25 }}>
+          {t('emi.title', 'Moratorium & Loan Repayment Calculator')}
         </h1>
-        <p style={{ fontSize: 14, color: '#64748b', margin: 0, lineHeight: 1.5 }}>
-          {t('emi.desc', 'Simulate official concessional schemes with exact promoter margin contributions, moratorium grace periods, and debt-trap protection metrics.')}
+        <p style={{ fontSize: 14.5, color: '#64748b', margin: 0, lineHeight: 1.55, maxWidth: 840 }}>
+          {t('emi.desc', 'Estimate exact monthly EMIs, moratorium interest accrual, and total repayment using applicable scheme parameters.')}
         </p>
       </div>
 

@@ -470,21 +470,44 @@ export default function SchemesPage() {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f8fafc' }}>
       <NavBar />
 
-      <main className="page-content" style={{ maxWidth: 1200, width: '100%', margin: '0 auto', padding: '36px 24px 64px', flex: 1 }}>
+      <main className="page-content" style={{ maxWidth: 1200, width: '100%', margin: '0 auto', padding: '28px 24px 64px', flex: 1 }}>
         
         {/* ── Page Header ─────────────────────────────────────────────────── */}
-        <div style={{ marginBottom: 28, display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, width: 'fit-content', background: '#fff7ed', border: '1px solid #fed7aa', color: '#c2410c', fontSize: 11, fontWeight: 800, padding: '4px 12px', borderRadius: 20, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            <Layers size={14} />
-            <span>{t('schemes.badge', 'Official Government Schemes & Programmes Catalogue')}</span>
+        <div style={{ marginBottom: 22, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              width: 'fit-content',
+              color: '#0369a1',
+              fontSize: 12,
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+            }}
+          >
+            <Layers size={13.5} strokeWidth={2.2} style={{ color: '#0284c7', flexShrink: 0 }} />
+            <span>{t('schemes.badge', 'Schemes Catalogue')}</span>
           </div>
 
-          <h1 style={{ fontSize: 32, fontWeight: 900, color: '#0b1f3a', margin: 0, letterSpacing: '-0.02em' }}>
-            {t('schemes.title', 'NSFDC Concessional Loan Schemes & Government Programmes')}
+          <h1 style={{ fontSize: 32, fontWeight: 900, color: '#0b1f3a', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.25 }}>
+            {t('schemes.title', 'Government Concessional Loan Schemes')}
           </h1>
 
-          <p style={{ fontSize: 15, color: '#64748b', maxWidth: 780, lineHeight: 1.6, margin: 0 }}>
-            {t('schemes.desc', 'Explore official financial assistance loan schemes and government welfare programmes for Scheduled Caste beneficiaries.')}
+          <p style={{ fontSize: 15, color: '#64748b', maxWidth: 840, lineHeight: 1.6, margin: 0 }}>
+            {t('schemes.desc', 'Explore government-supported financial assistance programs available through the NSFDC ecosystem for Scheduled Caste beneficiaries.')}
+          </p>
+
+          <p style={{ fontSize: 13.5, color: '#475569', lineHeight: 1.55, margin: '2px 0 0', maxWidth: 900 }}>
+            {t('schemes.curated_note', 'Showing a curated selection of 10 key schemes from the broader NSFDC scheme portfolio.')}{' '}
+            <a
+              href="/chat"
+              style={{ color: '#0369a1', fontWeight: 700, textDecoration: 'underline' }}
+            >
+              {t('schemes.curated_ai_action', 'Ask the AI Assistant')}
+            </a>{' '}
+            {t('schemes.curated_ai_desc', 'to discover other applicable schemes based on your income, purpose, education, or business needs.')}
           </p>
 
           {/* Type Filter Segment Selector */}

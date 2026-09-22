@@ -556,27 +556,10 @@ function RegisterContent() {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f1f5f9' }}>
       <NavBar />
 
-      <main style={{ flex: 1, padding: '48px 24px' }}>
+      <main style={{ flex: 1, padding: '32px 24px 48px' }}>
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
 
-          <div style={{ textAlign: 'center', marginBottom: 36 }}>
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              background: '#ecfdf5',
-              border: '1px solid #a7f3d0',
-              padding: '5px 14px',
-              borderRadius: 20,
-              fontSize: 12.5,
-              fontWeight: 700,
-              color: '#065f46',
-              marginBottom: 12,
-            }}>
-              <span>🛡️ Official Beneficiary Portal</span>
-              <span>•</span>
-              <span>Certificate OCR & Live Face Verification</span>
-            </div>
+          <div style={{ textAlign: 'center', marginBottom: 24 }}>
             <h1 style={{ fontSize: 30, fontWeight: 900, color: '#0b1f3a', marginBottom: 8, letterSpacing: '-0.02em' }}>
               Create Your Beneficiary Account
             </h1>

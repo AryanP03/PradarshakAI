@@ -52,7 +52,7 @@ function ChatPage() {
     { id: 'partners', label: t('nav.partners', 'Partner Locator'),     Icon: MapPin },
   ];
 
-  const [tab, setTab] = useState<TabId>('chat');
+  const [tab, setTab] = useState<TabId>(() => (searchParams.get('tab') === 'emi' ? 'emi' : 'chat'));
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [chatId, setChatId] = useState<string | null>(null);

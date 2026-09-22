@@ -99,9 +99,12 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
     'cta.btn_partners': 'Find Partners',
 
     // Schemes Page
-    'schemes.badge': 'Official Schemes Catalog',
+    'schemes.badge': 'Schemes Catalogue',
     'schemes.title': 'Government Concessional Loan Schemes',
-    'schemes.desc': 'Explore official financial assistance programs tailored for Scheduled Caste beneficiaries with family income up to ₹5.00 Lakh per annum.',
+    'schemes.desc': 'Explore government-supported financial assistance programs available through the NSFDC ecosystem for Scheduled Caste beneficiaries.',
+    'schemes.curated_note': 'Showing a curated selection of 10 key schemes from the broader NSFDC scheme portfolio.',
+    'schemes.curated_ai_action': 'Ask the AI Assistant',
+    'schemes.curated_ai_desc': 'to discover other applicable schemes based on your income, purpose, education, or business needs.',
     'schemes.search_ph': 'Search schemes by name, purpose, or activity (e.g. Mahila, Tailoring, Education, Green Business)...',
     'schemes.cat_label': 'Category:',
     'schemes.all': 'All Schemes',
@@ -118,7 +121,7 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
     'schemes.empty_btn': 'Show All Schemes',
 
     // Partners Page
-    'partners.badge': 'Geo-Spatial Locator',
+    'partners.badge': 'Partner Locator',
     'partners.title': 'Find Channel Partners Near You',
     'partners.desc': 'Locate State Channelizing Agencies (SCAs), Regional Rural Banks (RRBs), and NBFC-MFIs authorized to disburse concessional loans in your district.',
     'partners.search_ph': 'Enter city or district name (e.g. Lucknow, Delhi, Jaipur, Pune)...',
@@ -226,9 +229,9 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
     'chat.checklist_title': 'Application Checklist',
 
     // EMI Calculator
-    'emi.badge': 'Deterministic Math Engine',
+    'emi.badge': 'EMI Calculator',
     'emi.title': 'Moratorium & Loan Repayment Calculator',
-    'emi.desc': 'Estimate exact monthly EMIs, moratorium interest accrual, and total repayment liability under official NSFDC subsidized interest rates (3%–12%).',
+    'emi.desc': 'Estimate exact monthly EMIs, moratorium interest accrual, and total repayment using applicable scheme parameters.',
     'emi.loan_amount': 'Loan Required (₹)',
     'emi.interest_rate': 'Subsidized Interest Rate (% p.a.)',
     'emi.tenure': 'Repayment Tenure (Months)',
@@ -615,9 +618,12 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
     'cta.btn_partners': 'पार्टनर खोजें',
 
     // Schemes Page
-    'schemes.badge': 'आधिकारिक योजना सूची',
+    'schemes.badge': 'योजना सूची',
     'schemes.title': 'सरकारी रियायती ऋण योजनाएं',
-    'schemes.desc': '₹5.00 लाख प्रति वर्ष तक की पारिवारिक आय वाले अनुसूचित जाति के लाभार्थियों के लिए विशेष वित्तीय सहायता कार्यक्रम।',
+    'schemes.desc': 'अनुसूचित जाति के लाभार्थियों के लिए NSFDC पारिस्थितिकी तंत्र के माध्यम से उपलब्ध सरकारी सहायता कार्यक्रमों का अन्वेषण करें।',
+    'schemes.curated_note': 'व्यापक NSFDC योजना पोर्टफोलियो में से चुनी गई 10 प्रमुख योजनाओं का प्रदर्शन।',
+    'schemes.curated_ai_action': 'AI सहायक से पूछें',
+    'schemes.curated_ai_desc': 'अपनी आय, उद्देश्य, शिक्षा या व्यावसायिक आवश्यकताओं के अनुसार अन्य लागू योजनाएं खोजने के लिए।',
     'schemes.search_ph': 'योजना का नाम, उद्देश्य या व्यवसाय खोजें (उदा. महिला, सिलाई, शिक्षा, ग्रीन बिजनेस)...',
     'schemes.cat_label': 'श्रेणी:',
     'schemes.all': 'सभी योजनाएं',
@@ -735,9 +741,9 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
     'chat.checklist_title': 'आवेदन चेकलिस्ट',
 
     // EMI Calculator
-    'emi.badge': 'सटीक गणितीय कैलकुलेटर',
+    'emi.badge': 'ईएमआई कैलकुलेटर',
     'emi.title': 'मोरेटोरियम एवं ऋण पुनर्भुगतान कैलकुलेटर',
-    'emi.desc': 'NSFDC की रियायती ब्याज दरों (3%–12%) के तहत मासिक EMI, मोरेटोरियम अवधि के ब्याज और कुल भुगतान की सटीक गणना करें।',
+    'emi.desc': 'लागू योजना मापदंडों का उपयोग करके सटीक मासिक ईएमआई, मोरेटोरियम ब्याज और कुल पुनर्भुगतान का अनुमान लगाएं।',
     'emi.loan_amount': 'आवश्यक ऋण राशि (₹)',
     'emi.interest_rate': 'सब्सिडी युक्त ब्याज दर (% वार्षिक)',
     'emi.tenure': 'ऋण अवधि (महीने)',
@@ -1122,9 +1128,12 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
     'cta.btn_partners': 'भागीदार शोधा',
 
     // Schemes Page
-    'schemes.badge': 'अधिकृत योजनांची यादी',
+    'schemes.badge': 'योजनांची यादी',
     'schemes.title': 'शासकीय सवलतीची कर्ज योजना',
-    'schemes.desc': 'वार्षिक ₹५.०० लाख पर्यंत कौटुंबिक उत्पन्न असलेल्या अनुसूचित जातीच्या लाभार्थ्यांसाठी विशेष आर्थिक सहाय्य योजना.',
+    'schemes.desc': 'अनुसूचित जातीच्या लाभार्थ्यांसाठी NSFDC परिसंस्थेद्वारे उपलब्ध शासकीय सहाय्य योजनांचे अन्वेषण करा.',
+    'schemes.curated_note': 'व्यापक NSFDC पोर्टफोलिओमधील निवडक १० प्रमुख योजना दर्शवित आहे.',
+    'schemes.curated_ai_action': 'AI सहाय्यकास विचारा',
+    'schemes.curated_ai_desc': 'आपल्या उत्पन्न, हेतू, शिक्षण किंवा व्यावसायिक गरजेनुसार इतर लागू योजना शोधण्यासाठी.',
     'schemes.search_ph': 'योजनेचे नाव, हेतू किंवा व्यवसाय शोधा (उदा. महिला, शिवणकाम, शिक्षण, हरित व्यवसाय)...',
     'schemes.cat_label': 'प्रवर्ग:',
     'schemes.all': 'सर्व योजना',
@@ -1241,9 +1250,9 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
     'chat.checklist_title': 'अर्ज कागदपत्रे यादी',
 
     // EMI Calculator
-    'emi.badge': 'अचूक गणितीय गणकयंत्र',
+    'emi.badge': 'ईएमआय गणकयंत्र',
     'emi.title': 'मोरेटोरियम व कर्ज परतफेड गणकयंत्र',
-    'emi.desc': 'NSFDC च्या सवलतीच्या व्याजदरांवर (३%–१२%) मासिक EMI, मोरेटोरियम व्याज आणि एकूण परतफेडीची अचूक गणना करा.',
+    'emi.desc': 'लागू योजना निकषांचा वापर करून अचूक मासिक ईएमआय, मोरेटोरियम व्याज आणि एकूण परतफेडीचा अंदाज घ्या.',
     'emi.loan_amount': 'आवश्यक कर्ज रक्कम (₹)',
     'emi.interest_rate': 'सवलतीचा व्याजदर (% वार्षिक)',
     'emi.tenure': 'कर्ज परतफेड कालावधी (महिने)',

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
@@ -14,10 +13,7 @@ import {
   Navigation,
   X,
   SlidersHorizontal,
-  Compass,
   CheckCircle2,
-  Bot,
-  Calculator,
   LocateFixed,
   ShieldAlert,
 } from 'lucide-react';
@@ -265,75 +261,32 @@ function PartnersContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-  const TABS = [
-    { id: 'chat', label: t('chat.tab_ai', 'AI Scheme Assistant'), href: '/chat', Icon: Bot },
-    { id: 'emi', label: t('chat.tab_emi', 'EMI Calculator'), href: '/chat?tab=emi', Icon: Calculator },
-    { id: 'partners', label: t('chat.tab_partners', 'Channel Partners'), href: '/partners', Icon: MapPin },
-  ];
-
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f8fafc' }}>
       <NavBar />
 
-      {/* ── Subheader Segment Control ───────────────────────────────────────── */}
-      <div
-        className="material-toolbar"
-        style={{
-          background: '#ffffff',
-          borderBottom: '1px solid #e2e8f0',
-          padding: '0 24px',
-          minHeight: 56,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexShrink: 0,
-          zIndex: 20,
-          boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div className="segmented-control" style={{ display: 'flex', alignItems: 'center' }}>
-            {TABS.map(({ id, label, href, Icon }) => {
-              const active = id === 'partners';
-              return (
-                <Link
-                  key={id}
-                  href={href}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    padding: '6px 14px',
-                    borderRadius: 8,
-                    fontSize: 12.5,
-                    fontWeight: active ? 700 : 500,
-                    border: 'none',
-                    background: active ? '#ffffff' : 'transparent',
-                    color: active ? '#0b1f3a' : '#64748b',
-                    boxShadow: active ? '0 1px 4px rgba(0,0,0,0.06)' : 'none',
-                    textDecoration: 'none',
-                    transition: 'background-color 150ms ease, color 150ms ease, box-shadow 150ms ease',
-                  }}
-                >
-                  <Icon size={14} color={active ? '#e87722' : '#94a3b8'} />
-                  <span>{label}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      <main className="page-content" style={{ maxWidth: 1240, width: '100%', margin: '0 auto', padding: '32px 24px 64px', flex: 1 }}>
+      <main className="page-content" style={{ maxWidth: 1240, width: '100%', margin: '0 auto', padding: '28px 24px 64px', flex: 1 }}>
         
         {/* ── Page Header ─────────────────────────────────────────────────── */}
-        <div style={{ marginBottom: 24, display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, width: 'fit-content', background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#15803d', fontSize: 11, fontWeight: 800, padding: '4px 12px', borderRadius: 20, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            <Compass size={14} />
-            <span>{t('partners.badge', 'Channel Partner Locator')}</span>
+        <div style={{ marginBottom: 22, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              width: 'fit-content',
+              color: '#0369a1',
+              fontSize: 12,
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+            }}
+          >
+            <MapPin size={13.5} strokeWidth={2.2} style={{ color: '#0284c7', flexShrink: 0 }} />
+            <span>{t('partners.badge', 'Partner Locator')}</span>
           </div>
 
-          <h1 style={{ fontSize: 32, fontWeight: 900, color: '#0b1f3a', margin: 0, letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: 32, fontWeight: 900, color: '#0b1f3a', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.25 }}>
             {t('partners.title', 'Find Channel Partners Near You')}
           </h1>
 
@@ -346,8 +299,8 @@ function PartnersContent() {
             style={{
               background: '#ffffff',
               border: '1px solid #e2e8f0',
-              borderRadius: 14,
-              padding: '12px 18px',
+              borderRadius: 12,
+              padding: '11px 18px',
               marginTop: 4,
               display: 'flex',
               alignItems: 'center',
@@ -356,7 +309,7 @@ function PartnersContent() {
               fontSize: 13,
             }}
           >
-            <span style={{ fontWeight: 800, color: '#0b1f3a', fontSize: 12.5, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <span style={{ fontWeight: 800, color: '#0b1f3a', fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Partner Status Legend:
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

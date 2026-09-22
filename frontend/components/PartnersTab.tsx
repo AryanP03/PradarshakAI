@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import PartnerResultCard from './PartnerResultCard';
-import { Search, Compass, Navigation } from 'lucide-react';
+import { Search, MapPin, Navigation } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 import { API_BASE } from '@/lib/apiBase';
@@ -93,32 +93,22 @@ export default function PartnersTab() {
     >
       {/* ── Section Header ────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 10,
-              background: '#f0fdf4',
-              border: '1px solid #bbf7d0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Compass size={16} color="#15803d" />
-          </div>
-          <span
-            style={{
-              fontSize: 11,
-              fontWeight: 800,
-              color: '#15803d',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-            }}
-          >
-            {t('partners.badge', 'Geo-Spatial Locator')}
-          </span>
+        {/* Eyebrow */}
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            width: 'fit-content',
+            color: '#0369a1',
+            fontSize: 12,
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+          }}
+        >
+          <MapPin size={13.5} strokeWidth={2.2} style={{ color: '#0284c7', flexShrink: 0 }} />
+          <span>{t('partners.badge', 'Partner Locator')}</span>
         </div>
 
         <h1 style={{ fontSize: 26, fontWeight: 800, color: '#0b1f3a', margin: 0, letterSpacing: '-0.02em' }}>
