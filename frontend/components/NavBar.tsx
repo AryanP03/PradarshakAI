@@ -10,6 +10,7 @@ import {
   X,
   MessageSquare,
   Layers,
+  Compass,
   MapPin,
   User,
   Calculator,
@@ -117,7 +118,8 @@ function NavBarContent() {
 
   const navLinks = useMemo(() => [
     { label: t('nav.schemes', 'Explore Schemes'), href: '/schemes', icon: Layers },
-    { label: t('nav.chat', 'Scheme Advisory'), href: '/chat', icon: MessageSquare },
+    { label: t('nav.find_scheme', 'Find a Scheme'), href: '/find-scheme', icon: Compass },
+    { label: t('nav.chat', 'AI Assistant'), href: '/chat', icon: MessageSquare },
     { label: t('nav.emi', 'EMI Calculator'), href: '/chat?tab=emi', icon: Calculator },
     { label: t('nav.partners', 'Partner Locator'), href: '/partners', icon: MapPin },
   ], [t]);
@@ -127,49 +129,124 @@ function NavBarContent() {
   const navRef = useRef<HTMLElement>(null);
   const brandRef = useRef<HTMLAnchorElement>(null);
   const controlsRef = useRef<HTMLDivElement>(null);
-  const lastNavWidthRef = useRef<number>(0);
+  const measureNavRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // English, Hindi, and Marathi strictly preserve their existing approved layout
-    if (lang === 'en' || lang === 'hi' || lang === 'mr') {
-      setIsNavOverflowing((prev) => (prev ? false : prev));
-      return;
-    }
+    let animationFrameId: number;
 
     const checkFit = () => {
       const container = containerRef.current;
-      const nav = navRef.current;
       const brand = brandRef.current;
-      const controls = controlsRef.current;
+      const measureNav = measureNavRef.current;
 
-      if (!container || !brand || !controls) return;
-
-      if (nav && nav.offsetWidth > 0) {
-        lastNavWidthRef.current = nav.scrollWidth;
-      }
-
-      const estimatedNavWidth = navLinks.reduce(
-        (sum, l) => sum + l.label.length * 8.5 + 38,
-        0
-      );
-      const effectiveNavWidth = Math.max(lastNavWidthRef.current, estimatedNavWidth);
+      if (!container || !brand) return;
 
       const containerWidth = container.clientWidth;
-      const brandWidth = brand.offsetWidth || 210;
-      const controlsWidth = controls.offsetWidth || 220;
-      const totalNeeded = brandWidth + controlsWidth + effectiveNavWidth + 36;
+
+      // 1. Exact nav width from off-screen measurement node in current language
+      let requiredNavWidth = 0;
+      if (measureNav) {
+        requiredNavWidth = measureNav.scrollWidth;
+      }
+      if (requiredNavWidth === 0) {
+        // Fallback proportional estimate: ~6.5px per char + 40px (icon + padding + gaps)
+        requiredNavWidth = navLinks.reduce(
+          (sum, l) => sum + Math.round(l.label.length * 6.5) + 40,
+          0
+        );
+      }
+
+      // 2. Brand width (emblem + title + subtitle if visible)
+      const brandWidth = brand.offsetWidth || 160;
+
+      // 3. Desktop controls required width:
+      // Language dropdown (~115px) + Auth buttons (~165px) = ~280px
+      // If user is logged in: Language (~115px) + Profile/Signout (~145px) = ~260px
+      const requiredControlsWidth = user ? 260 : 280;
+
+      // Total needed with comfortable inter-element margins (16px)
+      const totalNeeded = brandWidth + requiredNavWidth + requiredControlsWidth + 16;
       const shouldOverflow = totalNeeded > containerWidth;
 
       setIsNavOverflowing((prev) => (prev !== shouldOverflow ? shouldOverflow : prev));
     };
 
-    checkFit();
-    window.addEventListener('resize', checkFit);
-    return () => window.removeEventListener('resize', checkFit);
-  }, [lang, navLinks]);
+    const scheduleCheck = () => {
+      cancelAnimationFrame(animationFrameId);
+      animationFrameId = requestAnimationFrame(checkFit);
+    };
+
+    scheduleCheck();
+
+    // ResizeObserver for reliable container measurement across all viewports & zoom levels
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+      observer = new ResizeObserver(() => {
+        scheduleCheck();
+      });
+      observer.observe(containerRef.current);
+    }
+
+    window.addEventListener('resize', scheduleCheck);
+
+    // Re-check once web fonts are fully loaded so character widths are exact
+    if (typeof document !== 'undefined' && (document as any).fonts?.ready) {
+      (document as any).fonts.ready.then(() => {
+        scheduleCheck();
+      });
+    }
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', scheduleCheck);
+      if (observer) {
+        observer.disconnect();
+      }
+    };
+  }, [lang, navLinks, user]);
 
   return (
     <header className="w-full sticky top-0 z-50">
+      {/* ── Off-screen measurement element to accurately detect required widths in any language ── */}
+      <div
+        ref={measureNavRef}
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          top: -9999,
+          left: -9999,
+          visibility: 'hidden',
+          pointerEvents: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 4,
+          whiteSpace: 'nowrap',
+          zIndex: -100,
+        }}
+      >
+        {navLinks.map((link) => {
+          const Icon = link.icon;
+          return (
+            <div
+              key={link.href}
+              className="navbar-nav-link"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
+                padding: '7px 10px',
+                fontSize: 12.5,
+                fontWeight: 600,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <Icon size={15} style={{ flexShrink: 0 }} />
+              <span>{link.label}</span>
+            </div>
+          );
+        })}
+      </div>
+
       {/* ── Main Clean Blue Navbar (Matching Footer #00132b) ─────────── */}
       <div
         className={`material-toolbar ${isNavOverflowing ? 'navbar-collapsed-mode' : ''}`}

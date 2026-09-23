@@ -1,8 +1,86 @@
 import { Router, Request, Response } from 'express';
 import { readonlyPool } from '../db/pool';
 import { llmCall } from '../lib/openrouter';
+import { recommendSchemes } from '../services/SchemeEngine';
+import type { UserEntities } from '../services/ConversationSession';
 
 const router = Router();
+
+// ── Guided Scheme Finder (Direct deterministic SchemeEngine execution) ───────
+// POST /api/recommend/finder
+router.post('/finder', async (req: Request, res: Response) => {
+  try {
+    const {
+      purpose,
+      occupation,
+      occupation_other,
+      education_level,
+      family_income_rs,
+      loan_amount_rs,
+      gender,
+      location,
+      category_hint,
+      limit = 6,
+    } = req.body;
+
+    const parsedIncome = family_income_rs != null && family_income_rs !== '' ? Number(family_income_rs) : undefined;
+    const parsedLoan = loan_amount_rs != null && loan_amount_rs !== '' ? Number(loan_amount_rs) : undefined;
+
+    // Build purpose text integrating occupation
+    const occLabel = occupation === 'other' ? (occupation_other || 'Other') : (occupation || '');
+    const combinedPurpose = [purpose, occLabel].filter(Boolean).join(' - ');
+
+    // Normalize gender: only 'female' triggers women-only schemes; 'male', 'other', 'prefer_not_to_say' don't exclude general schemes
+    const normGender = gender === 'female' ? 'female' : (gender === 'male' ? 'male' : undefined);
+
+    // Determine categoryHint if not provided
+    let catHint = category_hint;
+    if (!catHint) {
+      const pLower = (purpose || '').toLowerCase();
+      if (pLower.includes('education') || pLower.includes('vocational') || pLower.includes('training') || pLower.includes('skill')) {
+        catHint = 'education_loan';
+      } else if (pLower.includes('business') || pLower.includes('agriculture') || pLower.includes('dairy') || pLower.includes('trade') || pLower.includes('shop') || pLower.includes('green') || pLower.includes('sanitation')) {
+        catHint = 'business_loan';
+      }
+    }
+
+    const entities: UserEntities = {
+      purpose: combinedPurpose || purpose || undefined,
+      loan_amount_rs: parsedLoan && !isNaN(parsedLoan) ? parsedLoan : undefined,
+      family_income_rs: parsedIncome && !isNaN(parsedIncome) ? parsedIncome : undefined,
+      education_level: education_level || undefined,
+      gender: normGender,
+      location: location || undefined,
+    };
+
+    console.log('[recommend/finder] Running existing recommendSchemes with:', JSON.stringify(entities));
+    const results = await recommendSchemes(entities, catHint, Number(limit) || 6);
+
+    const eligibleSchemes = results.filter((s) => s.tier !== 'HARD_DISQUALIFIED').slice(0, 3);
+    const isDisqualified = results.length > 0 && eligibleSchemes.length === 0;
+
+    res.json({
+      schemes: eligibleSchemes,
+      allScored: results,
+      isDisqualified,
+      disqualificationReason: isDisqualified ? results[0]?.disqualificationReason : undefined,
+      totalMatches: eligibleSchemes.length,
+      query: {
+        purpose,
+        occupation: occLabel,
+        education_level,
+        family_income_rs: parsedIncome,
+        loan_amount_rs: parsedLoan,
+        gender,
+        location,
+      },
+    });
+  } catch (err) {
+    const msg = (err as Error)?.message || String(err);
+    console.error('[recommend/finder] Error:', msg);
+    res.status(500).json({ error: 'Failed to process recommendation request', detail: msg });
+  }
+});
 
 // ── Filter extraction ─────────────────────────────────────────────────────────
 

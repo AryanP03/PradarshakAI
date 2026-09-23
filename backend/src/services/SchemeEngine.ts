@@ -585,7 +585,7 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
   return scored;
 }
 
-export async function recommendSchemes(entities: UserEntities, categoryHint?: string): Promise<ScoredScheme[]> {
+export async function recommendSchemes(entities: UserEntities, categoryHint?: string, limit: number = 3): Promise<ScoredScheme[]> {
   console.log('[SCHEME_SERVICE] recommendSchemes called:', JSON.stringify({ categoryHint, purpose: entities.purpose, loan_amount_rs: entities.loan_amount_rs, gender: entities.gender, family_income_rs: entities.family_income_rs }));
   let all = await fetchActiveSchemes(categoryHint);
   console.log(`[DATABASE] fetchActiveSchemes(${categoryHint || 'all'}) returned ${all.length} schemes`);
@@ -600,9 +600,9 @@ export async function recommendSchemes(entities: UserEntities, categoryHint?: st
   console.log(`[SCHEME_SERVICE] scoreSchemes returned ${scored.length} scored schemes:`, scored.map(s => `${s.name}(score=${s.score},tier=${s.tier})`).join(', '));
 
   if (scored.length === 0) {
-    // Ultimate fallback: return top 3 from ALL active schemes
+    // Ultimate fallback: return top schemes from ALL active schemes
     const fallbackAll = await fetchActiveSchemes();
-    return fallbackAll.slice(0, 3).map((s) => ({
+    return fallbackAll.slice(0, limit).map((s) => ({
       ...s,
       score: 50,
       tier: 'ELIGIBLE_SUBOPTIMAL' as SchemeTier,
@@ -610,5 +610,11 @@ export async function recommendSchemes(entities: UserEntities, categoryHint?: st
       warnings: [],
     }));
   }
-  return scored.slice(0, 3);
+
+  const eligible = scored.filter((s) => s.tier !== 'HARD_DISQUALIFIED');
+  if (eligible.length > 0) {
+    return eligible.slice(0, limit);
+  }
+
+  return scored.slice(0, limit);
 }

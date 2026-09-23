@@ -525,6 +525,42 @@ export async function adminGetStats(token: string) {
   return res.json() as Promise<{ schemes: { total: number; active: number }; partners: { total: number; active: number } }>;
 }
 
+export interface GuidedFinderRequest {
+  purpose: string;
+  occupation: string;
+  occupation_other?: string;
+  education_level: string;
+  family_income_rs: number;
+  loan_amount_rs: number;
+  gender: string;
+  location?: string;
+  category_hint?: string;
+  limit?: number;
+}
+
+export interface GuidedFinderResponse {
+  schemes: Scheme[];
+  allScored?: any[];
+  isDisqualified?: boolean;
+  disqualificationReason?: string;
+  totalMatches: number;
+  query?: Record<string, any>;
+}
+
+export async function findSchemesGuided(params: GuidedFinderRequest): Promise<GuidedFinderResponse> {
+  const res = await fetch(`${BASE}/recommend/finder`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(errorText || 'Failed to retrieve scheme recommendations');
+  }
+  return res.json();
+}
+
 // ── Legacy stubs (old components only) ───────────────────────────────────────
 
 export async function emiChat(_message: string, _history: object[] = []) {
