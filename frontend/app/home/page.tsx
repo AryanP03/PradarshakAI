@@ -15,6 +15,10 @@ import {
   ArrowRight,
   ShieldCheck,
   Layers,
+  Compass,
+  GraduationCap,
+  Users,
+  Sparkles,
 } from 'lucide-react';
 
 export default function PortalOverviewPage() {
@@ -190,7 +194,7 @@ export default function PortalOverviewPage() {
           </p>
         </div>
 
-        <div className="action-cards-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 24 }}>
+        <div className="action-cards-grid">
           {/* Card 1: Explore Schemes */}
           <Link href="/schemes" style={{ textDecoration: 'none' }} className="action-card-link">
             <div
@@ -227,16 +231,16 @@ export default function PortalOverviewPage() {
               </div>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 <h3 style={{ fontSize: 18, fontWeight: 700, color: '#003366', margin: '0 0 8px 0', lineHeight: 1.3 }}>
-                  {t('home.services_schemes_title', t('home.card_explore_title', t('nav.schemes', 'Explore Schemes')))}
+                  {t('home.card_explore_title', 'Explore Schemes')}
                 </h3>
                 <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.5 }}>
-                  {t('home.services_schemes_desc', t('home.card_explore_desc', 'View available concessional loan schemes'))}
+                  {t('home.card_explore_desc', 'View available concessional loan schemes')}
                 </p>
               </div>
             </div>
           </Link>
 
-          {/* Card 2: Check Eligibility */}
+          {/* Card 2: Chat with AI Assistant */}
           <Link href="/chat" style={{ textDecoration: 'none' }} className="action-card-link">
             <div
               className="action-card-inner"
@@ -268,14 +272,14 @@ export default function PortalOverviewPage() {
                   flexShrink: 0,
                 }}
               >
-                <ShieldCheck size={30} color="#3730a3" />
+                <MessageCircle size={30} color="#3730a3" />
               </div>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 <h3 style={{ fontSize: 18, fontWeight: 700, color: '#003366', margin: '0 0 8px 0', lineHeight: 1.3 }}>
-                  {t('home.services_eligibility_title', t('home.card_eligibility_title', 'Check Eligibility'))}
+                  {t('home.card_chat_title', 'Chat with AI Assistant')}
                 </h3>
                 <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.5 }}>
-                  {t('home.services_eligibility_desc', t('home.card_eligibility_desc', 'Find schemes you may be eligible for'))}
+                  {t('home.card_chat_desc', 'Get personalized scheme recommendations through AI.')}
                 </p>
               </div>
             </div>
@@ -317,10 +321,10 @@ export default function PortalOverviewPage() {
               </div>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 <h3 style={{ fontSize: 18, fontWeight: 700, color: '#003366', margin: '0 0 8px 0', lineHeight: 1.3 }}>
-                  {t('home.services_emi_title', t('home.card_emi_title', 'Calculate EMI'))}
+                  {t('home.card_emi_title', 'Calculate EMI')}
                 </h3>
                 <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.5 }}>
-                  {t('home.services_emi_desc', t('home.card_emi_desc', 'Estimate your monthly repayment'))}
+                  {t('home.card_emi_desc', 'Estimate your monthly repayment')}
                 </p>
               </div>
             </div>
@@ -362,10 +366,55 @@ export default function PortalOverviewPage() {
               </div>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 <h3 style={{ fontSize: 18, fontWeight: 700, color: '#003366', margin: '0 0 8px 0', lineHeight: 1.3 }}>
-                  {t('home.services_partner_title', t('home.card_partner_title', 'Find a Partner'))}
+                  {t('home.card_partner_title', 'Find a Partner')}
                 </h3>
                 <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.5 }}>
-                  {t('home.services_partner_desc', t('home.card_partner_desc', 'Locate nearby channel partners'))}
+                  {t('home.card_partner_desc', 'Locate nearby channel partners')}
+                </p>
+              </div>
+            </div>
+          </Link>
+
+          {/* Card 5: Find a Scheme */}
+          <Link href="/find-scheme" style={{ textDecoration: 'none' }} className="action-card-link">
+            <div
+              className="action-card-inner"
+              style={{
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: 12,
+                padding: '32px 22px 28px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                gap: 16,
+                boxShadow: '0 2px 8px rgba(0, 30, 64, 0.04)',
+                height: '100%',
+                transition: 'all 200ms ease',
+              }}
+            >
+              <div
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: '50%',
+                  background: '#f0f9ff',
+                  border: '1px solid #bae6fd',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Compass size={30} color="#0284c7" />
+              </div>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#003366', margin: '0 0 8px 0', lineHeight: 1.3 }}>
+                  {t('home.card_find_title', 'Find a Scheme')}
+                </h3>
+                <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.5 }}>
+                  {t('home.card_find_desc', 'Answer a few questions to find schemes that may suit you.')}
                 </p>
               </div>
             </div>
@@ -744,8 +793,266 @@ export default function PortalOverviewPage() {
         </div>
       </section>
 
-      {/* ── 5. NEED HELP / AI ASSISTANT SECTION ────────────────────────── */}
-      <section style={{ padding: '8px 24px 60px', width: '100%' }}>
+      {/* ── 5. ABOUT PRADARSHAKAI ─────────────────────────────────────── */}
+      <section
+        className="home-about-section"
+        style={{
+          background: '#ffffff',
+          borderTop: '1px solid #e2e8f0',
+          borderBottom: '1px solid #e2e8f0',
+          padding: '56px 24px 60px',
+          width: '100%',
+        }}
+      >
+        <div style={{ maxWidth: 1040, margin: '0 auto', textAlign: 'center' }}>
+          {/* Header */}
+          <div style={{ marginBottom: 28 }}>
+            <h2
+              style={{
+                fontSize: 'clamp(22px, 2.6vw, 30px)',
+                fontWeight: 800,
+                color: '#003366',
+                margin: '0 0 10px 0',
+                letterSpacing: '-0.015em',
+              }}
+            >
+              {t('home.about_title', 'About PradarshakAI')}
+            </h2>
+            <p
+              style={{
+                fontSize: 'clamp(14px, 1.5vw, 16px)',
+                color: '#64748b',
+                margin: 0,
+                maxWidth: 720,
+                marginLeft: 'auto',
+                marginRight: 'auto',
+                lineHeight: 1.55,
+              }}
+            >
+              {t(
+                'home.about_subtitle',
+                'PradarshakAI is a student-built initiative designed to make government financial assistance easier to discover, understand, and navigate.'
+              )}
+            </p>
+          </div>
+
+          {/* Main Explanatory Paragraph */}
+          <div
+            style={{
+              maxWidth: 860,
+              margin: '0 auto 28px',
+              padding: '0 12px',
+            }}
+          >
+            <p
+              style={{
+                fontSize: 'clamp(14.5px, 1.1vw, 15.5px)',
+                color: '#334155',
+                lineHeight: 1.75,
+                margin: '0 0 20px 0',
+              }}
+            >
+              {t(
+                'home.about_desc',
+                'PradarshakAI is developed by a team of undergraduate students from Pune Institute of Computer Technology (PICT), Pune, with a shared goal of making government financial assistance easier for citizens to discover and understand. We built PradarshakAI to help people navigate the large and often complex landscape of concessional loan and financial-assistance schemes through personalized AI-based recommendations, multilingual interaction, voice assistance, and channel-partner discovery.'
+              )}
+            </p>
+
+            {/* Mission Statement */}
+            <div
+              style={{
+                display: 'inline-block',
+                background: '#f8fafc',
+                borderLeft: '3px solid #003366',
+                borderRadius: '0 8px 8px 0',
+                padding: '12px 20px',
+                textAlign: 'left',
+                maxWidth: 720,
+              }}
+            >
+              <p
+                style={{
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: '#003366',
+                  margin: 0,
+                  lineHeight: 1.55,
+                }}
+              >
+                {t(
+                  'home.about_mission',
+                  'Our aim is simple: help citizens find the right scheme, understand their options, and take the next step with confidence.'
+                )}
+              </p>
+            </div>
+          </div>
+
+          {/* Three Supporting Highlights */}
+          <div
+            className="about-highlights-grid"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+              gap: 20,
+              marginTop: 36,
+              textAlign: 'center',
+            }}
+          >
+            {/* Highlight 1: Student-Built */}
+            <div
+              className="about-highlight-card"
+              style={{
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: 12,
+                padding: '24px 20px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                gap: 10,
+                boxShadow: '0 2px 6px rgba(0, 30, 64, 0.02)',
+                transition: 'all 180ms ease',
+              }}
+            >
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: '50%',
+                  background: '#eff6ff',
+                  border: '1px solid #dbeafe',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#003366',
+                  flexShrink: 0,
+                }}
+              >
+                <GraduationCap size={22} />
+              </div>
+              <h4
+                style={{
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: '#003366',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  margin: 0,
+                }}
+              >
+                {t('home.about_h1_title', 'Student-Built')}
+              </h4>
+              <p style={{ fontSize: 13.5, color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                {t('home.about_h1_desc', 'Developed by undergraduate students from PICT, Pune.')}
+              </p>
+            </div>
+
+            {/* Highlight 2: Citizen-Centric */}
+            <div
+              className="about-highlight-card"
+              style={{
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: 12,
+                padding: '24px 20px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                gap: 10,
+                boxShadow: '0 2px 6px rgba(0, 30, 64, 0.02)',
+                transition: 'all 180ms ease',
+              }}
+            >
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: '50%',
+                  background: '#eff6ff',
+                  border: '1px solid #dbeafe',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#003366',
+                  flexShrink: 0,
+                }}
+              >
+                <Users size={22} />
+              </div>
+              <h4
+                style={{
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: '#003366',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  margin: 0,
+                }}
+              >
+                {t('home.about_h2_title', 'Citizen-Centric')}
+              </h4>
+              <p style={{ fontSize: 13.5, color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                {t('home.about_h2_desc', 'Designed to simplify scheme discovery through clear, accessible interactions.')}
+              </p>
+            </div>
+
+            {/* Highlight 3: Technology-Enabled */}
+            <div
+              className="about-highlight-card"
+              style={{
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: 12,
+                padding: '24px 20px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                gap: 10,
+                boxShadow: '0 2px 6px rgba(0, 30, 64, 0.02)',
+                transition: 'all 180ms ease',
+              }}
+            >
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: '50%',
+                  background: '#eff6ff',
+                  border: '1px solid #dbeafe',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#003366',
+                  flexShrink: 0,
+                }}
+              >
+                <Sparkles size={22} />
+              </div>
+              <h4
+                style={{
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: '#003366',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  margin: 0,
+                }}
+              >
+                {t('home.about_h3_title', 'Technology-Enabled')}
+              </h4>
+              <p style={{ fontSize: 13.5, color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                {t('home.about_h3_desc', 'Combines AI, multilingual interaction, voice assistance, and partner discovery.')}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 6. NEED HELP / AI ASSISTANT SECTION ────────────────────────── */}
+      <section style={{ padding: '48px 24px 60px', width: '100%' }}>
         <div
           style={{
             maxWidth: 1200,
@@ -800,6 +1107,26 @@ export default function PortalOverviewPage() {
       <Footer />
 
       <style jsx>{`
+        :global(.action-cards-grid) {
+          display: flex !important;
+          flex-wrap: wrap !important;
+          justify-content: center !important;
+          gap: 24px !important;
+          width: 100% !important;
+        }
+
+        :global(.action-card-link) {
+          display: flex !important;
+          flex-direction: column !important;
+          transition: transform 200ms ease;
+        }
+
+        :global(.action-card-inner) {
+          flex: 1 !important;
+          width: 100% !important;
+          min-height: 220px;
+        }
+
         :global(.action-card-inner:hover) {
           transform: translateY(-4px);
           box-shadow: 0 8px 24px rgba(0, 51, 102, 0.08) !important;
@@ -830,33 +1157,50 @@ export default function PortalOverviewPage() {
           box-shadow: 0 6px 18px rgba(245, 130, 32, 0.45) !important;
         }
 
+        :global(.about-highlight-card:hover) {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(0, 51, 102, 0.06) !important;
+          border-color: #cbd5e1 !important;
+        }
+
         @media (min-width: 1024px) {
-          :global(.action-cards-grid) {
-            grid-template-columns: repeat(4, 1fr) !important;
+          :global(.action-card-link) {
+            flex: 0 0 calc((100% - 72px) / 4) !important;
+            max-width: calc((100% - 72px) / 4) !important;
+            min-width: 220px !important;
           }
           :global(.featured-schemes-grid) {
             grid-template-columns: repeat(3, 1fr) !important;
           }
           :global(.how-steps-grid) {
+            grid-template-columns: repeat(3, 1fr) !important;
+          }
+          :global(.about-highlights-grid) {
             grid-template-columns: repeat(3, 1fr) !important;
           }
         }
 
         @media (min-width: 640px) and (max-width: 1023px) {
-          :global(.action-cards-grid) {
-            grid-template-columns: repeat(2, 1fr) !important;
+          :global(.action-card-link) {
+            flex: 0 0 calc((100% - 24px) / 2) !important;
+            max-width: calc((100% - 24px) / 2) !important;
           }
           :global(.featured-schemes-grid) {
             grid-template-columns: repeat(2, 1fr) !important;
           }
           :global(.how-steps-grid) {
             grid-template-columns: repeat(2, 1fr) !important;
+          }
+          :global(.about-highlights-grid) {
+            grid-template-columns: repeat(3, 1fr) !important;
           }
         }
 
         @media (max-width: 639px) {
-          :global(.action-cards-grid) {
-            grid-template-columns: 1fr !important;
+          :global(.action-card-link) {
+            flex: 1 1 100% !important;
+            max-width: 100% !important;
+            width: 100% !important;
           }
           :global(.featured-schemes-grid) {
             grid-template-columns: 1fr !important;
@@ -864,9 +1208,13 @@ export default function PortalOverviewPage() {
           :global(.how-steps-grid) {
             grid-template-columns: 1fr !important;
           }
+          :global(.about-highlights-grid) {
+            grid-template-columns: 1fr !important;
+          }
           :global(.home-services-section),
           :global(.home-featured-section),
-          :global(.home-how-section) {
+          :global(.home-how-section),
+          :global(.home-about-section) {
             padding-left: 16px !important;
             padding-right: 16px !important;
           }
