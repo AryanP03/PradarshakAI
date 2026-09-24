@@ -286,18 +286,30 @@ function NavBarContent() {
           >
             <div
               style={{
-                width: 34,
-                height: 38,
+                width: 64,
+                height: 44,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0,
                 background: '#ffffff',
-                borderRadius: 4,
-                padding: '2px',
+                borderRadius: 8,
+                padding: '2px 4px',
+                overflow: 'hidden',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.25)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
               }}
             >
-              <EmblemOfIndia size={30} />
+              <img
+                src="/Pradarshak_logo_full.jpeg"
+                alt="PradarshakAI Logo"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  display: 'block',
+                }}
+              />
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0 }}>
@@ -653,8 +665,17 @@ function NavBarContent() {
             {/* Drawer Header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 12, borderBottom: '1px solid rgba(255, 255, 255, 0.12)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 30, height: 34, background: '#ffffff', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2px' }}>
-                  <EmblemOfIndia size={26} />
+                <div style={{ width: 56, height: 38, background: '#ffffff', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2px 4px', overflow: 'hidden', boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)' }}>
+                  <img
+                    src="/Pradarshak_logo_full.jpeg"
+                    alt="PradarshakAI Logo"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <span style={{ fontSize: 15, fontWeight: 800, color: '#ffffff' }}>PradarshakAI</span>

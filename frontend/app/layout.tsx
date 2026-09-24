@@ -16,12 +16,13 @@ export const metadata: Metadata = {
   applicationName: 'PradarshakAI',
   icons: {
     icon: [
-      { url: "/emblem-gold.png?v=2", href: "/emblem-gold.png?v=2" },
+      { url: "/Pradarshak_logo_only.jpeg?v=3", href: "/Pradarshak_logo_only.jpeg?v=3" },
+      { url: "/favicon.ico?v=3", href: "/favicon.ico?v=3" },
     ],
     apple: [
-      { url: "/emblem-gold.png?v=2", href: "/emblem-gold.png?v=2" },
+      { url: "/Pradarshak_logo_only.jpeg?v=3", href: "/Pradarshak_logo_only.jpeg?v=3" },
     ],
-    shortcut: ['/emblem-gold.png?v=2'],
+    shortcut: ['/Pradarshak_logo_only.jpeg?v=3'],
   },
   openGraph: {
     title: "PradarshakAI - Ministry of Social Justice & Empowerment",
@@ -32,11 +33,11 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/og-image.png',
+        url: '/Pradarshak_logo_only.jpeg',
         width: 600,
         height: 600,
-        type: 'image/png',
-        alt: 'PradarshakAI Golden Lion Emblem',
+        type: 'image/jpeg',
+        alt: 'PradarshakAI Logo',
       },
     ],
   },
@@ -44,7 +45,7 @@ export const metadata: Metadata = {
     card: 'summary',
     title: "PradarshakAI - Ministry of Social Justice & Empowerment",
     description: 'Find the right government loan scheme, calculate your EMI, and locate the nearest eligible Channel Partner.',
-    images: ['/og-image.png'],
+    images: ['/Pradarshak_logo_only.jpeg'],
   },
 };
 

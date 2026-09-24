@@ -38,18 +38,28 @@ export default function Footer() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <div
                 style={{
-                  width: 40,
+                  width: 44,
                   height: 44,
-                  borderRadius: 4,
+                  borderRadius: 8,
                   background: '#ffffff',
                   border: '1px solid rgba(255, 255, 255, 0.4)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  padding: '2px',
+                  padding: '3px',
+                  overflow: 'hidden',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.25)',
                 }}
               >
-                <EmblemOfIndia size={34} />
+                <img
+                  src="/Pradarshak_logo_only.jpeg"
+                  alt="PradarshakAI Logo"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                  }}
+                />
               </div>
               <span style={{ fontSize: 17, fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>
                 {t('brand.name', 'PradarshakAI')}

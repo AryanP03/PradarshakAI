@@ -23,7 +23,6 @@ import {
 import {
   Send,
   Sparkles,
-  Bot,
   User,
   Info,
   Briefcase,
@@ -2323,21 +2322,24 @@ export default function ChatInterface({
             ))}
 
             {loading && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24, width: '100%' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 24, width: '100%' }}>
                 <div
                   style={{
                     width: 38,
                     height: 38,
-                    borderRadius: 12,
-                    background: 'linear-gradient(135deg, #e87722, #d36513)',
-                    color: '#ffffff',
+                    borderRadius: 8,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0,
+                    background: '#ffffff',
+                    border: '1.5px solid #cbd5e1',
+                    color: '#001e40',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
+                    padding: 3,
                   }}
                 >
-                  <Bot size={18} />
+                  <EmblemOfIndia size={28} />
                 </div>
                 <TypingIndicator />
               </div>

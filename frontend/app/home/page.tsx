@@ -793,259 +793,368 @@ export default function PortalOverviewPage() {
         </div>
       </section>
 
-      {/* ── 5. ABOUT PRADARSHAKAI ─────────────────────────────────────── */}
+      {/* ── 5. ABOUT PRADARSHAKAI (2-Column Aesthetic Layout) ───────────── */}
       <section
         className="home-about-section"
         style={{
           background: '#ffffff',
           borderTop: '1px solid #e2e8f0',
           borderBottom: '1px solid #e2e8f0',
-          padding: '56px 24px 60px',
+          padding: '64px 24px 68px',
           width: '100%',
         }}
       >
-        <div style={{ maxWidth: 1040, margin: '0 auto', textAlign: 'center' }}>
-          {/* Header */}
-          <div style={{ marginBottom: 28 }}>
-            <h2
-              style={{
-                fontSize: 'clamp(22px, 2.6vw, 30px)',
-                fontWeight: 800,
-                color: '#003366',
-                margin: '0 0 10px 0',
-                letterSpacing: '-0.015em',
-              }}
-            >
-              {t('home.about_title', 'About PradarshakAI')}
-            </h2>
-            <p
-              style={{
-                fontSize: 'clamp(14px, 1.5vw, 16px)',
-                color: '#64748b',
-                margin: 0,
-                maxWidth: 720,
-                marginLeft: 'auto',
-                marginRight: 'auto',
-                lineHeight: 1.55,
-              }}
-            >
-              {t(
-                'home.about_subtitle',
-                'PradarshakAI is a student-built initiative designed to make government financial assistance easier to discover, understand, and navigate.'
-              )}
-            </p>
-          </div>
-
-          {/* Main Explanatory Paragraph */}
+        <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
           <div
+            className="about-split-layout"
             style={{
-              maxWidth: 860,
-              margin: '0 auto 28px',
-              padding: '0 12px',
+              display: 'grid',
+              gridTemplateColumns: '1fr',
+              gap: 40,
+              alignItems: 'center',
             }}
           >
-            <p
-              style={{
-                fontSize: 'clamp(14.5px, 1.1vw, 15.5px)',
-                color: '#334155',
-                lineHeight: 1.75,
-                margin: '0 0 20px 0',
-              }}
-            >
-              {t(
-                'home.about_desc',
-                'PradarshakAI is developed by a team of undergraduate students from Pune Institute of Computer Technology (PICT), Pune, with a shared goal of making government financial assistance easier for citizens to discover and understand. We built PradarshakAI to help people navigate the large and often complex landscape of concessional loan and financial-assistance schemes through personalized AI-based recommendations, multilingual interaction, voice assistance, and channel-partner discovery.'
-              )}
-            </p>
+            {/* ── LEFT COLUMN: Text Content & Highlights ── */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <div>
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: '#003366',
+                    background: '#eff6ff',
+                    border: '1px solid #dbeafe',
+                    borderRadius: 999,
+                    padding: '4px 12px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    marginBottom: 12,
+                  }}
+                >
+                  <Sparkles size={13} color="#003366" />
+                  <span>About The Initiative</span>
+                </div>
+                <h2
+                  style={{
+                    fontSize: 'clamp(24px, 2.8vw, 34px)',
+                    fontWeight: 800,
+                    color: '#003366',
+                    margin: '0 0 12px 0',
+                    letterSpacing: '-0.02em',
+                    lineHeight: 1.25,
+                  }}
+                >
+                  {t('home.about_title', 'About PradarshakAI')}
+                </h2>
+                <p
+                  style={{
+                    fontSize: 'clamp(14.5px, 1.4vw, 16px)',
+                    color: '#0b5a8f',
+                    margin: 0,
+                    lineHeight: 1.55,
+                    fontWeight: 500,
+                  }}
+                >
+                  {t(
+                    'home.about_subtitle',
+                    'PradarshakAI is a student-built initiative designed to make government financial assistance easier to discover, understand, and navigate.'
+                  )}
+                </p>
+              </div>
 
-            {/* Mission Statement */}
-            <div
-              style={{
-                display: 'inline-block',
-                background: '#f8fafc',
-                borderLeft: '3px solid #003366',
-                borderRadius: '0 8px 8px 0',
-                padding: '12px 20px',
-                textAlign: 'left',
-                maxWidth: 720,
-              }}
-            >
+              {/* Main Explanatory Paragraph */}
               <p
                 style={{
-                  fontSize: 14,
-                  fontWeight: 600,
-                  color: '#003366',
+                  fontSize: 'clamp(14px, 1.1vw, 15px)',
+                  color: '#334155',
+                  lineHeight: 1.75,
                   margin: 0,
-                  lineHeight: 1.55,
                 }}
               >
                 {t(
-                  'home.about_mission',
-                  'Our aim is simple: help citizens find the right scheme, understand their options, and take the next step with confidence.'
+                  'home.about_desc',
+                  'PradarshakAI is developed by a team of undergraduate students from Pune Institute of Computer Technology (PICT), Pune, with a shared goal of making government financial assistance easier for citizens to discover and understand. We built PradarshakAI to help people navigate the large and often complex landscape of concessional loan and financial-assistance schemes through personalized AI-based recommendations, multilingual interaction, voice assistance, and channel-partner discovery.'
                 )}
               </p>
-            </div>
-          </div>
 
-          {/* Three Supporting Highlights */}
-          <div
-            className="about-highlights-grid"
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-              gap: 20,
-              marginTop: 36,
-              textAlign: 'center',
-            }}
-          >
-            {/* Highlight 1: Student-Built */}
+              {/* Mission Statement Callout */}
+              <div
+                style={{
+                  background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)',
+                  borderLeft: '4px solid #003366',
+                  borderRadius: '0 10px 10px 0',
+                  padding: '14px 20px',
+                  boxShadow: '0 2px 6px rgba(0, 30, 64, 0.03)',
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: '#003366',
+                    margin: 0,
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {t(
+                    'home.about_mission',
+                    'Our aim is simple: help citizens find the right scheme, understand their options, and take the next step with confidence.'
+                  )}
+                </p>
+              </div>
+
+              {/* Three Supporting Highlights in Grid */}
+              <div
+                className="about-highlights-grid"
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: 14,
+                  marginTop: 12,
+                }}
+              >
+                {/* Highlight 1: Student-Built */}
+                <div
+                  className="about-highlight-card"
+                  style={{
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: 10,
+                    padding: '16px 14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 8,
+                    boxShadow: '0 1px 4px rgba(0, 30, 64, 0.02)',
+                    transition: 'all 180ms ease',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: '50%',
+                        background: '#eff6ff',
+                        border: '1px solid #dbeafe',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#003366',
+                        flexShrink: 0,
+                      }}
+                    >
+                      <GraduationCap size={18} />
+                    </div>
+                    <h4
+                      style={{
+                        fontSize: 12.5,
+                        fontWeight: 700,
+                        color: '#003366',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
+                        margin: 0,
+                      }}
+                    >
+                      {t('home.about_h1_title', 'Student-Built')}
+                    </h4>
+                  </div>
+                  <p style={{ fontSize: 13, color: '#64748b', margin: 0, lineHeight: 1.45 }}>
+                    {t('home.about_h1_desc', 'Developed by undergraduate students from PICT, Pune.')}
+                  </p>
+                </div>
+
+                {/* Highlight 2: Citizen-Centric */}
+                <div
+                  className="about-highlight-card"
+                  style={{
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: 10,
+                    padding: '16px 14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 8,
+                    boxShadow: '0 1px 4px rgba(0, 30, 64, 0.02)',
+                    transition: 'all 180ms ease',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: '50%',
+                        background: '#eff6ff',
+                        border: '1px solid #dbeafe',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#003366',
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Users size={18} />
+                    </div>
+                    <h4
+                      style={{
+                        fontSize: 12.5,
+                        fontWeight: 700,
+                        color: '#003366',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
+                        margin: 0,
+                      }}
+                    >
+                      {t('home.about_h2_title', 'Citizen-Centric')}
+                    </h4>
+                  </div>
+                  <p style={{ fontSize: 13, color: '#64748b', margin: 0, lineHeight: 1.45 }}>
+                    {t('home.about_h2_desc', 'Designed to simplify scheme discovery through clear, accessible interactions.')}
+                  </p>
+                </div>
+
+                {/* Highlight 3: Technology-Enabled */}
+                <div
+                  className="about-highlight-card"
+                  style={{
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: 10,
+                    padding: '16px 14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 8,
+                    boxShadow: '0 1px 4px rgba(0, 30, 64, 0.02)',
+                    transition: 'all 180ms ease',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: '50%',
+                        background: '#eff6ff',
+                        border: '1px solid #dbeafe',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#003366',
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Sparkles size={18} />
+                    </div>
+                    <h4
+                      style={{
+                        fontSize: 12.5,
+                        fontWeight: 700,
+                        color: '#003366',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
+                        margin: 0,
+                      }}
+                    >
+                      {t('home.about_h3_title', 'Technology-Enabled')}
+                    </h4>
+                  </div>
+                  <p style={{ fontSize: 13, color: '#64748b', margin: 0, lineHeight: 1.45 }}>
+                    {t('home.about_h3_desc', 'Combines AI, multilingual interaction, voice assistance, and partner discovery.')}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* ── RIGHT COLUMN: Pradarshak Full Logo Showcase ── */}
             <div
-              className="about-highlight-card"
+              className="about-logo-column"
               style={{
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: 12,
-                padding: '24px 20px',
                 display: 'flex',
-                flexDirection: 'column',
+                justifyContent: 'center',
                 alignItems: 'center',
-                textAlign: 'center',
-                gap: 10,
-                boxShadow: '0 2px 6px rgba(0, 30, 64, 0.02)',
-                transition: 'all 180ms ease',
               }}
             >
               <div
                 style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: '50%',
-                  background: '#eff6ff',
-                  border: '1px solid #dbeafe',
+                  width: '100%',
+                  maxWidth: 480,
+                  background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 20,
+                  padding: '24px 20px',
+                  boxShadow: '0 16px 36px rgba(0, 30, 64, 0.06), 0 2px 8px rgba(0, 0, 0, 0.03)',
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#003366',
-                  flexShrink: 0,
+                  gap: 16,
+                  position: 'relative',
+                  overflow: 'hidden',
                 }}
               >
-                <GraduationCap size={22} />
-              </div>
-              <h4
-                style={{
-                  fontSize: 13,
-                  fontWeight: 700,
-                  color: '#003366',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  margin: 0,
-                }}
-              >
-                {t('home.about_h1_title', 'Student-Built')}
-              </h4>
-              <p style={{ fontSize: 13.5, color: '#64748b', margin: 0, lineHeight: 1.5 }}>
-                {t('home.about_h1_desc', 'Developed by undergraduate students from PICT, Pune.')}
-              </p>
-            </div>
+                {/* Decorative background glow behind logo */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: -50,
+                    right: -50,
+                    width: 160,
+                    height: 160,
+                    borderRadius: '50%',
+                    background: 'radial-gradient(circle, rgba(0, 51, 102, 0.08) 0%, transparent 70%)',
+                    pointerEvents: 'none',
+                  }}
+                />
 
-            {/* Highlight 2: Citizen-Centric */}
-            <div
-              className="about-highlight-card"
-              style={{
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: 12,
-                padding: '24px 20px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                textAlign: 'center',
-                gap: 10,
-                boxShadow: '0 2px 6px rgba(0, 30, 64, 0.02)',
-                transition: 'all 180ms ease',
-              }}
-            >
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: '50%',
-                  background: '#eff6ff',
-                  border: '1px solid #dbeafe',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#003366',
-                  flexShrink: 0,
-                }}
-              >
-                <Users size={22} />
-              </div>
-              <h4
-                style={{
-                  fontSize: 13,
-                  fontWeight: 700,
-                  color: '#003366',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  margin: 0,
-                }}
-              >
-                {t('home.about_h2_title', 'Citizen-Centric')}
-              </h4>
-              <p style={{ fontSize: 13.5, color: '#64748b', margin: 0, lineHeight: 1.5 }}>
-                {t('home.about_h2_desc', 'Designed to simplify scheme discovery through clear, accessible interactions.')}
-              </p>
-            </div>
+                <div
+                  style={{
+                    width: '100%',
+                    borderRadius: 14,
+                    overflow: 'hidden',
+                    background: '#ffffff',
+                    border: '1px solid #edf2f7',
+                    padding: '16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.02)',
+                  }}
+                >
+                  <img
+                    src="/Pradarshak_logo_full.jpeg"
+                    alt="PradarshakAI Full Logo"
+                    style={{
+                      width: '100%',
+                      height: 'auto',
+                      maxHeight: 280,
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
+                </div>
 
-            {/* Highlight 3: Technology-Enabled */}
-            <div
-              className="about-highlight-card"
-              style={{
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: 12,
-                padding: '24px 20px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                textAlign: 'center',
-                gap: 10,
-                boxShadow: '0 2px 6px rgba(0, 30, 64, 0.02)',
-                transition: 'all 180ms ease',
-              }}
-            >
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: '50%',
-                  background: '#eff6ff',
-                  border: '1px solid #dbeafe',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#003366',
-                  flexShrink: 0,
-                }}
-              >
-                <Sparkles size={22} />
+                {/* Subtitle Badge below full logo */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: '#64748b',
+                    padding: '6px 14px',
+                    background: '#ffffff',
+                    borderRadius: 999,
+                    border: '1px solid #e2e8f0',
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)',
+                  }}
+                >
+                  <ShieldCheck size={14} color="#003366" />
+                  <span>Student Initiative • PICT, Pune</span>
+                </div>
               </div>
-              <h4
-                style={{
-                  fontSize: 13,
-                  fontWeight: 700,
-                  color: '#003366',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  margin: 0,
-                }}
-              >
-                {t('home.about_h3_title', 'Technology-Enabled')}
-              </h4>
-              <p style={{ fontSize: 13.5, color: '#64748b', margin: 0, lineHeight: 1.5 }}>
-                {t('home.about_h3_desc', 'Combines AI, multilingual interaction, voice assistance, and partner discovery.')}
-              </p>
             </div>
           </div>
         </div>
@@ -1177,6 +1286,10 @@ export default function PortalOverviewPage() {
           }
           :global(.about-highlights-grid) {
             grid-template-columns: repeat(3, 1fr) !important;
+          }
+          :global(.about-split-layout) {
+            grid-template-columns: 1.15fr 0.85fr !important;
+            gap: 48px !important;
           }
         }
 

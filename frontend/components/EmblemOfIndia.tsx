@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 
 interface EmblemProps {
   className?: string;
@@ -12,29 +11,33 @@ interface EmblemProps {
 export default function EmblemOfIndia({
   className = '',
   size = 36,
-  invert = false,
 }: EmblemProps) {
   return (
     <div
-      className={`inline-flex items-center justify-center flex-shrink-0 ${className}`}
+      className={`inline-flex items-center justify-center flex-shrink-0 overflow-hidden ${className}`}
       style={{
         width: size,
         height: size,
         position: 'relative',
+        background: '#ffffff',
+        borderRadius: Math.max(4, Math.round(size * 0.16)),
+        padding: Math.max(1, Math.round(size * 0.05)),
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
       }}
     >
       <img
-        src="/emblem-india.png"
-        alt="Government of India Emblem"
+        src="/Pradarshak_logo_only.jpeg"
+        alt="PradarshakAI Logo"
         width={size}
         height={size}
         style={{
           width: '100%',
           height: '100%',
           objectFit: 'contain',
-          filter: invert ? 'brightness(0) invert(1)' : 'none',
         }}
       />
     </div>
   );
 }
+
+export { EmblemOfIndia as PradarshakLogo };
