@@ -13,7 +13,7 @@ interface LanguageContextType {
   isAuto: boolean;
   setLang: (mode: LanguageMode) => void;
   updateDetectedLang: (detectedCode: string, probability?: number | null) => void;
-  t: (key: string, fallback?: string) => string;
+  t: (key: string, fallback?: string, vars?: Record<string, string | number>) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType>({
@@ -23,7 +23,15 @@ const LanguageContext = createContext<LanguageContextType>({
   isAuto: true,
   setLang: () => {},
   updateDetectedLang: () => {},
-  t: (key: string, fallback?: string) => fallback || key,
+  t: (key: string, fallback?: string, vars?: Record<string, string | number>) => {
+    let res = fallback || key;
+    if (vars) {
+      Object.entries(vars).forEach(([k, v]) => {
+        res = res.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
+      });
+    }
+    return res;
+  },
 });
 
 function getLanguageCookie(name: string): string | null {
@@ -122,11 +130,15 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
-  function t(key: string, fallback?: string): string {
+  function t(key: string, fallback?: string, vars?: Record<string, string | number>): string {
     const table = TRANSLATIONS[lang] || TRANSLATIONS.en;
-    if (table[key]) return table[key];
-    if (TRANSLATIONS.en[key]) return TRANSLATIONS.en[key];
-    return fallback || key;
+    let res = table[key] || TRANSLATIONS.en[key] || fallback || key;
+    if (vars) {
+      Object.entries(vars).forEach(([k, v]) => {
+        res = res.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
+      });
+    }
+    return res;
   }
 
   return (

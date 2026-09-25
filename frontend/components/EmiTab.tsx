@@ -26,6 +26,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { getLocalizedSchemeName } from '@/lib/translations';
 import { fetchSchemes, fetchSchemeById, fetchTTS, Scheme } from '@/lib/api';
 
 export type BorrowerMode = 'individual' | 'msme';
@@ -469,10 +470,10 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <span style={{ fontSize: 13, fontWeight: 800, color: '#0b1f3a' }}>
-            Borrower Classification & Legal Structure
+            {t('emi.borrower_classification', 'Borrower Classification & Legal Structure')}
           </span>
           <span style={{ fontSize: 12, color: '#64748b' }}>
-            Determines promoter margin equity (5% vs 10%) and CGTMSE credit guarantee qualification.
+            {t('emi.borrower_classification_desc', 'Determines promoter margin equity (5% vs 10%) and CGTMSE credit guarantee qualification.')}
           </span>
         </div>
 
@@ -499,7 +500,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
             }}
           >
             <User size={14} color={borrowerMode === 'individual' ? '#e87722' : '#64748b'} />
-            <span>Individual Entrepreneur (5% Margin)</span>
+            <span>{t('emi.individual_borrower', 'Individual Entrepreneur (5% Margin)')}</span>
           </button>
 
           <button
@@ -521,7 +522,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
             }}
           >
             <Building2 size={14} color={borrowerMode === 'msme' ? '#fbbf24' : '#64748b'} />
-            <span>Registered MSME / Enterprise (10% Margin)</span>
+            <span>{t('emi.msme_borrower', 'Registered MSME / Enterprise (10% Margin)')}</span>
           </button>
         </div>
       </div>
@@ -543,10 +544,10 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
           <ShieldCheck size={22} color="#059669" style={{ flexShrink: 0 }} />
           <div>
             <div style={{ fontSize: 12, fontWeight: 800, color: '#065f46', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              {calculation.cgtmseBadge}
+              {t('emi.cgtmse_badge', 'CGTMSE Eligible: Collateral-Free Credit Guarantee (up to ₹5 Crore)')}
             </div>
             <p style={{ fontSize: 12.5, color: '#047857', margin: 0, lineHeight: 1.4 }}>
-              Registered MSME units are eligible for collateral-free sanction under CGTMSE. No third-party guarantor or landed property mortgage required for loans up to ₹50 Lakh.
+              {t('emi.cgtmse_desc', 'Registered MSME units are eligible for collateral-free sanction under CGTMSE. No third-party guarantor or landed property mortgage required for loans up to ₹50 Lakh.')}
             </p>
           </div>
         </div>
@@ -591,17 +592,17 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
                   letterSpacing: '0.06em',
                 }}
               >
-                Selected Scheme Active
+                {t('emi.selected_scheme_active', 'Selected Scheme Active')}
               </span>
             </div>
             <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>
-              Moratorium & Loan Repayment Calculator
+              {t('emi.title', 'Moratorium & Loan Repayment Calculator')}
             </span>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
             <h2 style={{ fontSize: 22, fontWeight: 800, margin: 0, color: '#ffffff' }}>
-              {selectedScheme.name}
+              {getLocalizedSchemeName(selectedScheme.name, lang)}
             </h2>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span
@@ -614,7 +615,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
                   fontWeight: 700,
                 }}
               >
-                {selectedScheme.interest_rate ?? rate}% p.a.
+                {Number(selectedScheme.interest_rate ?? selectedScheme.interest_rate_min ?? rate)}% {t('emi.p_a', 'p.a.')}
               </span>
               <button
                 onClick={() => {
@@ -631,7 +632,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
                   cursor: 'pointer',
                 }}
               >
-                Clear Selection
+                {t('emi.clear_selection', 'Clear Selection')}
               </button>
             </div>
           </div>
@@ -648,21 +649,21 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
             }}
           >
             <span>
-              <strong>Interest Rate:</strong> {selectedScheme.interest_rate ?? rate}% p.a.
+              <strong>{t('emi.interest_rate_label', 'Interest Rate:')}</strong> {Number(selectedScheme.interest_rate ?? selectedScheme.interest_rate_min ?? rate)}% {t('emi.p_a', 'p.a.')}
             </span>
             <span>•</span>
             <span>
-              <strong>Max Tenure:</strong> Up to {selectedScheme.tenure_months ?? tenure} months
+              <strong>{t('emi.max_tenure_label', 'Max Tenure:')}</strong> {t('emi.up_to_months', 'Up to {months} months').replace('{months}', String(selectedScheme.tenure_months ?? tenure))}
             </span>
             <span>•</span>
             <span>
-              <strong>Grace / Moratorium:</strong> {selectedScheme.moratorium_months ?? moratorium} months
+              <strong>{t('emi.grace_moratorium_label', 'Grace / Moratorium:')}</strong> {selectedScheme.moratorium_months ?? moratorium} {t('emi.months', 'months')}
             </span>
             {selectedScheme.max_loan_lakh && (
               <>
                 <span>•</span>
                 <span>
-                  <strong>Max Loan Ceiling:</strong> ₹{selectedScheme.max_loan_lakh} Lakhs
+                  <strong>{t('emi.max_loan_ceiling', 'Max Loan Ceiling:')}</strong> ₹{selectedScheme.max_loan_lakh} {t('emi.lakhs', 'Lakhs')}
                 </span>
               </>
             )}
@@ -673,7 +674,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
       {/* ── Scheme Presets Pills ───────────────────────────────────────────── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <span style={{ fontSize: 11, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-          Select Scheme or Preset:
+          {t('emi.select_preset', 'Select Scheme or Preset:')}
         </span>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           {PRESETS.map((p, i) => {
@@ -698,7 +699,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
                   transition: 'all 150ms ease',
                 }}
               >
-                <span>{p.name}</span>
+                <span>{getLocalizedSchemeName(p.name, lang)}</span>
                 <span
                   style={{
                     fontSize: 11,
@@ -709,7 +710,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
                     color: isSelected ? '#fbbf24' : '#64748b',
                   }}
                 >
-                  {p.rate}% p.a.
+                  {p.rate}% {t('emi.p_a', 'p.a.')}
                 </span>
               </button>
             );
@@ -719,6 +720,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
             .slice(0, 4)
             .map((s) => {
               const isSelected = selectedScheme?.id === s.id;
+              const displayRate = s.interest_rate ?? s.interest_rate_min ?? (s as any).rate ?? rate;
               return (
                 <button
                   key={s.id}
@@ -739,7 +741,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
                     transition: 'all 150ms ease',
                   }}
                 >
-                  <span>{s.name}</span>
+                  <span>{getLocalizedSchemeName(s.name, lang)}</span>
                   <span
                     style={{
                       fontSize: 11,
@@ -750,7 +752,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
                       color: isSelected ? '#fbbf24' : '#64748b',
                     }}
                   >
-                    {s.interest_rate}% p.a.
+                    {displayRate}% {t('emi.p_a', 'p.a.')}
                   </span>
                 </button>
               );
@@ -777,7 +779,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: 14 }}>
             <span style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>
-              Loan Parameters & Outlay
+              {t('emi.parameters_title', 'Loan Parameters & Outlay')}
             </span>
             <button
               onClick={() => applyPreset(PRESETS[0], 0)}
@@ -794,7 +796,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
               }}
             >
               <RotateCcw size={12} />
-              <span>Reset</span>
+              <span>{t('emi.reset', 'Reset')}</span>
             </button>
           </div>
 
@@ -803,7 +805,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <label style={{ fontSize: 13, fontWeight: 600, color: '#334155', display: 'flex', alignItems: 'center', gap: 6 }}>
                 <IndianRupee size={14} color="#0b1f3a" />
-                <span>Requested Loan Amount (NSFDC Share)</span>
+                <span>{t('emi.requested_amount', 'Requested Loan Amount (NSFDC Share)')}</span>
               </label>
               <span style={{ fontSize: 17, fontWeight: 800, color: '#0b1f3a' }}>
                 {formatINR(amount)}
@@ -829,9 +831,9 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
             />
 
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#94a3b8' }}>
-              <span>₹50,000 (Min)</span>
-              <span>₹1.4L (MCF)</span>
-              <span>{borrowerMode === 'msme' ? '₹50 Lakh (Max MSME)' : '₹25 Lakh (Max)'}</span>
+              <span>₹50,000 ({t('emi.min', 'Min')})</span>
+              <span>₹1.4L ({t('emi.mcf', 'MCF')})</span>
+              <span>{borrowerMode === 'msme' ? `₹50 ${t('emi.lakh', 'Lakh')} (${t('emi.max_msme', 'Max MSME')})` : `₹25 ${t('emi.lakh', 'Lakh')} (${t('emi.max', 'Max')})`}</span>
             </div>
           </div>
 
@@ -849,23 +851,23 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: '#475569', letterSpacing: '0.04em' }}>
-                Total Project Cost & Promoter Margin Breakdown
+                {t('emi.breakdown_title', 'Total Project Cost & Promoter Margin Breakdown')}
               </span>
               <span style={{ fontSize: 11, fontWeight: 800, color: '#0284c7' }}>
-                {calculation.loanFundingPercent}% / {calculation.promoterMarginPercent}% Split
+                {calculation.loanFundingPercent}% / {calculation.promoterMarginPercent}% {t('emi.split', 'Split')}
               </span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, textAlign: 'center' }}>
               <div style={{ background: '#ffffff', padding: '8px', borderRadius: 8, border: '1px solid #e2e8f0' }}>
-                <span style={{ fontSize: 10, color: '#64748b', display: 'block' }}>Total Project Cost</span>
+                <span style={{ fontSize: 10, color: '#64748b', display: 'block' }}>{t('emi.total_project_cost', 'Total Project Cost')}</span>
                 <strong style={{ fontSize: 12.5, color: '#0b1f3a' }}>{formatINR(calculation.totalProjectOutlay)}</strong>
               </div>
               <div style={{ background: '#eff6ff', padding: '8px', borderRadius: 8, border: '1px solid #bfdbfe' }}>
-                <span style={{ fontSize: 10, color: '#1e40af', display: 'block' }}>NSFDC Loan ({calculation.loanFundingPercent}%)</span>
+                <span style={{ fontSize: 10, color: '#1e40af', display: 'block' }}>{t('emi.nsfdc_loan', 'NSFDC Loan')} ({calculation.loanFundingPercent}%)</span>
                 <strong style={{ fontSize: 12.5, color: '#1e40af' }}>{formatINR(amount)}</strong>
               </div>
               <div style={{ background: '#fef3c7', padding: '8px', borderRadius: 8, border: '1px solid #fde68a' }}>
-                <span style={{ fontSize: 10, color: '#92400e', display: 'block' }}>Your Margin ({calculation.promoterMarginPercent}%)</span>
+                <span style={{ fontSize: 10, color: '#92400e', display: 'block' }}>{t('emi.your_margin', 'Your Margin')} ({calculation.promoterMarginPercent}%)</span>
                 <strong style={{ fontSize: 12.5, color: '#92400e' }}>{formatINR(calculation.promoterContribution)}</strong>
               </div>
             </div>
@@ -876,10 +878,10 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <label style={{ fontSize: 13, fontWeight: 600, color: '#334155', display: 'flex', alignItems: 'center', gap: 6 }}>
                 <Percent size={14} color="#0b1f3a" />
-                <span>Interest Rate (Concessional Subsidized)</span>
+                <span>{t('emi.concessional_rate', 'Interest Rate (Concessional Subsidized)')}</span>
               </label>
               <span style={{ fontSize: 16, fontWeight: 800, color: '#c2410c' }}>
-                {Number(rate).toFixed(1)}% per annum
+                {Number(rate).toFixed(1)}% {t('emi.per_annum', 'per annum')}
               </span>
             </div>
 
@@ -903,7 +905,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
 
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#94a3b8' }}>
               <span>{minRate}%</span>
-              <span style={{ color: '#15803d', fontWeight: 600 }}>4%–7% (NSFDC Standard)</span>
+              <span style={{ color: '#15803d', fontWeight: 600 }}>4%–7% ({t('emi.nsfdc_standard', 'NSFDC Standard')})</span>
               <span>{maxRate}%</span>
             </div>
           </div>
@@ -913,10 +915,10 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <label style={{ fontSize: 13, fontWeight: 600, color: '#334155', display: 'flex', alignItems: 'center', gap: 6 }}>
                 <Calendar size={14} color="#0b1f3a" />
-                <span>Total Loan Tenure</span>
+                <span>{t('emi.total_tenure', 'Total Loan Tenure')}</span>
               </label>
               <span style={{ fontSize: 16, fontWeight: 800, color: '#0b1f3a' }}>
-                {tenure} Months ({Math.round(tenure / 12)} Years)
+                {tenure} {t('emi.months', 'Months')} ({Math.round(tenure / 12)} {t('emi.years', 'Years')})
               </span>
             </div>
 
@@ -939,9 +941,9 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
             />
 
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#94a3b8' }}>
-              <span>{minTenure} Mo</span>
-              <span>{Math.round((minTenure + maxTenure) / 2)} Mo</span>
-              <span>{maxTenure} Mo</span>
+              <span>{minTenure} {t('emi.mo', 'Mo')}</span>
+              <span>{Math.round((minTenure + maxTenure) / 2)} {t('emi.mo', 'Mo')}</span>
+              <span>{maxTenure} {t('emi.mo', 'Mo')}</span>
             </div>
           </div>
 
@@ -959,7 +961,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <label style={{ fontSize: 13, fontWeight: 600, color: '#334155' }}>
-                👨‍👩‍👧‍👦 Family Size (including self)
+                👨‍👩‍👧‍👦 {t('emi.family_size', 'Family Size (including self)')}
               </label>
               <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
                 <button
@@ -1000,7 +1002,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
               </div>
             </div>
             <div style={{ fontSize: 11.5, color: '#64748b', lineHeight: 1.45 }}>
-              Estimated living cost: <strong>₹3,000/month × {familySize} member{familySize > 1 ? 's' : ''} = ₹{(3000 * familySize).toLocaleString('en-IN')}/month</strong>. This is deducted from your income to compute disposable income for repayment.
+              {t('emi.estimated_living_cost', 'Estimated living cost')}: <strong>₹3,000/{t('emi.month', 'month')} × {familySize} {familySize > 1 ? t('emi.members', 'members') : t('emi.member', 'member')} = ₹{(3000 * familySize).toLocaleString('en-IN')}/{t('emi.month', 'month')}</strong>. {t('emi.living_cost_note', 'This is deducted from your income to compute disposable income for repayment.')}
             </div>
           </div>
 
@@ -1009,10 +1011,10 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <label style={{ fontSize: 13, fontWeight: 600, color: '#334155', display: 'flex', alignItems: 'center', gap: 6 }}>
                 <Clock size={14} color="#0b1f3a" />
-                <span>Moratorium Grace Period</span>
+                <span>{t('emi.moratorium_grace_period', 'Moratorium Grace Period')}</span>
               </label>
               <span style={{ fontSize: 14, fontWeight: 700, color: '#c2410c' }}>
-                {moratorium === 0 ? 'No Grace Period' : `${moratorium} Months`}
+                {moratorium === 0 ? t('emi.no_grace_period', 'No Grace Period') : `${moratorium} ${t('emi.months', 'Months')}`}
               </span>
             </div>
 
@@ -1033,14 +1035,14 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
                     transition: 'all 150ms ease',
                   }}
                 >
-                  {m === 0 ? '0 Mo' : `${m} Mo`}
+                  {m === 0 ? `0 ${t('emi.mo', 'Mo')}` : `${m} ${t('emi.mo', 'Mo')}`}
                 </button>
               ))}
             </div>
 
             {moratorium > 0 && (
               <div style={{ background: '#fef3c7', border: '1px solid #fde68a', borderRadius: 10, padding: '10px 12px', fontSize: 11.5, color: '#78350f', lineHeight: 1.45 }}>
-                <strong>Simple Interest Accrual:</strong> Simple interest of <strong>{formatINR(calculation.moratoriumInterest)}</strong> accrues during the first {moratorium} months, capitalizing repayment principal to <strong>{formatINR(calculation.principalAtRepayment)}</strong> spread equally over the remaining {calculation.repaymentMonths} months.
+                <strong>{t('emi.simple_interest_accrual_label', 'Simple Interest Accrual:')}</strong> {t('emi.simple_interest_accrual_desc', 'Simple interest of {interest} accrues during the first {moratorium} months, capitalizing repayment principal to {principal} spread equally over the remaining {repaymentMonths} months.').replace('{interest}', formatINR(calculation.moratoriumInterest)).replace('{moratorium}', String(moratorium)).replace('{principal}', formatINR(calculation.principalAtRepayment)).replace('{repaymentMonths}', String(calculation.repaymentMonths))}
               </div>
             )}
           </div>
@@ -1073,10 +1075,10 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.15)', paddingBottom: 14 }}>
               <div>
                 <span style={{ fontSize: 10.5, fontWeight: 700, color: '#fbbf24', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                  {borrowerMode === 'msme' ? 'MSME Enterprise Plan' : 'Estimated Repayment Plan'}
+                  {borrowerMode === 'msme' ? t('emi.msme_plan', 'MSME Enterprise Plan') : t('emi.estimated_repayment_plan', 'Estimated Repayment Plan')}
                 </span>
                 <h3 style={{ fontSize: 16, fontWeight: 800, color: '#ffffff', margin: '2px 0 0' }}>
-                  {selectedScheme ? selectedScheme.name : (presetIndex >= 0 ? PRESETS[presetIndex].name : 'Custom Loan Schedule')}
+                  {selectedScheme ? getLocalizedSchemeName(selectedScheme.name, lang) : (presetIndex >= 0 ? getLocalizedSchemeName(PRESETS[presetIndex].name, lang) : t('emi.custom_schedule', 'Custom Loan Schedule'))}
                 </h3>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -1090,7 +1092,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
                   size="sm"
                 />
                 <div style={{ background: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700, color: '#ffffff' }}>
-                  {rate}% p.a.
+                  {rate}% {t('emi.p_a', 'p.a.')}
                 </div>
               </div>
             </div>
@@ -1109,30 +1111,30 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
               }}
             >
               <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>
-                Monthly Instalment (EMI)
+                {t('emi.monthly_instalment', 'Monthly Instalment (EMI)')}
               </span>
               <div style={{ fontSize: 36, fontWeight: 900, color: '#fbbf24', letterSpacing: '-0.02em' }}>
                 {formatINR(calculation.monthlyEMI)}
               </div>
               <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.6)' }}>
-                for {calculation.repaymentMonths} months (months {moratorium + 1}–{tenure})
+                {t('emi.for_months_breakdown', `for ${calculation.repaymentMonths} months (months ${moratorium + 1}–${tenure})`, { count: calculation.repaymentMonths, start: moratorium + 1, end: tenure })}
               </span>
             </div>
 
             {/* Breakdown Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
               <div style={{ background: 'rgba(255,255,255,0.06)', padding: '12px 10px', borderRadius: 12, textAlign: 'center' }}>
-                <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 2 }}>Loan Principal</span>
+                <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 2 }}>{t('emi.principal_amount', 'Loan Principal')}</span>
                 <strong style={{ fontSize: 13, color: '#ffffff' }}>{formatINR(calculation.principal)}</strong>
               </div>
 
               <div style={{ background: 'rgba(255,255,255,0.06)', padding: '12px 10px', borderRadius: 12, textAlign: 'center' }}>
-                <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 2 }}>Total Interest</span>
+                <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 2 }}>{t('emi.total_interest', 'Total Interest')}</span>
                 <strong style={{ fontSize: 13, color: '#fed7aa' }}>{formatINR(calculation.totalInterest)}</strong>
               </div>
 
               <div style={{ background: 'rgba(255,255,255,0.06)', padding: '12px 10px', borderRadius: 12, textAlign: 'center' }}>
-                <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 2 }}>Total Outflow</span>
+                <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 2 }}>{t('emi.total_outflow', 'Total Outflow')}</span>
                 <strong style={{ fontSize: 13, color: '#86efac' }}>{formatINR(calculation.totalRepaid)}</strong>
               </div>
             </div>
@@ -1140,8 +1142,8 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
             {/* Ratio Progress Bar */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>
-                <span>Principal: {calculation.principalPct}%</span>
-                <span>Interest: {calculation.interestPct}%</span>
+                <span>{t('emi.principal_label', 'Principal')}: {calculation.principalPct}%</span>
+                <span>{t('emi.interest_label', 'Interest')}: {calculation.interestPct}%</span>
               </div>
               <div style={{ height: 8, background: 'rgba(255,255,255,0.15)', borderRadius: 10, overflow: 'hidden', display: 'flex' }}>
                 <div style={{ width: `${calculation.principalPct}%`, background: '#38bdf8' }} />
@@ -1159,10 +1161,10 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
                 : 999;
               const verdict =
                 dtiRatio <= 40
-                  ? { label: '✓ Comfortable — EMI fits within disposable income', color: '#86efac', bg: 'rgba(134,239,172,0.12)', border: 'rgba(134,239,172,0.3)' }
+                  ? { label: t('emi.verdict_comfortable', '✓ Comfortable — EMI fits within disposable income'), color: '#86efac', bg: 'rgba(134,239,172,0.12)', border: 'rgba(134,239,172,0.3)' }
                   : dtiRatio <= 60
-                  ? { label: '⚠ Stretched — reduce amount or extend tenure', color: '#fbbf24', bg: 'rgba(251,191,36,0.12)', border: 'rgba(251,191,36,0.35)' }
-                  : { label: '✗ Unaffordable — EMI exceeds disposable income', color: '#fca5a5', bg: 'rgba(252,165,165,0.12)', border: 'rgba(252,165,165,0.35)' };
+                  ? { label: t('emi.verdict_stretched', '⚠ Stretched — reduce amount or extend tenure'), color: '#fbbf24', bg: 'rgba(251,191,36,0.12)', border: 'rgba(251,191,36,0.35)' }
+                  : { label: t('emi.verdict_unaffordable', '✗ Unaffordable — EMI exceeds disposable income'), color: '#fca5a5', bg: 'rgba(252,165,165,0.12)', border: 'rgba(252,165,165,0.35)' };
               return (
                 <div
                   style={{
@@ -1177,27 +1179,27 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: 10.5, fontWeight: 800, textTransform: 'uppercase', color: '#fbbf24', letterSpacing: '0.05em' }}>
-                      Affordability · Family of {familySize}
+                      {t('emi.affordability_family', `Affordability · Family of ${familySize}`, { count: familySize })}
                     </span>
                     <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.7)' }}>
-                      {formatINR(salary)}/yr
+                      {formatINR(salary)}/{t('emi.yr', 'yr')}
                     </span>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
                     <div style={{ background: 'rgba(255,255,255,0.06)', padding: '7px 10px', borderRadius: 9 }}>
-                      <div style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.55)', marginBottom: 2 }}>Monthly Income</div>
+                      <div style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.55)', marginBottom: 2 }}>{t('emi.monthly_income', 'Monthly Income')}</div>
                       <strong style={{ fontSize: 12, color: '#ffffff' }}>{formatINR(monthlyIncome)}</strong>
                     </div>
                     <div style={{ background: 'rgba(255,255,255,0.06)', padding: '7px 10px', borderRadius: 9 }}>
-                      <div style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.55)', marginBottom: 2 }}>Living Costs ({familySize} person{familySize > 1 ? 's' : ''})</div>
+                      <div style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.55)', marginBottom: 2 }}>{t('emi.living_costs', 'Living Costs')} ({familySize} {familySize > 1 ? t('emi.persons', 'persons') : t('emi.person', 'person')})</div>
                       <strong style={{ fontSize: 12, color: '#fca5a5' }}>− {formatINR(livingCostPerMonth)}</strong>
                     </div>
                     <div style={{ background: 'rgba(255,255,255,0.06)', padding: '7px 10px', borderRadius: 9 }}>
-                      <div style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.55)', marginBottom: 2 }}>Disposable Income</div>
+                      <div style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.55)', marginBottom: 2 }}>{t('emi.disposable_income', 'Disposable Income')}</div>
                       <strong style={{ fontSize: 12, color: '#86efac' }}>{formatINR(disposableIncome)}</strong>
                     </div>
                     <div style={{ background: 'rgba(255,255,255,0.06)', padding: '7px 10px', borderRadius: 9 }}>
-                      <div style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.55)', marginBottom: 2 }}>EMI Burden (DTI)</div>
+                      <div style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.55)', marginBottom: 2 }}>{t('emi.dti_burden', 'EMI Burden (DTI)')}</div>
                       <strong style={{ fontSize: 12, color: verdict.color }}>{dtiRatio > 200 ? '>200' : dtiRatio}%</strong>
                     </div>
                   </div>
@@ -1239,7 +1241,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
                 }}
               >
                 <Sparkles size={16} />
-                <span>Inquire This Loan with AI</span>
+                <span>{t('emi.inquire_ai', 'Inquire This Loan with AI')}</span>
                 <ArrowRight size={14} />
               </button>
 
@@ -1262,7 +1264,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
                 }}
               >
                 <MapPin size={14} color="#fbbf24" />
-                <span>Find Nearest Channel Partner</span>
+                <span>{t('partner.find_nearest', 'Find Nearest Channel Partner')}</span>
               </button>
 
               <button
@@ -1283,7 +1285,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
                 }}
               >
                 {showSchedule ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                <span>{showSchedule ? 'Hide Full Amortization Schedule' : `View ${tenure}-Month Amortization Schedule`}</span>
+                <span>{showSchedule ? t('emi.hide_schedule', 'Hide Full Amortization Schedule') : t('emi.view_schedule', `View ${tenure}-Month Amortization Schedule`, { tenure })}</span>
               </button>
             </div>
           </div>
@@ -1307,10 +1309,10 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
               </div>
               <div>
                 <span style={{ fontSize: 10.5, fontWeight: 800, textTransform: 'uppercase', color: '#15803d', letterSpacing: '0.04em' }}>
-                  FinTech Literacy • Debt-Trap Shield
+                  {t('emi.debt_trap_badge', 'FinTech Literacy • Debt-Trap Shield')}
                 </span>
                 <h4 style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                  Concessional vs. Informal Moneylender
+                  {t('emi.moneylender_vs_title', 'Concessional vs. Informal Moneylender')}
                 </h4>
               </div>
             </div>
@@ -1318,25 +1320,25 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 12, padding: '10px 12px' }}>
                 <span style={{ fontSize: 10.5, fontWeight: 700, color: '#166534', display: 'block' }}>
-                  NSFDC Concessional ({rate}% APR)
+                  {t('emi.nsfdc_concessional_apr', `NSFDC Concessional (${rate}% APR)`, { rate })}
                 </span>
                 <div style={{ fontSize: 16, fontWeight: 800, color: '#15803d', margin: '2px 0' }}>
                   {formatINR(calculation.totalInterest)}
                 </div>
                 <span style={{ fontSize: 10, color: '#64748b' }}>
-                  Total interest over {tenure} months
+                  {t('emi.total_interest_over_tenure', `Total interest over ${tenure} months`, { tenure })}
                 </span>
               </div>
 
               <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 12, padding: '10px 12px' }}>
                 <span style={{ fontSize: 10.5, fontWeight: 700, color: '#991b1b', display: 'block' }}>
-                  Informal Moneylender (36% APR)
+                  {t('emi.informal_moneylender_apr', 'Informal Moneylender (36% APR)')}
                 </span>
                 <div style={{ fontSize: 16, fontWeight: 800, color: '#b91c1c', margin: '2px 0' }}>
                   {formatINR(calculation.informalTotalInterest)}
                 </div>
                 <span style={{ fontSize: 10, color: '#64748b' }}>
-                  Compound debt burden
+                  {t('emi.compound_debt_burden', 'Compound debt burden')}
                 </span>
               </div>
             </div>
@@ -1354,19 +1356,19 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
             >
               <div>
                 <span style={{ fontSize: 10.5, fontWeight: 700, color: '#166534', display: 'block' }}>
-                  Net Family Wealth Preserved
+                  {t('emi.net_wealth_preserved', 'Net Family Wealth Preserved')}
                 </span>
                 <div style={{ fontSize: 18, fontWeight: 900, color: '#15803d' }}>
                   {formatINR(calculation.netWealthPreserved)}
                 </div>
               </div>
               <span style={{ fontSize: 11, fontWeight: 800, color: '#047857', background: '#dcfce7', padding: '4px 10px', borderRadius: 20 }}>
-                🛡️ Shielded
+                🛡️ {t('emi.shielded', 'Shielded')}
               </span>
             </div>
 
             <p style={{ fontSize: 11.5, color: '#475569', margin: 0, lineHeight: 1.4 }}>
-              Informal local moneylenders compound high interest monthly, trapping marginalized households in generational debt. Concessional government credit preserves up to <strong>{formatINR(calculation.netWealthPreserved)}</strong> inside your family business.
+              {t('emi.debt_trap_explanation', `Informal local moneylenders compound high interest monthly, trapping marginalized households in generational debt. Concessional government credit preserves up to ${formatINR(calculation.netWealthPreserved)} inside your family business.`, { amount: formatINR(calculation.netWealthPreserved) })}
             </p>
           </div>
         </div>
@@ -1389,10 +1391,10 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0b1f3a', margin: 0 }}>
-                Month-by-Month Amortization Breakdown ({tenure} Months)
+                {t('emi.amortization_breakdown', `Month-by-Month Amortization Breakdown (${tenure} Months)`, { tenure })}
               </h3>
               <span style={{ fontSize: 12, color: '#64748b' }}>
-                Months 1–{moratorium} grace period (₹0 repayment), Months {moratorium + 1}–{tenure} equal monthly installments.
+                {t('emi.amortization_sub', `Months 1–${moratorium} grace period (₹0 repayment), Months ${moratorium + 1}–${tenure} equal monthly installments.`, { moratorium, start: moratorium + 1, end: tenure })}
               </span>
             </div>
             <button
@@ -1408,7 +1410,7 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
                 cursor: 'pointer',
               }}
             >
-              Close Table
+              {t('emi.close_table', 'Close Table')}
             </button>
           </div>
 
@@ -1416,12 +1418,12 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, textAlign: 'right' }}>
               <thead>
                 <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0 }}>
-                  <th style={{ padding: '10px 14px', textAlign: 'left', color: '#475569', fontWeight: 700 }}>Month</th>
-                  <th style={{ padding: '10px 14px', textAlign: 'left', color: '#475569', fontWeight: 700 }}>Phase</th>
-                  <th style={{ padding: '10px 14px', color: '#475569', fontWeight: 700 }}>EMI Paid</th>
-                  <th style={{ padding: '10px 14px', color: '#475569', fontWeight: 700 }}>Principal Paid</th>
-                  <th style={{ padding: '10px 14px', color: '#475569', fontWeight: 700 }}>Interest Accrued</th>
-                  <th style={{ padding: '10px 14px', color: '#475569', fontWeight: 700 }}>Ending Balance</th>
+                  <th style={{ padding: '10px 14px', textAlign: 'left', color: '#475569', fontWeight: 700 }}>{t('emi.th_month', 'Month')}</th>
+                  <th style={{ padding: '10px 14px', textAlign: 'left', color: '#475569', fontWeight: 700 }}>{t('emi.th_phase', 'Phase')}</th>
+                  <th style={{ padding: '10px 14px', color: '#475569', fontWeight: 700 }}>{t('emi.th_emi', 'EMI Paid')}</th>
+                  <th style={{ padding: '10px 14px', color: '#475569', fontWeight: 700 }}>{t('emi.th_principal', 'Principal Paid')}</th>
+                  <th style={{ padding: '10px 14px', color: '#475569', fontWeight: 700 }}>{t('emi.th_interest', 'Interest Accrued')}</th>
+                  <th style={{ padding: '10px 14px', color: '#475569', fontWeight: 700 }}>{t('emi.th_balance', 'Ending Balance')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1434,16 +1436,16 @@ export default function EmiTab({ onSchemeSelect }: { onSchemeSelect?: (schemeNam
                     }}
                   >
                     <td style={{ padding: '8px 14px', textAlign: 'left', fontWeight: 700, color: '#0f172a' }}>
-                      Month {row.month}
+                      {t('emi.month_num', `Month ${row.month}`, { num: row.month })}
                     </td>
                     <td style={{ padding: '8px 14px', textAlign: 'left' }}>
                       {row.isMoratorium ? (
                         <span style={{ fontSize: 10.5, fontWeight: 700, color: '#b45309', background: '#fef3c7', padding: '2px 6px', borderRadius: 4 }}>
-                          Grace Period
+                          {t('emi.grace_period', 'Grace Period')}
                         </span>
                       ) : (
                         <span style={{ fontSize: 10.5, fontWeight: 700, color: '#15803d', background: '#dcfce7', padding: '2px 6px', borderRadius: 4 }}>
-                          Repayment
+                          {t('emi.repayment', 'Repayment')}
                         </span>
                       )}
                     </td>

@@ -179,7 +179,12 @@ export default function PartnerResultCard({ partner, isSelected, onSelect }: Par
               }}
             >
               <CheckCircle2 size={12} />
-              <span>HEALTHY PARTNER ({partner.npa_percent}% NPA)</span>
+              <span>
+                {t('partner.healthy_partner', 'HEALTHY PARTNER ({npa}% NPA)').replace(
+                  '{npa}',
+                  String(partner.npa_percent)
+                )}
+              </span>
             </span>
           )}
 
@@ -198,7 +203,7 @@ export default function PartnerResultCard({ partner, isSelected, onSelect }: Par
                 border: '1px solid #bfdbfe',
               }}
             >
-              <span>🏛️ APEX STATE AGENCY (150 KM)</span>
+              <span>🏛️ {t('partner.apex_state_agency_badge', 'APEX STATE AGENCY (150 KM)')}</span>
             </span>
           ) : (
             <span
@@ -215,7 +220,7 @@ export default function PartnerResultCard({ partner, isSelected, onSelect }: Par
                 border: '1px solid #e2e8f0',
               }}
             >
-              <span>🌱 GRASSROOTS BRANCH (35 KM)</span>
+              <span>🌱 {t('partner.grassroots_branch_badge', 'GRASSROOTS BRANCH (35 KM)')}</span>
             </span>
           )}
 
@@ -234,7 +239,7 @@ export default function PartnerResultCard({ partner, isSelected, onSelect }: Par
                 border: '1px solid #fde68a',
               }}
             >
-              <span>⚠️ ESCALATED DIRECT CHANNEL</span>
+              <span>⚠️ {t('partner.escalated_channel', 'ESCALATED DIRECT CHANNEL')}</span>
             </span>
           )}
         </div>
@@ -349,7 +354,7 @@ export default function PartnerResultCard({ partner, isSelected, onSelect }: Par
               }}
             >
               <Globe size={12} />
-              <span>Website</span>
+              <span>{t('partner.website', 'Website')}</span>
             </a>
           )}
         </div>

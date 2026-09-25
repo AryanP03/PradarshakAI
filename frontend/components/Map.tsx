@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { useLanguage } from '@/context/LanguageContext';
 
 // Fix default Leaflet marker icons in Next.js/webpack builds
 delete (L.Icon.Default.prototype as { _getIconUrl?: unknown })._getIconUrl;
@@ -154,6 +155,7 @@ export default function Map({
   onPartnerClick,
   height = '500px',
 }: Props) {
+  const { t } = useLanguage();
   const defaultCenter: [number, number] = userLocation
     ? [userLocation.lat, userLocation.lng]
     : partners.length > 0 && partners[0].latitude
@@ -219,7 +221,9 @@ export default function Map({
                         color: isSCA ? '#92400e' : '#1e40af',
                       }}
                     >
-                      {isSCA ? '🏛️ APEX STATE AGENCY (150 KM)' : '🏦 GRASSROOTS BRANCH (35 KM)'}
+                      {isSCA
+                        ? `🏛️ ${t('partner.apex_state_agency_badge', 'APEX STATE AGENCY (150 KM)')}`
+                        : `🏦 ${t('partner.grassroots_branch_badge', 'GRASSROOTS BRANCH (35 KM)')}`}
                     </span>
                     {isVerified && (
                       <span style={{ fontSize: 9.5, fontWeight: 800, color: '#059669' }}>
@@ -287,7 +291,7 @@ export default function Map({
 
                   {partner.is_escalated && (
                     <div style={{ marginTop: 4, fontSize: 10, fontWeight: 700, color: '#b45309', background: '#fffbeb', padding: '3px 6px', borderRadius: 4, border: '1px solid #fde68a' }}>
-                      ⚠️ Escalated Direct Channel
+                      ⚠️ {t('partner.escalated_channel', 'Escalated Direct Channel')}
                     </div>
                   )}
                 </div>
