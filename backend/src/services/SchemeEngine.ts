@@ -8,14 +8,14 @@ export interface Scheme {
   category: string;
   description: string;
   min_income_lakh?: number | null;
-  max_income_lakh: number;
+  max_income_lakh?: number | null;
   min_loan_lakh?: number | null;
-  max_loan_lakh: number;
-  interest_rate_min: number;
-  interest_rate_max: number;
-  moratorium_months_min: number;
-  moratorium_months_max: number;
-  max_tenure_months: number;
+  max_loan_lakh?: number | null;
+  interest_rate_min?: number | null;
+  interest_rate_max?: number | null;
+  moratorium_months_min?: number | null;
+  moratorium_months_max?: number | null;
+  max_tenure_months?: number | null;
   min_tenure_months?: number | null;
   coverage_percent?: number | null;
   eligible_project_types: string[];
@@ -33,6 +33,13 @@ export interface Scheme {
   aliases?: string[] | null;
   current_official_name?: string | null;
   channel_partner_applicable?: boolean;
+  for_sc?: boolean;
+  for_st?: boolean;
+  target_beneficiary?: string | null;
+  state_or_body?: string | null;
+  state?: string;
+  level?: string;
+  family_income_limit?: string | null;
 }
 
 export type SchemeTier = 'ELIGIBLE_OPTIMAL' | 'ELIGIBLE_SUBOPTIMAL' | 'HARD_DISQUALIFIED';
@@ -54,27 +61,133 @@ export function normalizeSchemeText(str: string): string {
     .trim();
 }
 
-export async function fetchActiveSchemes(categoryHint?: string): Promise<Scheme[]> {
-  // The categoryHint values from the orchestrator ('business_loan', 'education_loan')
-  // don't always match real DB category column values.
-  // Real DB categories: micro_finance, entrepreneurship, term_loan, education_loan, skill_development, other_programme
-  let query = 'SELECT * FROM schemes WHERE active = TRUE';
-  const params: string[] = [];
+export const INDIAN_STATES = [
+  'Maharashtra', 'Gujarat', 'Madhya Pradesh', 'Jharkhand', 'Delhi', 'Goa',
+  'Assam', 'Tamil Nadu', 'Karnataka', 'Kerala', 'Rajasthan', 'Uttar Pradesh',
+  'Bihar', 'Punjab', 'Haryana', 'Andhra Pradesh', 'Telangana', 'West Bengal',
+  'Odisha', 'Himachal Pradesh', 'Uttarakhand', 'Chhattisgarh'
+];
 
-  if (categoryHint === 'education_loan') {
-    // education_loan exists in DB — filter directly
-    query += ' AND category = $1';
-    params.push('education_loan');
-  } else if (categoryHint === 'business_loan') {
-    // 'business_loan' does NOT exist in DB — exclude non-business categories instead
-    query += " AND category NOT IN ('education_loan', 'skill_development', 'other_programme')";
-  } else if (categoryHint) {
-    // Direct category match for other hints
-    query += ' AND category = $1';
-    params.push(categoryHint);
+export const CITY_STATE_MAP: Record<string, string> = {
+  // Maharashtra
+  'mumbai': 'Maharashtra', 'pune': 'Maharashtra', 'nagpur': 'Maharashtra', 'nashik': 'Maharashtra',
+  'thane': 'Maharashtra', 'aurangabad': 'Maharashtra', 'solapur': 'Maharashtra', 'kolhapur': 'Maharashtra',
+  'amravati': 'Maharashtra', 'nanded': 'Maharashtra', 'mh': 'Maharashtra',
+  // Gujarat
+  'ahmedabad': 'Gujarat', 'surat': 'Gujarat', 'vadodara': 'Gujarat', 'rajkot': 'Gujarat',
+  'bhavnagar': 'Gujarat', 'jamnagar': 'Gujarat', 'gandhinagar': 'Gujarat', 'junagadh': 'Gujarat', 'gj': 'Gujarat',
+  // Madhya Pradesh
+  'bhopal': 'Madhya Pradesh', 'indore': 'Madhya Pradesh', 'gwalior': 'Madhya Pradesh', 'jabalpur': 'Madhya Pradesh',
+  'ujjain': 'Madhya Pradesh', 'sagar': 'Madhya Pradesh', 'rewa': 'Madhya Pradesh', 'mp': 'Madhya Pradesh',
+  // Jharkhand
+  'ranchi': 'Jharkhand', 'jamshedpur': 'Jharkhand', 'dhanbad': 'Jharkhand', 'bokaro': 'Jharkhand',
+  'deoghar': 'Jharkhand', 'hazaribagh': 'Jharkhand', 'jh': 'Jharkhand',
+  // Delhi
+  'delhi': 'Delhi', 'new delhi': 'Delhi', 'ncr': 'Delhi', 'dl': 'Delhi',
+  // Goa
+  'goa': 'Goa', 'panaji': 'Goa', 'margao': 'Goa', 'vasco': 'Goa', 'mapusa': 'Goa', 'ga': 'Goa',
+  // Assam
+  'assam': 'Assam', 'guwahati': 'Assam', 'silchar': 'Assam', 'dibrugarh': 'Assam', 'jorhat': 'Assam', 'as': 'Assam',
+  // Tamil Nadu
+  'chennai': 'Tamil Nadu', 'coimbatore': 'Tamil Nadu', 'madurai': 'Tamil Nadu', 'trichy': 'Tamil Nadu',
+  'salem': 'Tamil Nadu', 'tirunelveli': 'Tamil Nadu', 'tiruppur': 'Tamil Nadu', 'tn': 'Tamil Nadu',
+  // Karnataka
+  'bengaluru': 'Karnataka', 'bangalore': 'Karnataka', 'mysuru': 'Karnataka', 'mysore': 'Karnataka',
+  'hubli': 'Karnataka', 'mangaluru': 'Karnataka', 'belgaum': 'Karnataka', 'gulbarga': 'Karnataka', 'ka': 'Karnataka',
+  // Kerala
+  'thiruvananthapuram': 'Kerala', 'trivandrum': 'Kerala', 'kochi': 'Kerala', 'cochin': 'Kerala',
+  'kozhikode': 'Kerala', 'thrissur': 'Kerala', 'kollam': 'Kerala', 'palakkad': 'Kerala', 'kl': 'Kerala',
+  // Rajasthan
+  'jaipur': 'Rajasthan', 'jodhpur': 'Rajasthan', 'kota': 'Rajasthan', 'bikaner': 'Rajasthan',
+  'ajmer': 'Rajasthan', 'udaipur': 'Rajasthan', 'bhilwara': 'Rajasthan', 'alwar': 'Rajasthan', 'rj': 'Rajasthan',
+  // Uttar Pradesh
+  'lucknow': 'Uttar Pradesh', 'kanpur': 'Uttar Pradesh', 'varanasi': 'Uttar Pradesh', 'agra': 'Uttar Pradesh',
+  'prayagraj': 'Uttar Pradesh', 'allahabad': 'Uttar Pradesh', 'meerut': 'Uttar Pradesh', 'noida': 'Uttar Pradesh',
+  'ghaziabad': 'Uttar Pradesh', 'gorakhpur': 'Uttar Pradesh', 'bareilly': 'Uttar Pradesh', 'aligarh': 'Uttar Pradesh', 'up': 'Uttar Pradesh',
+  // Bihar
+  'patna': 'Bihar', 'gaya': 'Bihar', 'bhagalpur': 'Bihar', 'muzaffarpur': 'Bihar', 'purnia': 'Bihar',
+  'darbhanga': 'Bihar', 'biharsharif': 'Bihar', 'br': 'Bihar',
+  // Punjab
+  'ludhiana': 'Punjab', 'amritsar': 'Punjab', 'jalandhar': 'Punjab', 'patiala': 'Punjab', 'bathinda': 'Punjab', 'pb': 'Punjab',
+  // Haryana
+  'gurugram': 'Haryana', 'gurgaon': 'Haryana', 'faridabad': 'Haryana', 'panipat': 'Haryana',
+  'ambala': 'Haryana', 'karnal': 'Haryana', 'hisar': 'Haryana', 'rohtak': 'Haryana', 'hr': 'Haryana',
+  // Andhra Pradesh
+  'visakhapatnam': 'Andhra Pradesh', 'vizag': 'Andhra Pradesh', 'vijayawada': 'Andhra Pradesh',
+  'guntur': 'Andhra Pradesh', 'nellore': 'Andhra Pradesh', 'kurnool': 'Andhra Pradesh', 'tirupati': 'Andhra Pradesh', 'ap': 'Andhra Pradesh',
+  // Telangana
+  'hyderabad': 'Telangana', 'warangal': 'Telangana', 'nizamabad': 'Telangana', 'karimnagar': 'Telangana', 'ts': 'Telangana', 'tg': 'Telangana',
+  // West Bengal
+  'kolkata': 'West Bengal', 'calcutta': 'West Bengal', 'howrah': 'West Bengal', 'durgapur': 'West Bengal',
+  'asansol': 'West Bengal', 'siliguri': 'West Bengal', 'wb': 'West Bengal',
+  // Odisha
+  'bhubaneswar': 'Odisha', 'cuttack': 'Odisha', 'rourkela': 'Odisha', 'berhampur': 'Odisha', 'sambalpur': 'Odisha', 'or': 'Odisha', 'od': 'Odisha',
+  // Himachal Pradesh
+  'shimla': 'Himachal Pradesh', 'dharamshala': 'Himachal Pradesh', 'solan': 'Himachal Pradesh', 'mandi': 'Himachal Pradesh', 'hp': 'Himachal Pradesh',
+  // Uttarakhand
+  'dehradun': 'Uttarakhand', 'haridwar': 'Uttarakhand', 'roorkee': 'Uttarakhand', 'haldwani': 'Uttarakhand', 'rishikesh': 'Uttarakhand', 'uk': 'Uttarakhand',
+  // Chhattisgarh
+  'raipur': 'Chhattisgarh', 'bhilai': 'Chhattisgarh', 'bilaspur': 'Chhattisgarh', 'korba': 'Chhattisgarh', 'durg': 'Chhattisgarh', 'cg': 'Chhattisgarh'
+};
+
+export function resolveUserState(entities: UserEntities): string | null {
+  if (entities.state && entities.state.trim()) {
+    const raw = entities.state.trim().toLowerCase();
+    for (const s of INDIAN_STATES) {
+      if (s.toLowerCase() === raw || raw.includes(s.toLowerCase())) return s;
+    }
+    if (CITY_STATE_MAP[raw]) return CITY_STATE_MAP[raw];
   }
 
-  query += ' ORDER BY interest_rate_min ASC';
+  // Check location string (city/district/state)
+  if (entities.location && entities.location.trim()) {
+    const loc = entities.location.toLowerCase();
+    for (const s of INDIAN_STATES) {
+      if (loc.includes(s.toLowerCase())) return s;
+    }
+    const words = loc.split(/[\s,.-]+/).filter(Boolean);
+    for (const w of words) {
+      if (CITY_STATE_MAP[w]) return CITY_STATE_MAP[w];
+    }
+  }
+
+  // Check purpose or raw text for explicit state mention
+  if (entities.purpose) {
+    const p = entities.purpose.toLowerCase();
+    for (const s of INDIAN_STATES) {
+      const sLower = s.toLowerCase();
+      const regex = new RegExp(`\\b${sLower}\\b`, 'i');
+      if (regex.test(p)) return s;
+    }
+    const words = p.split(/[\s,.-]+/).filter(Boolean);
+    for (const w of words) {
+      if (CITY_STATE_MAP[w]) return CITY_STATE_MAP[w];
+    }
+  }
+
+  return null;
+}
+
+export async function fetchActiveSchemes(categoryHint?: string, userState?: string | null): Promise<Scheme[]> {
+  let query = 'SELECT * FROM schemes WHERE active = TRUE';
+  const params: (string | number)[] = [];
+
+  if (categoryHint === 'education_loan') {
+    params.push('education_loan');
+    query += ` AND category = $${params.length}`;
+  } else if (categoryHint === 'business_loan') {
+    query += " AND category NOT IN ('education_loan', 'skill_development', 'other_programme', 'welfare')";
+  } else if (categoryHint) {
+    params.push(categoryHint);
+    query += ` AND category = $${params.length}`;
+  }
+
+  if (userState) {
+    params.push(userState);
+    query += ` AND (state = 'Central' OR state ILIKE $${params.length})`;
+  }
+
+  query += ' ORDER BY interest_rate_min ASC NULLS LAST, id ASC';
   const { rows } = await readonlyPool.query<Scheme>(query, params);
   return rows;
 }
@@ -163,12 +276,10 @@ export function identifySpecificScheme(
   const normAscii = normalizeSchemeText(message);
   const normMulti = normalizeMultilingualText(message);
 
-  // 1. Check if user is asking for alternatives, comparison, or broad options
   const isAlternativeOrCompare =
     /\b(alternative|alternatives|other schemes?|similar|options|compare|comparison|versus|vs|better|all schemes?|more schemes?|which scheme is better|diff|difference)\b/i.test(message) ||
     /विकल्प|अन्य योजना|इतर योजना|तुलना|फरक|સરખામણી|તુલના|વિકલ્પ|অন্যান্য/i.test(message);
 
-  // Determine query focus
   let queryFocus: SpecificSchemeResolution['queryFocus'] = 'overview';
   if (/interest rate|interest|rate of interest|vyaaj|vyaj|ब्याज|व्याज|વ્યાજ|સુદ|வட்டி|వడ్డీ/i.test(message)) {
     queryFocus = 'interest_rate';
@@ -184,7 +295,6 @@ export function identifySpecificScheme(
     queryFocus = 'partner';
   }
 
-  // 2. Try to identify a specific named scheme directly in the message
   let matchedScheme: Scheme | null = null;
   const words = normAscii.split(' ').filter(Boolean);
 
@@ -196,25 +306,20 @@ export function identifySpecificScheme(
     const shortName = s.short_name ? normalizeSchemeText(s.short_name) : '';
     const normAliases = (s.aliases || []).map((a) => normalizeSchemeText(a));
     const multiAliases = (MULTILINGUAL_SCHEME_ALIASES[s.id] || []).map((a) => normalizeMultilingualText(a));
+    const dbMultiAliases = (s.aliases || []).map((a) => normalizeMultilingualText(a));
 
-    // Acronym match: require standalone word match (e.g. "msy", "mcf", "els")
     const isAcronymMatch = acronym.length >= 2 && words.includes(acronym);
     const isShortMatch = shortName.length >= 2 && words.includes(shortName);
-
-    // Full name or base name match: require substring match with at least 5 characters to avoid false positives
     const isFullNameMatch = fullName.length >= 5 && normAscii.includes(fullName);
     const isBaseNameMatch = baseName.length >= 5 && normAscii.includes(baseName);
 
-    // Alias match:
     const isAliasMatch = normAliases.some((alias) => {
       if (alias.length <= 4) return words.includes(alias);
       return normAscii.includes(alias);
     });
 
-    // Multilingual native script match:
-    const isMultiMatch = multiAliases.some((alias) => {
-      return normMulti.includes(alias);
-    });
+    const isMultiMatch = multiAliases.some((alias) => normMulti.includes(alias)) ||
+      dbMultiAliases.some((alias) => alias.length >= 3 && normMulti.includes(alias));
 
     if (isAcronymMatch || isShortMatch || isFullNameMatch || isBaseNameMatch || isAliasMatch || isMultiMatch) {
       matchedScheme = s;
@@ -222,14 +327,12 @@ export function identifySpecificScheme(
     }
   }
 
-  // 3. If no direct name match in message, check if this is a follow-up about the previously selected scheme
   if (!matchedScheme && currentSelected?.id) {
     const prevScheme = activeSchemes.find((s) => s.id === currentSelected.id);
     if (prevScheme) {
       const isPronounOrFollowup =
         /\b(this|that|it|its|the scheme|this scheme|this loan|that loan|the loan)\b/i.test(message) ||
         /इस योजना|यह योजना|या योजने|या योजनेची|આ યોજના|এই প্রকল্প|அந்த திட்டம்|ఈ పథకం/i.test(message) ||
-        // Or specific attribute queries without specifying any other scheme
         (queryFocus !== 'overview' && !/\b(which scheme|what schemes|any scheme|suggest|recommend)\b/i.test(message));
 
       if (isPronounOrFollowup && !isAlternativeOrCompare) {
@@ -305,20 +408,38 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
   const isBaseNameMatch = normBaseName.length >= 3 && (normP === normBaseName || normP.includes(normBaseName) || normBaseName.includes(normP));
   const isAliasMatch = normAliases.some((alias) => alias.length >= 2 && (normP === alias || normP.includes(alias) || alias.includes(normP)));
 
+  const rawTypes = scheme.eligible_project_types || [];
+  const normalizedTypes = rawTypes.map((t) => t.toLowerCase().replace(/[-_]/g, ' '));
+
   if (isAcronymMatch || isShortMatch || isFullNameMatch || isBaseNameMatch || isAliasMatch) {
-    const rawTypes = scheme.eligible_project_types || [];
-    const normalizedTypes = rawTypes.map((t) => t.toLowerCase().replace(/[-_]/g, ' '));
     const tokenBonus = normalizedTypes.some((t) => normP.includes(t)) ? 20 : 0;
     return 100 + tokenBonus;
   }
 
-  const rawTypes = scheme.eligible_project_types || [];
-  const normalizedTypes = rawTypes.map((t) => t.toLowerCase().replace(/[-_]/g, ' '));
+  // Generic keyword overlap scoring based on eligible_project_types
+  let tagMatchScore = 0;
+  let matchingTagCount = 0;
 
+  for (const tag of normalizedTypes) {
+    if (!tag) continue;
+    if (normP.includes(tag) || tag.includes(normP)) {
+      tagMatchScore += 45;
+      matchingTagCount++;
+      continue;
+    }
+    const tagWords = tag.split(/\s+/).filter((w) => w.length > 2);
+    const hasWordMatch = tagWords.some((tw) => pTokens.includes(tw) || normP.includes(tw));
+    if (hasWordMatch) {
+      tagMatchScore += 30;
+      matchingTagCount++;
+    }
+  }
+
+  // Multilingual & cross-domain sector clusters
   const sanitationWords = ['waste', 'recycling', 'sanitation', 'garbage', 'sewage', 'toilet', 'scavenger', 'cleaning', 'safai', 'सफाई', 'कचरा', 'शौचालय', 'स्वच्छता'];
   const greenWords = ['green', 'electric', 'rickshaw', 'solar', 'biogas', 'polyhouse', 'organic', 'eco', 'renewable', 'ev', 'ई-रिक्शा', 'सौर', 'पर्यावरण'];
   const artisanWords = ['artisan', 'handicraft', 'weaving', 'craft', 'pottery', 'woodwork', 'sculpture', 'textile', 'carpet', 'embroidery', 'शिल्पकार', 'बुनकर', 'हस्तकला', 'हस्तशिल्प'];
-  const businessWords = ['tailoring', 'shop', 'grocery', 'kirana', 'trade', 'enterprise', 'business', 'store', 'restaurant', 'hotel', 'manufacturing', 'repair', 'सिलाई', 'दुकान', 'व्यापार', 'व्यवसाय', 'शिलाई', 'उद्योग'];
+  const businessWords = ['tailoring', 'shop', 'grocery', 'kirana', 'trade', 'enterprise', 'business', 'store', 'restaurant', 'hotel', 'manufacturing', 'repair', 'auto', 'rickshaw', 'सिलाई', 'दुकान', 'व्यापार', 'व्यवसाय', 'शिलाई', 'उद्योग'];
   const agriWords = ['agriculture', 'farming', 'poultry', 'animal', 'cattle', 'horticulture', 'dairy', 'crop', 'fisheries', 'खेती', 'कृषि', 'डेयरी', 'पशुपालन', 'शेतकरी'];
   const techWords = ['saas', 'software', 'tech', 'it', 'b2b', 'supplier', 'suppliers', 'supply', 'logistics', 'services', 'agency', 'wholesale', 'सॉफ्टवेयर', 'तकनीक', 'सप्लायर'];
   const educationWords = [
@@ -329,58 +450,51 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
     'શિક્ષણ', 'கல்வி', 'విద్య', 'വിദ്യാഭ്യാസം', 'ଶିକ୍ଷା', 'ਸਿੱਖਿਆ'
   ];
 
-  const isSanitationScheme = scheme.name.includes('Swachhta') || scheme.name.includes('SUY');
-  const isGreenScheme = scheme.name.includes('Green') || scheme.name.includes('GBS');
-  const isArtisanScheme = scheme.name.includes('Shilpi') || scheme.name.includes('SSY');
-  const isAgriScheme = scheme.name.includes('Kisan') || scheme.name.includes('MKY');
-  const isEducationScheme = scheme.category === 'education_loan' || scheme.education_required;
+  const isSanitationScheme = normalizedTypes.some((t) => /sanitation|waste|sewage|toilet|clean|scavenger/.test(t));
+  const isGreenScheme = normalizedTypes.some((t) => /green|solar|renewable|electric|rickshaw|biogas|eco/.test(t));
+  const isArtisanScheme = normalizedTypes.some((t) => /artisan|handicraft|weaving|craft|pottery|leather|wood_work|textile|embroidery/.test(t));
+  const isAgriScheme = normalizedTypes.some((t) => /agri|farm|dairy|poultry|crop|livestock|fisher|cattle|animal/.test(t));
+  const isEducationScheme = scheme.category === 'education_loan' || scheme.education_required || normalizedTypes.some((t) => /education|course|degree|school|college|scholarship|study/.test(t));
 
-  if (normP) {
-    if (educationWords.some((w) => normP.includes(w))) {
-      if (isEducationScheme) return 50;
-      return -15;
+  if (educationWords.some((w) => normP.includes(w))) {
+    if (isEducationScheme) return Math.max(50, tagMatchScore);
+    return -15;
+  }
+  if (sanitationWords.some((w) => normP.includes(w))) {
+    if (isSanitationScheme) return Math.max(50, tagMatchScore);
+    return 5;
+  }
+  if (greenWords.some((w) => normP.includes(w))) {
+    if (isGreenScheme) return Math.max(50, tagMatchScore);
+    return 10;
+  }
+  if (artisanWords.some((w) => normP.includes(w))) {
+    if (isArtisanScheme) return Math.max(50, tagMatchScore);
+    return 10;
+  }
+  if (agriWords.some((w) => normP.includes(w))) {
+    if (isAgriScheme) return Math.max(50, tagMatchScore);
+    if (scheme.category === 'entrepreneurship' || normalizedTypes.includes('manufacturing')) return 30;
+    return 5;
+  }
+  if (techWords.some((w) => normP.includes(w))) {
+    if (normalizedTypes.some((t) => /services|technology|software|startup|innovation/.test(t))) return 40;
+    return 5;
+  }
+  if (businessWords.some((w) => normP.includes(w))) {
+    if (normP.includes('सिलाई') || normP.includes('tailoring') || normP.includes('शिलाई')) {
+      if (normalizedTypes.some((t) => t.includes('tailoring'))) return 50;
     }
-    if (sanitationWords.some((w) => normP.includes(w))) {
-      if (isSanitationScheme) return 50;
-      return 5;
-    }
-    if (greenWords.some((w) => normP.includes(w))) {
-      if (isGreenScheme) return 50;
-      return 10;
-    }
-    if (artisanWords.some((w) => normP.includes(w))) {
-      if (isArtisanScheme) return 50;
-      return 10;
-    }
-    if (agriWords.some((w) => normP.includes(w))) {
-      if (isAgriScheme) return 50;
-      if (scheme.name.includes('Term Loan')) return 30;
-      return 5;
-    }
-    if (techWords.some((w) => normP.includes(w))) {
-      if (scheme.name.includes('Term Loan') || scheme.name.includes('Utkarsh') || normalizedTypes.includes('services') || normalizedTypes.includes('it services')) {
-        return 40;
-      }
-      return 5;
-    }
-    if (businessWords.some((w) => normP.includes(w))) {
-      if (isAgriScheme) return -30;
-      if (isSanitationScheme || isArtisanScheme) return -15;
-      if (isEducationScheme || scheme.category === 'skill_development' || scheme.category === 'welfare_programme') return -50;
-      if (normP.includes('सिलाई') || normP.includes('tailoring') || normP.includes('शिलाई')) {
-        if (scheme.name.includes('Mahila Samriddhi')) return 50;
-        if (normalizedTypes.some((t) => t.includes('tailoring'))) return 45;
-      }
-      if (normalizedTypes.some((t) => businessWords.some((w) => normP.includes(w) && t.includes(w)))) return 45;
-      if (scheme.name.includes('Term Loan') || scheme.name.includes('Micro Credit Finance') || scheme.name.includes('Laghu Vyavasaya') || scheme.name.includes('Mahila Samriddhi')) {
-        return 40;
-      }
-      return 15;
-    }
+    if (matchingTagCount > 0) return Math.min(95, 35 + tagMatchScore);
+    if (isAgriScheme) return -30;
+    if (isSanitationScheme || isArtisanScheme) return -15;
+    if (isEducationScheme || scheme.category === 'skill_development' || scheme.category === 'welfare') return -50;
+    if (scheme.category === 'entrepreneurship' || scheme.category === 'micro_finance') return 40;
+    return 15;
+  }
 
-    const pWords = normP.split(/\s+/).filter((w) => w.length > 2);
-    const typeWords = normalizedTypes.flatMap((t) => t.split(/\s+/));
-    if (pWords.some((w) => typeWords.includes(w))) return 35;
+  if (matchingTagCount > 0) {
+    return Math.min(95, 30 + tagMatchScore);
   }
 
   if (isSanitationScheme || isArtisanScheme || isAgriScheme) return -30;
@@ -393,7 +507,7 @@ function incomeScore(scheme: Scheme, incomeRs: number | undefined): { score: num
   if (!incomeRs) return { score: 10 };
   const incomeLakh = incomeRs / 100000;
 
-  if (incomeLakh > 5.0) {
+  if (incomeLakh > 5.0 && scheme.level === 'Central') {
     return {
       score: -20,
       warning: `Family income (₹${incomeLakh.toFixed(1)}L) exceeds the standard NSFDC concessional limit of ₹5.0L`,
@@ -419,14 +533,14 @@ function loanAmountScore(scheme: Scheme, amountRs: number | undefined): { score:
   const amountLakh = amountRs / 100000;
   const schemeMax = Number(scheme.max_loan_lakh || 0);
 
-  if (schemeMax === 0) {
+  if (schemeMax === 0 && (scheme.category === 'skill_development' || scheme.category === 'welfare')) {
     return {
       score: -100,
       warning: `${scheme.name} is a non-loan assistance programme (₹0 loan ceiling)`,
     };
   }
 
-  if (amountLakh > schemeMax) {
+  if (schemeMax > 0 && amountLakh > schemeMax) {
     return {
       score: -20,
       warning: `Required amount (₹${amountLakh.toFixed(1)}L) exceeds this scheme's maximum limit (₹${scheme.max_loan_lakh}L)`,
@@ -475,6 +589,8 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
     entities.course
   );
 
+  const userState = resolveUserState(entities);
+
   const scored = schemes
     .map((scheme): ScoredScheme => {
       let score = 0;
@@ -514,7 +630,7 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
 
       score += Math.max(0, (10 - Number(scheme.interest_rate_min || 6)) * 2);
 
-      // --- 3-TIER DETERMINISTIC CLASSIFICATION (SIH PS 26092) ---
+      // --- 3-TIER DETERMINISTIC CLASSIFICATION ---
       let tier: SchemeTier = 'ELIGIBLE_SUBOPTIMAL';
       let disqualificationReason: string | undefined = undefined;
 
@@ -526,24 +642,31 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
       const schemeMaxIncome = Number(scheme.max_income_lakh || 0);
 
       const isBusinessQuery = categoryHint === 'business_loan' ||
-        ['tailor', 'tailoring', 'sewing', 'business', 'shop', 'kirana', 'dairy', 'machine', 'सिलाई', 'शिलाई', 'दुकान', 'व्यापार'].some(w => pNorm.includes(w));
+        ['tailor', 'tailoring', 'sewing', 'business', 'shop', 'kirana', 'dairy', 'machine', 'transport', 'auto', 'सिलाई', 'शिलाई', 'दुकान', 'व्यापार'].some(w => pNorm.includes(w));
 
+      // Boundary check 0: State eligibility (Hard filter)
+      if (scheme.state && scheme.state !== 'Central') {
+        if (!userState || scheme.state.toLowerCase() !== userState.toLowerCase()) {
+          tier = 'HARD_DISQUALIFIED';
+          disqualificationReason = `This scheme is exclusively for residents of ${scheme.state}.`;
+        }
+      }
       // Boundary check 1: Loan ceiling exceeded (e.g. ₹55L > ₹50L Term Loan cap) or non-loan scheme when loan requested
-      if (loanLakh && (schemeMaxLoan === 0 || loanLakh > schemeMaxLoan)) {
+      else if (loanLakh && (schemeMaxLoan === 0 || loanLakh > schemeMaxLoan)) {
         tier = 'HARD_DISQUALIFIED';
         disqualificationReason = schemeMaxLoan === 0
           ? `${scheme.name} is a non-loan skill training or social welfare programme with no loan facility (₹0 cap). It cannot provide the requested loan of ₹${loanLakh.toFixed(1)}L.`
           : `Requested loan amount (₹${loanLakh.toFixed(1)}L) exceeds the maximum statutory ceiling of ₹${schemeMaxLoan.toFixed(1)}L for ${scheme.name}.`;
       }
       // Boundary check 1b: Business query vs non-loan welfare / skill training
-      else if (isBusinessQuery && (scheme.category === 'skill_development' || scheme.category === 'welfare_programme' || scheme.education_required)) {
+      else if (isBusinessQuery && (scheme.category === 'skill_development' || scheme.category === 'welfare' || scheme.category === 'welfare_programme' || scheme.category === 'other_programme' || scheme.education_required)) {
         tier = 'HARD_DISQUALIFIED';
         disqualificationReason = `${scheme.name} is a skill training or welfare programme, not an enterprise business loan.`;
       }
-      // Boundary check 2: Family income exceeded (e.g. > ₹5.00L universal cap)
+      // Boundary check 2: Family income exceeded
       else if (incomeLakh && schemeMaxIncome > 0 && incomeLakh > schemeMaxIncome) {
         tier = 'HARD_DISQUALIFIED';
-        disqualificationReason = `Annual family income (₹${incomeLakh.toFixed(1)}L) exceeds the statutory eligibility cap of ₹${schemeMaxIncome.toFixed(1)}L/yr for NSFDC concessional loans.`;
+        disqualificationReason = `Annual family income (₹${incomeLakh.toFixed(1)}L) exceeds the statutory eligibility cap of ₹${schemeMaxIncome.toFixed(1)}L/yr for this scheme.`;
       }
       // Boundary check 3: Gender exclusivity
       else if (isWomenOnly && entities.gender && entities.gender !== 'female' && !isDirectMatch) {
@@ -579,34 +702,55 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
       const tierRank = (t: SchemeTier) => (t === 'ELIGIBLE_OPTIMAL' ? 1 : t === 'ELIGIBLE_SUBOPTIMAL' ? 2 : 3);
       const rankDiff = tierRank(a.tier) - tierRank(b.tier);
       if (rankDiff !== 0) return rankDiff;
-      return b.score - a.score;
+      if (b.score !== a.score) return b.score - a.score;
+
+      // Tiebreaker 1: State preference (State-specific matching user's state prioritized over general Central)
+      if (userState) {
+        const aIsState = a.state && a.state.toLowerCase() === userState.toLowerCase();
+        const bIsState = b.state && b.state.toLowerCase() === userState.toLowerCase();
+        if (aIsState && !bIsState) return -1;
+        if (!aIsState && bIsState) return 1;
+      }
+
+      // Tiebreaker 2: Lower minimum interest rate
+      const rateA = a.interest_rate_min != null ? Number(a.interest_rate_min) : 999;
+      const rateB = b.interest_rate_min != null ? Number(b.interest_rate_min) : 999;
+      if (rateA !== rateB) return rateA - rateB;
+
+      // Tiebreaker 3: Higher maximum loan limit
+      const loanA = a.max_loan_lakh != null ? Number(a.max_loan_lakh) : 0;
+      const loanB = b.max_loan_lakh != null ? Number(b.max_loan_lakh) : 0;
+      if (loanA !== loanB) return loanB - loanA;
+
+      // Tiebreaker 4: Stable ID
+      return a.id - b.id;
     });
 
   return scored;
 }
 
 export async function recommendSchemes(entities: UserEntities, categoryHint?: string, limit: number = 3): Promise<ScoredScheme[]> {
-  console.log('[SCHEME_SERVICE] recommendSchemes called:', JSON.stringify({ categoryHint, purpose: entities.purpose, loan_amount_rs: entities.loan_amount_rs, gender: entities.gender, family_income_rs: entities.family_income_rs }));
-  let all = await fetchActiveSchemes(categoryHint);
-  console.log(`[DATABASE] fetchActiveSchemes(${categoryHint || 'all'}) returned ${all.length} schemes`);
+  const userState = resolveUserState(entities);
+  console.log('[SCHEME_SERVICE] recommendSchemes called:', JSON.stringify({ categoryHint, userState, purpose: entities.purpose, loan_amount_rs: entities.loan_amount_rs, gender: entities.gender, family_income_rs: entities.family_income_rs }));
 
-  // If category filtering returned zero, fall back to ALL active schemes
+  let all = await fetchActiveSchemes(categoryHint, userState);
+  console.log(`[DATABASE] fetchActiveSchemes(${categoryHint || 'all'}, ${userState || 'any'}) returned ${all.length} schemes`);
+
   if (all.length === 0 && categoryHint) {
-    console.log('[DATABASE] Category filter returned 0 results, falling back to ALL active schemes');
-    all = await fetchActiveSchemes();
+    console.log('[DATABASE] Category filter returned 0 results, falling back to all active schemes for state');
+    all = await fetchActiveSchemes(undefined, userState);
   }
 
   const scored = scoreSchemes(all, entities, categoryHint);
-  console.log(`[SCHEME_SERVICE] scoreSchemes returned ${scored.length} scored schemes:`, scored.map(s => `${s.name}(score=${s.score},tier=${s.tier})`).join(', '));
+  console.log(`[SCHEME_SERVICE] scoreSchemes returned ${scored.length} scored schemes:`, scored.slice(0, 5).map(s => `${s.name}(score=${s.score},tier=${s.tier},state=${s.state})`).join(', '));
 
   if (scored.length === 0) {
-    // Ultimate fallback: return top schemes from ALL active schemes
-    const fallbackAll = await fetchActiveSchemes();
+    const fallbackAll = await fetchActiveSchemes(undefined, userState);
     return fallbackAll.slice(0, limit).map((s) => ({
       ...s,
       score: 50,
       tier: 'ELIGIBLE_SUBOPTIMAL' as SchemeTier,
-      matchReasons: ['Official NSFDC Concessional Scheme'],
+      matchReasons: ['Official Concessional Scheme'],
       warnings: [],
     }));
   }

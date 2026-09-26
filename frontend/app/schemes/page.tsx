@@ -51,6 +51,7 @@ const CATEGORY_META: Record<
   education_loan:    { label: 'Education Loan',        bg: '#faf5ff', text: '#6b21a8', border: '#e9d5ff' },
   entrepreneurship:  { label: 'Entrepreneurship',      bg: '#fff7ed', text: '#9a3412', border: '#fed7aa' },
   skill_development: { label: 'Skill Development',     bg: '#fdf2f8', text: '#9d174d', border: '#fbcfe8' },
+  welfare:           { label: 'Social Welfare',        bg: '#f0fdf4', text: '#166534', border: '#bbf7d0' },
   other_programme:   { label: 'Government Programme', bg: '#f1f5f9', text: '#475569', border: '#cbd5e1' },
 };
 
@@ -373,23 +374,7 @@ export default function SchemesPage() {
       });
   }, []);
 
-  // Curate a diverse selection of 10 schemes across categories
-  const FEATURED_10_IDS = [
-    1,  // Micro Credit Finance (MCF) - Micro Finance
-    2,  // Mahila Samriddhi Yojana (MSY) - Micro Finance / Women Exclusive
-    4,  // Shilpi Samriddhi Yojana (SSY) - Term Loan / Artisans
-    5,  // Term Loan (TL) - Entrepreneurship / Term Loan
-    6,  // Green Business Scheme (GBS) - Entrepreneurship / Sanitation
-    7,  // Swachhta Udyami Yojana (SUY) - Entrepreneurship / Sanitation
-    8,  // Udyam Nidhi Yojana (UNY) - Entrepreneurship
-    10, // Educational Loan Scheme (ELS) - Education Loan
-    12, // PM-DAKSH - Skill Development
-    13, // SMILE - Government Welfare Programme
-  ];
-
-  const schemeList = Array.isArray(schemes)
-    ? schemes.filter((s) => FEATURED_10_IDS.includes(s.id))
-    : [];
+  const schemeList = Array.isArray(schemes) ? schemes : [];
   const filtered = schemeList.filter((s) => {
     const isInfo = s.scheme_type === 'informational' || s.channel_partner_applicable === false;
     if (typeFilter === 'financing' && isInfo) return false;
@@ -401,7 +386,7 @@ export default function SchemesPage() {
       const currentNameMatch = s.current_official_name ? s.current_official_name.toLowerCase().includes(q) : false;
       const m =
         s.name.toLowerCase().includes(q) ||
-        s.description.toLowerCase().includes(q) ||
+        (s.description || '').toLowerCase().includes(q) ||
         s.category.toLowerCase().includes(q) ||
         aliasMatch ||
         currentNameMatch;
@@ -410,21 +395,11 @@ export default function SchemesPage() {
     if (catFilter.length > 0) {
       const isMatch = catFilter.some((cat) => {
         if (s.category === cat) return true;
-        if (cat === 'entrepreneurship') {
-          return s.category === 'entrepreneurship' || ['Term Loan (TL)', 'Udyam Nidhi Yojana (UNY)', 'Green Business Scheme (GBS)', 'Swachhta Udyami Yojana (SUY)', 'Mahila Adhikarita Yojana (MAY)', 'Stand-Up India Scheme'].includes(s.name);
-        }
-        if (cat === 'term_loan') {
-          return s.category === 'term_loan' || ['Term Loan (TL)', 'Udyam Nidhi Yojana (UNY)', 'Green Business Scheme (GBS)', 'Swachhta Udyami Yojana (SUY)', 'Mahila Adhikarita Yojana (MAY)', 'Shilpi Samriddhi Yojana (SSY)'].includes(s.name);
-        }
-        if (cat === 'micro_finance') {
-          return s.category === 'micro_finance' || ['Micro Credit Finance (MCF)', 'Mahila Samriddhi Yojana (MSY)', 'Aajeevika Microfinance Yojana (AMY)', 'Mahila Adhikarita Yojana (MAY)', 'Shilpi Samriddhi Yojana (SSY)'].includes(s.name);
-        }
-        if (cat === 'skill_development') {
-          return s.category === 'skill_development' || s.name.includes('Vocational');
-        }
-        if (cat === 'other_programme') {
-          return s.scheme_type === 'informational' || s.category === 'other_programme';
-        }
+        // Group similar category aliases gracefully
+        if (cat === 'entrepreneurship' && (s.category === 'entrepreneurship' || s.category === 'term_loan')) return true;
+        if (cat === 'term_loan' && (s.category === 'term_loan' || s.category === 'entrepreneurship')) return true;
+        if (cat === 'other_programme' && (s.category === 'other_programme' || s.category === 'welfare')) return true;
+        if (cat === 'welfare' && (s.category === 'welfare' || s.category === 'other_programme')) return true;
         return false;
       });
       if (!isMatch) return false;
@@ -500,7 +475,7 @@ export default function SchemesPage() {
           </p>
 
           <p style={{ fontSize: 13.5, color: '#475569', lineHeight: 1.55, margin: '2px 0 0', maxWidth: 900 }}>
-            {t('schemes.curated_note', 'Showing a curated selection of 10 key schemes from the broader NSFDC scheme portfolio.')}{' '}
+            {t('schemes.catalog_note', 'Browse the complete catalog of 198+ Central and State Government schemes.')}{' '}
             <a
               href="/chat"
               style={{ color: '#0369a1', fontWeight: 700, textDecoration: 'underline' }}

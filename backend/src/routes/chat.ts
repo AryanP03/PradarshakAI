@@ -82,12 +82,12 @@ router.post('/', async (req: UserAuthRequest, res: Response) => {
     schemeAction?.action === 'KNOW_MORE'
       ? `Learn more about ${schemeAction.schemeName || 'selected scheme'}`
       : schemeAction?.action === 'DOCUMENTS'
-      ? `Required documents for ${schemeAction.schemeName || 'selected scheme'}`
-      : schemeAction?.action === 'EMI'
-      ? `Calculate EMI for ${schemeAction.schemeName || 'selected scheme'}`
-      : schemeAction?.action === 'COMPARE'
-      ? 'Compare selected schemes'
-      : ''
+        ? `Required documents for ${schemeAction.schemeName || 'selected scheme'}`
+        : schemeAction?.action === 'EMI'
+          ? `Calculate EMI for ${schemeAction.schemeName || 'selected scheme'}`
+          : schemeAction?.action === 'COMPARE'
+            ? 'Compare selected schemes'
+            : ''
   );
 
   if (!effectiveMessage) {

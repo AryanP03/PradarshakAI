@@ -763,10 +763,10 @@ Write in plain conversational prose only.
         finalText = reply.content || speechText;
       } else if (schemeAction.action === 'EMI') {
         const s = targetScheme;
-        const principal = s ? s.max_loan_lakh * 100000 : 100000;
-        const rate = s ? s.interest_rate_min : 6.5;
-        const tenure = s ? s.max_tenure_months : 36;
-        const morat = s ? s.moratorium_months_min : 3;
+        const principal = (s && s.max_loan_lakh != null) ? s.max_loan_lakh * 100000 : 100000;
+        const rate = (s && s.interest_rate_min != null) ? s.interest_rate_min : 6.5;
+        const tenure = (s && s.max_tenure_months != null) ? s.max_tenure_months : 36;
+        const morat = (s && s.moratorium_months_min != null) ? s.moratorium_months_min : 3;
 
         const emiResult = await executeTool('calculate_emi', {
           loan_amount_rs: principal,

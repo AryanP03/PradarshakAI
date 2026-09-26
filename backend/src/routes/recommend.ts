@@ -19,6 +19,7 @@ router.post('/finder', async (req: Request, res: Response) => {
       loan_amount_rs,
       gender,
       location,
+      state,
       category_hint,
       limit = 6,
     } = req.body;
@@ -51,6 +52,7 @@ router.post('/finder', async (req: Request, res: Response) => {
       education_level: education_level || undefined,
       gender: normGender,
       location: location || undefined,
+      state: state || undefined,
     };
 
     console.log('[recommend/finder] Running existing recommendSchemes with:', JSON.stringify(entities));

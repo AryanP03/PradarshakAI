@@ -13,6 +13,7 @@ export interface UserEntities {
   education_level?: string;
   course?: string;
   location?: string;              // city / district / PIN
+  state?: string;                 // state of residence (e.g. 'Maharashtra', 'Gujarat')
   gender?: string;
   age?: number;
   scheme_names?: string[];        // schemes mentioned by user
@@ -50,7 +51,7 @@ export interface ConversationFacts {
   category_hint?: string;        // 'business_loan' | 'education_loan' | 'general'
   education_level?: string;
   course?: string;
-  last_recommended_schemes?: { id?: number; name: string; code?: string; category?: string; max_loan_lakh?: number }[];
+  last_recommended_schemes?: { id?: number; name: string; code?: string; category?: string; max_loan_lakh?: number | null }[];
   selected_scheme?: { name: string; code?: string; id?: number };
 }
 

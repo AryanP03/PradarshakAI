@@ -55,6 +55,7 @@ export const TOOL_DEFS: ToolDef[] = [
           course: { type: 'string' },
           gender: { type: 'string', enum: ['male', 'female'] },
           location: { type: 'string', description: 'City or district' },
+          state: { type: 'string', description: 'State of residence of beneficiary (e.g. Maharashtra, Gujarat, Delhi, Tamil Nadu, etc.)' },
           category_hint: { type: 'string', enum: ['education_loan', 'business_loan'], description: 'Set to education_loan for education/study queries, business_loan for business/trade queries' },
         },
       },
@@ -207,6 +208,7 @@ export async function executeTool(name: string, args: Record<string, unknown>): 
         course: args.course as string | undefined,
         gender: (args.gender as string | undefined) || (isWomen ? 'female' : undefined),
         location: args.location as string | undefined,
+        state: args.state as string | undefined,
       };
       const schemes: ScoredScheme[] = await recommendSchemes(entities, categoryHint);
 
@@ -305,15 +307,15 @@ export async function executeTool(name: string, args: Record<string, unknown>): 
 
       const conditionalDocuments = isEdu
         ? [
-            'Admission Offer Letter / Bonafide Certificate from College/University',
-            'Fee Structure Breakdown (Tuition, Hostel, Books, Exam fees)',
-            'Educational Marksheets (10th, 12th, or Graduation degree)',
-          ]
+          'Admission Offer Letter / Bonafide Certificate from College/University',
+          'Fee Structure Breakdown (Tuition, Hostel, Books, Exam fees)',
+          'Educational Marksheets (10th, 12th, or Graduation degree)',
+        ]
         : [
-            'Detailed Business Plan / Project Proposal',
-            'Machinery / Equipment / Stock Quotation from Authorized Vendor',
-            'Rent Agreement or Land Ownership Document (for business premises)',
-          ];
+          'Detailed Business Plan / Project Proposal',
+          'Machinery / Equipment / Stock Quotation from Authorized Vendor',
+          'Rent Agreement or Land Ownership Document (for business premises)',
+        ];
 
       const allDocs = scheme?.documents_required && scheme.documents_required.length > 0
         ? Array.from(new Set([...mandatoryDocuments, ...scheme.documents_required, ...conditionalDocuments]))

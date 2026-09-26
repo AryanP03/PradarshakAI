@@ -42,7 +42,7 @@ async function executeOpenRouterRequest(
     let data: any;
     try {
       data = JSON.parse(text);
-    } catch {}
+    } catch { }
 
     return { ok: response.ok, status: response.status, text, data };
   } catch (err) {

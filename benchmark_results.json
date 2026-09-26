@@ -1,0 +1,1565 @@
+{
+  "timestamp": "2026-09-26T15:55:39.638Z",
+  "targetUrl": "http://localhost:4000/api/chat",
+  "totalQueries": 7,
+  "runsPerQuery": 5,
+  "globalStats": {
+    "min": 3478.63,
+    "max": 36991.1,
+    "avg": 25997.04,
+    "p50": 29522.91,
+    "p90": 33486.1,
+    "p95": 34187.02
+  },
+  "avgGlobalLlm": 66273,
+  "avgGlobalTools": 370,
+  "avgGlobalDb": 0,
+  "avgGlobalRounds": "5.5",
+  "measurements": [
+    {
+      "queryType": "TEST_A",
+      "label": "Simple Information",
+      "query": "Tell me about Mahila Samriddhi Yojana.",
+      "iteration": 1,
+      "isCold": true,
+      "status": "SUCCESS",
+      "e2eMs": 7200.32,
+      "ttfrMs": 7200.32,
+      "backendMs": 7143.8,
+      "llmTotalMs": 3971.8,
+      "llmRounds": 2,
+      "llmCalls": [
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 200,
+          "durationMs": 2139.48,
+          "ok": true
+        },
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 200,
+          "durationMs": 1832.32,
+          "ok": true
+        }
+      ],
+      "toolTotalMs": 522.31,
+      "toolCallsCount": 1,
+      "toolCalls": [
+        {
+          "toolName": "get_scheme_details",
+          "durationMs": 522.31
+        }
+      ],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 2649.69,
+      "responseLength": 766,
+      "responseType": "schemes"
+    },
+    {
+      "queryType": "TEST_A",
+      "label": "Simple Information",
+      "query": "Tell me about Mahila Samriddhi Yojana.",
+      "iteration": 2,
+      "isCold": false,
+      "status": "TIMEOUT",
+      "errorDetail": "Timeout after 45000ms",
+      "e2eMs": 45019.3,
+      "ttfrMs": 45019.3,
+      "backendMs": 0,
+      "llmTotalMs": 0,
+      "llmRounds": 0,
+      "llmCalls": [],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 0,
+      "responseType": "unknown"
+    },
+    {
+      "queryType": "TEST_A",
+      "label": "Simple Information",
+      "query": "Tell me about Mahila Samriddhi Yojana.",
+      "iteration": 3,
+      "isCold": false,
+      "status": "TIMEOUT",
+      "errorDetail": "Timeout after 45000ms",
+      "e2eMs": 45005.24,
+      "ttfrMs": 45005.24,
+      "backendMs": 0,
+      "llmTotalMs": 0,
+      "llmRounds": 0,
+      "llmCalls": [],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 0,
+      "responseType": "unknown"
+    },
+    {
+      "queryType": "TEST_A",
+      "label": "Simple Information",
+      "query": "Tell me about Mahila Samriddhi Yojana.",
+      "iteration": 4,
+      "isCold": false,
+      "status": "SUCCESS",
+      "e2eMs": 33388.76,
+      "ttfrMs": 33388.76,
+      "backendMs": 33379.72,
+      "llmTotalMs": 58703.55,
+      "llmRounds": 10,
+      "llmCalls": [
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 435.52,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 500,
+          "durationMs": 25006.11,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nex-agi/nex-n2.5-mini:free",
+          "model": "nex-agi/nex-n2.5-mini:free",
+          "status": 404,
+          "durationMs": 77.1,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_inclusionai/ling-3.0-flash-vl:free",
+          "model": "inclusionai/ling-3.0-flash-vl:free",
+          "status": 404,
+          "durationMs": 31.98,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_openrouter/free",
+          "model": "openrouter/free",
+          "status": 200,
+          "durationMs": 4270.1,
+          "ok": true
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 500,
+          "durationMs": 25006.79,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nex-agi/nex-n2.5-mini:free",
+          "model": "nex-agi/nex-n2.5-mini:free",
+          "status": 404,
+          "durationMs": 346.16,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_inclusionai/ling-3.0-flash-vl:free",
+          "model": "inclusionai/ling-3.0-flash-vl:free",
+          "status": 404,
+          "durationMs": 24.49,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_openrouter/free",
+          "model": "openrouter/free",
+          "status": 200,
+          "durationMs": 1246.51,
+          "ok": true
+        },
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 200,
+          "durationMs": 2258.79,
+          "ok": true
+        }
+      ],
+      "toolTotalMs": 2079.86,
+      "toolCallsCount": 1,
+      "toolCalls": [
+        {
+          "toolName": "get_scheme_details",
+          "durationMs": 2079.86
+        }
+      ],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 766,
+      "responseType": "schemes"
+    },
+    {
+      "queryType": "TEST_A",
+      "label": "Simple Information",
+      "query": "Tell me about Mahila Samriddhi Yojana.",
+      "iteration": 5,
+      "isCold": false,
+      "status": "SUCCESS",
+      "e2eMs": 29635.12,
+      "ttfrMs": 29635.12,
+      "backendMs": 29626.22,
+      "llmTotalMs": 28616.46,
+      "llmRounds": 6,
+      "llmCalls": [
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 200,
+          "durationMs": 1044.92,
+          "ok": true
+        },
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 99.4,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 500,
+          "durationMs": 25010.66,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nex-agi/nex-n2.5-mini:free",
+          "model": "nex-agi/nex-n2.5-mini:free",
+          "status": 404,
+          "durationMs": 64.12,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_inclusionai/ling-3.0-flash-vl:free",
+          "model": "inclusionai/ling-3.0-flash-vl:free",
+          "status": 404,
+          "durationMs": 21.98,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_openrouter/free",
+          "model": "openrouter/free",
+          "status": 200,
+          "durationMs": 2375.38,
+          "ok": true
+        }
+      ],
+      "toolTotalMs": 502.47,
+      "toolCallsCount": 1,
+      "toolCalls": [
+        {
+          "toolName": "get_scheme_details",
+          "durationMs": 502.47
+        }
+      ],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 507.29,
+      "responseLength": 146,
+      "responseType": "schemes"
+    },
+    {
+      "queryType": "TEST_B",
+      "label": "Specific Scheme",
+      "query": "Tell me about Green Business Scheme.",
+      "iteration": 1,
+      "isCold": false,
+      "status": "SUCCESS",
+      "e2eMs": 31076.2,
+      "ttfrMs": 31076.2,
+      "backendMs": 31068.3,
+      "llmTotalMs": 28498.32,
+      "llmRounds": 8,
+      "llmCalls": [
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 341.1,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_reducedTokens",
+          "model": "google/gemini-2.5-flash",
+          "status": 200,
+          "durationMs": 1066.08,
+          "ok": true
+        },
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 35.55,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_reducedTokens",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 112.38,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 500,
+          "durationMs": 25002.85,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nex-agi/nex-n2.5-mini:free",
+          "model": "nex-agi/nex-n2.5-mini:free",
+          "status": 404,
+          "durationMs": 360.09,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_inclusionai/ling-3.0-flash-vl:free",
+          "model": "inclusionai/ling-3.0-flash-vl:free",
+          "status": 404,
+          "durationMs": 41.56,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_openrouter/free",
+          "model": "openrouter/free",
+          "status": 200,
+          "durationMs": 1538.71,
+          "ok": true
+        }
+      ],
+      "toolTotalMs": 508.95,
+      "toolCallsCount": 1,
+      "toolCalls": [
+        {
+          "toolName": "get_scheme_details",
+          "durationMs": 508.95
+        }
+      ],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 2061.03,
+      "responseLength": 954,
+      "responseType": "schemes"
+    },
+    {
+      "queryType": "TEST_B",
+      "label": "Specific Scheme",
+      "query": "Tell me about Green Business Scheme.",
+      "iteration": 2,
+      "isCold": false,
+      "status": "TIMEOUT",
+      "errorDetail": "Timeout after 45000ms",
+      "e2eMs": 45004.26,
+      "ttfrMs": 45004.26,
+      "backendMs": 0,
+      "llmTotalMs": 0,
+      "llmRounds": 0,
+      "llmCalls": [],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 0,
+      "responseType": "unknown"
+    },
+    {
+      "queryType": "TEST_B",
+      "label": "Specific Scheme",
+      "query": "Tell me about Green Business Scheme.",
+      "iteration": 3,
+      "isCold": false,
+      "status": "SUCCESS",
+      "e2eMs": 33875.46,
+      "ttfrMs": 33875.46,
+      "backendMs": 33864,
+      "llmTotalMs": 66480.72,
+      "llmRounds": 12,
+      "llmCalls": [
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 375.18,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_reducedTokens",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 959.17,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 500,
+          "durationMs": 25006.91,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nex-agi/nex-n2.5-mini:free",
+          "model": "nex-agi/nex-n2.5-mini:free",
+          "status": 404,
+          "durationMs": 331.91,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_inclusionai/ling-3.0-flash-vl:free",
+          "model": "inclusionai/ling-3.0-flash-vl:free",
+          "status": 404,
+          "durationMs": 332.51,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 500,
+          "durationMs": 25011.29,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nex-agi/nex-n2.5-mini:free",
+          "model": "nex-agi/nex-n2.5-mini:free",
+          "status": 404,
+          "durationMs": 99.42,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_inclusionai/ling-3.0-flash-vl:free",
+          "model": "inclusionai/ling-3.0-flash-vl:free",
+          "status": 404,
+          "durationMs": 321.45,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_openrouter/free",
+          "model": "openrouter/free",
+          "status": 200,
+          "durationMs": 2531.53,
+          "ok": true
+        },
+        {
+          "callType": "llmChat_fallback_openrouter/free",
+          "model": "openrouter/free",
+          "status": 200,
+          "durationMs": 9833.18,
+          "ok": true
+        },
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 61.64,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_reducedTokens",
+          "model": "google/gemini-2.5-flash",
+          "status": 200,
+          "durationMs": 1616.53,
+          "ok": true
+        }
+      ],
+      "toolTotalMs": 2379.39,
+      "toolCallsCount": 1,
+      "toolCalls": [
+        {
+          "toolName": "get_scheme_details",
+          "durationMs": 2379.39
+        }
+      ],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 552,
+      "responseType": "schemes"
+    },
+    {
+      "queryType": "TEST_B",
+      "label": "Specific Scheme",
+      "query": "Tell me about Green Business Scheme.",
+      "iteration": 4,
+      "isCold": false,
+      "status": "SUCCESS",
+      "e2eMs": 3478.63,
+      "ttfrMs": 3478.63,
+      "backendMs": 3468.38,
+      "llmTotalMs": 2448.9,
+      "llmRounds": 4,
+      "llmCalls": [
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 86.54,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_reducedTokens",
+          "model": "google/gemini-2.5-flash",
+          "status": 200,
+          "durationMs": 849.54,
+          "ok": true
+        },
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 64.81,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_reducedTokens",
+          "model": "google/gemini-2.5-flash",
+          "status": 200,
+          "durationMs": 1448.01,
+          "ok": true
+        }
+      ],
+      "toolTotalMs": 509.39,
+      "toolCallsCount": 1,
+      "toolCalls": [
+        {
+          "toolName": "get_scheme_details",
+          "durationMs": 509.39
+        }
+      ],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 510.09,
+      "responseLength": 604,
+      "responseType": "schemes"
+    },
+    {
+      "queryType": "TEST_B",
+      "label": "Specific Scheme",
+      "query": "Tell me about Green Business Scheme.",
+      "iteration": 5,
+      "isCold": false,
+      "status": "TIMEOUT",
+      "errorDetail": "Timeout after 45000ms",
+      "e2eMs": 45004.72,
+      "ttfrMs": 45004.72,
+      "backendMs": 0,
+      "llmTotalMs": 0,
+      "llmRounds": 0,
+      "llmCalls": [],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 0,
+      "responseType": "unknown"
+    },
+    {
+      "queryType": "TEST_C",
+      "label": "Recommendation",
+      "query": "I need a loan to start a tailoring business.",
+      "iteration": 1,
+      "isCold": false,
+      "status": "TIMEOUT",
+      "errorDetail": "Timeout after 45000ms",
+      "e2eMs": 45010.8,
+      "ttfrMs": 45010.8,
+      "backendMs": 0,
+      "llmTotalMs": 0,
+      "llmRounds": 0,
+      "llmCalls": [],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 0,
+      "responseType": "unknown"
+    },
+    {
+      "queryType": "TEST_C",
+      "label": "Recommendation",
+      "query": "I need a loan to start a tailoring business.",
+      "iteration": 2,
+      "isCold": false,
+      "status": "SUCCESS",
+      "e2eMs": 26990.16,
+      "ttfrMs": 26990.16,
+      "backendMs": 26984.26,
+      "llmTotalMs": 47147.69,
+      "llmRounds": 6,
+      "llmCalls": [
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 88.23,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_reducedTokens",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 127.1,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_openrouter/free",
+          "model": "openrouter/free",
+          "status": 200,
+          "durationMs": 22445.32,
+          "ok": true
+        },
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 39.49,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_reducedTokens",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 41.31,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 200,
+          "durationMs": 24406.24,
+          "ok": true
+        }
+      ],
+      "toolTotalMs": 268.82,
+      "toolCallsCount": 1,
+      "toolCalls": [
+        {
+          "toolName": "recommend_schemes",
+          "durationMs": 268.82
+        }
+      ],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 70,
+      "responseType": "text"
+    },
+    {
+      "queryType": "TEST_C",
+      "label": "Recommendation",
+      "query": "I need a loan to start a tailoring business.",
+      "iteration": 3,
+      "isCold": false,
+      "status": "SUCCESS",
+      "e2eMs": 32306.97,
+      "ttfrMs": 32306.97,
+      "backendMs": 32299.94,
+      "llmTotalMs": 29435.39,
+      "llmRounds": 8,
+      "llmCalls": [
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 71.48,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_reducedTokens",
+          "model": "google/gemini-2.5-flash",
+          "status": 200,
+          "durationMs": 1249.32,
+          "ok": true
+        },
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 58.84,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_reducedTokens",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 42.03,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 500,
+          "durationMs": 25013.78,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nex-agi/nex-n2.5-mini:free",
+          "model": "nex-agi/nex-n2.5-mini:free",
+          "status": 404,
+          "durationMs": 373.69,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_inclusionai/ling-3.0-flash-vl:free",
+          "model": "inclusionai/ling-3.0-flash-vl:free",
+          "status": 404,
+          "durationMs": 297.27,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_openrouter/free",
+          "model": "openrouter/free",
+          "status": 200,
+          "durationMs": 2328.98,
+          "ok": true
+        }
+      ],
+      "toolTotalMs": 259.85,
+      "toolCallsCount": 1,
+      "toolCalls": [
+        {
+          "toolName": "recommend_schemes",
+          "durationMs": 259.85
+        }
+      ],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 2604.7,
+      "responseLength": 202,
+      "responseType": "schemes"
+    },
+    {
+      "queryType": "TEST_C",
+      "label": "Recommendation",
+      "query": "I need a loan to start a tailoring business.",
+      "iteration": 4,
+      "isCold": false,
+      "status": "TIMEOUT",
+      "errorDetail": "Timeout after 45000ms",
+      "e2eMs": 45013.63,
+      "ttfrMs": 45013.63,
+      "backendMs": 0,
+      "llmTotalMs": 0,
+      "llmRounds": 0,
+      "llmCalls": [],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 0,
+      "responseType": "unknown"
+    },
+    {
+      "queryType": "TEST_C",
+      "label": "Recommendation",
+      "query": "I need a loan to start a tailoring business.",
+      "iteration": 5,
+      "isCold": false,
+      "status": "TIMEOUT",
+      "errorDetail": "Timeout after 45000ms",
+      "e2eMs": 45013.85,
+      "ttfrMs": 45013.85,
+      "backendMs": 0,
+      "llmTotalMs": 0,
+      "llmRounds": 0,
+      "llmCalls": [],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 0,
+      "responseType": "unknown"
+    },
+    {
+      "queryType": "TEST_D",
+      "label": "Education",
+      "query": "I want a loan for B.Tech education.",
+      "iteration": 1,
+      "isCold": false,
+      "status": "TIMEOUT",
+      "errorDetail": "Timeout after 45000ms",
+      "e2eMs": 45008.47,
+      "ttfrMs": 45008.47,
+      "backendMs": 0,
+      "llmTotalMs": 0,
+      "llmRounds": 0,
+      "llmCalls": [],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 0,
+      "responseType": "unknown"
+    },
+    {
+      "queryType": "TEST_D",
+      "label": "Education",
+      "query": "I want a loan for B.Tech education.",
+      "iteration": 2,
+      "isCold": false,
+      "status": "SUCCESS",
+      "e2eMs": 36991.1,
+      "ttfrMs": 36991.1,
+      "backendMs": 36985.7,
+      "llmTotalMs": 34367.31,
+      "llmRounds": 3,
+      "llmCalls": [
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 368.15,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_reducedTokens",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 367.65,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 200,
+          "durationMs": 33631.51,
+          "ok": true
+        }
+      ],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 2618.39,
+      "responseLength": 15,
+      "responseType": "text"
+    },
+    {
+      "queryType": "TEST_D",
+      "label": "Education",
+      "query": "I want a loan for B.Tech education.",
+      "iteration": 3,
+      "isCold": false,
+      "status": "SUCCESS",
+      "e2eMs": 26930.35,
+      "ttfrMs": 26930.35,
+      "backendMs": 26925.41,
+      "llmTotalMs": 117404.83,
+      "llmRounds": 4,
+      "llmCalls": [
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 62.07,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_reducedTokens",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 359.85,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 200,
+          "durationMs": 92759.01,
+          "ok": true
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 200,
+          "durationMs": 24223.9,
+          "ok": true
+        }
+      ],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 857,
+      "responseType": "text"
+    },
+    {
+      "queryType": "TEST_D",
+      "label": "Education",
+      "query": "I want a loan for B.Tech education.",
+      "iteration": 4,
+      "isCold": false,
+      "status": "SUCCESS",
+      "e2eMs": 24452.8,
+      "ttfrMs": 24452.8,
+      "backendMs": 24447.55,
+      "llmTotalMs": 374881.83,
+      "llmRounds": 5,
+      "llmCalls": [
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 392.72,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_reducedTokens",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 376.62,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 200,
+          "durationMs": 214334.32,
+          "ok": true
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 200,
+          "durationMs": 138146.03,
+          "ok": true
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 200,
+          "durationMs": 21632.14,
+          "ok": true
+        }
+      ],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 867,
+      "responseType": "text"
+    },
+    {
+      "queryType": "TEST_D",
+      "label": "Education",
+      "query": "I want a loan for B.Tech education.",
+      "iteration": 5,
+      "isCold": false,
+      "status": "SUCCESS",
+      "e2eMs": 29725.49,
+      "ttfrMs": 29725.49,
+      "backendMs": 29720.13,
+      "llmTotalMs": 27660.85,
+      "llmRounds": 3,
+      "llmCalls": [
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 96.26,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_reducedTokens",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 110.42,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 200,
+          "durationMs": 27454.17,
+          "ok": true
+        }
+      ],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 2059.28,
+      "responseLength": 759,
+      "responseType": "text"
+    },
+    {
+      "queryType": "TEST_E",
+      "label": "Follow-up (Interest Rate)",
+      "query": "What is the interest rate?",
+      "iteration": 1,
+      "isCold": false,
+      "status": "TIMEOUT",
+      "errorDetail": "Timeout after 45000ms",
+      "e2eMs": 45015.35,
+      "ttfrMs": 45015.35,
+      "backendMs": 0,
+      "llmTotalMs": 0,
+      "llmRounds": 0,
+      "llmCalls": [],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 0,
+      "responseType": "unknown"
+    },
+    {
+      "queryType": "TEST_E",
+      "label": "Follow-up (Interest Rate)",
+      "query": "What is the interest rate?",
+      "iteration": 2,
+      "isCold": false,
+      "status": "TIMEOUT",
+      "errorDetail": "Timeout after 45000ms",
+      "e2eMs": 45001.61,
+      "ttfrMs": 45001.61,
+      "backendMs": 0,
+      "llmTotalMs": 0,
+      "llmRounds": 0,
+      "llmCalls": [],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 0,
+      "responseType": "unknown"
+    },
+    {
+      "queryType": "TEST_E",
+      "label": "Follow-up (Interest Rate)",
+      "query": "What is the interest rate?",
+      "iteration": 3,
+      "isCold": false,
+      "status": "SUCCESS",
+      "e2eMs": 25980.35,
+      "ttfrMs": 25980.35,
+      "backendMs": 25973.97,
+      "llmTotalMs": 175224.07,
+      "llmRounds": 5,
+      "llmCalls": [
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 347.87,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_reducedTokens",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 335.46,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 200,
+          "durationMs": 99155.02,
+          "ok": true
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 200,
+          "durationMs": 52164.1,
+          "ok": true
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 200,
+          "durationMs": 23221.62,
+          "ok": true
+        }
+      ],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 946,
+      "responseType": "text"
+    },
+    {
+      "queryType": "TEST_E",
+      "label": "Follow-up (Interest Rate)",
+      "query": "What is the interest rate?",
+      "iteration": 4,
+      "isCold": false,
+      "status": "TIMEOUT",
+      "errorDetail": "Timeout after 45000ms",
+      "e2eMs": 45015.99,
+      "ttfrMs": 45015.99,
+      "backendMs": 0,
+      "llmTotalMs": 0,
+      "llmRounds": 0,
+      "llmCalls": [],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 0,
+      "responseType": "unknown"
+    },
+    {
+      "queryType": "TEST_E",
+      "label": "Follow-up (Interest Rate)",
+      "query": "What is the interest rate?",
+      "iteration": 5,
+      "isCold": false,
+      "status": "TIMEOUT",
+      "errorDetail": "Timeout after 45000ms",
+      "e2eMs": 45014.4,
+      "ttfrMs": 45014.4,
+      "backendMs": 0,
+      "llmTotalMs": 0,
+      "llmRounds": 0,
+      "llmCalls": [],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 0,
+      "responseType": "unknown"
+    },
+    {
+      "queryType": "TEST_F",
+      "label": "Contextual Follow-up (Tenure)",
+      "query": "Can I get this loan for 5 years?",
+      "iteration": 1,
+      "isCold": false,
+      "status": "SUCCESS",
+      "e2eMs": 29522.91,
+      "ttfrMs": 29522.91,
+      "backendMs": 29517.59,
+      "llmTotalMs": 55105.09,
+      "llmRounds": 10,
+      "llmCalls": [
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 95.75,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_reducedTokens",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 403.96,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 500,
+          "durationMs": 25005.94,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nex-agi/nex-n2.5-mini:free",
+          "model": "nex-agi/nex-n2.5-mini:free",
+          "status": 404,
+          "durationMs": 147.49,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_inclusionai/ling-3.0-flash-vl:free",
+          "model": "inclusionai/ling-3.0-flash-vl:free",
+          "status": 404,
+          "durationMs": 42.36,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_openrouter/free",
+          "model": "openrouter/free",
+          "status": 200,
+          "durationMs": 2424.72,
+          "ok": true
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 500,
+          "durationMs": 25010.9,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nex-agi/nex-n2.5-mini:free",
+          "model": "nex-agi/nex-n2.5-mini:free",
+          "status": 404,
+          "durationMs": 388.07,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_inclusionai/ling-3.0-flash-vl:free",
+          "model": "inclusionai/ling-3.0-flash-vl:free",
+          "status": 404,
+          "durationMs": 44.16,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_openrouter/free",
+          "model": "openrouter/free",
+          "status": 200,
+          "durationMs": 1541.74,
+          "ok": true
+        }
+      ],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 268,
+      "responseType": "schemes"
+    },
+    {
+      "queryType": "TEST_F",
+      "label": "Contextual Follow-up (Tenure)",
+      "query": "Can I get this loan for 5 years?",
+      "iteration": 2,
+      "isCold": false,
+      "status": "SUCCESS",
+      "e2eMs": 30473.04,
+      "ttfrMs": 30473.04,
+      "backendMs": 30468.52,
+      "llmTotalMs": 28413.43,
+      "llmRounds": 6,
+      "llmCalls": [
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 106.84,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_reducedTokens",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 391.8,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 500,
+          "durationMs": 25014.23,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nex-agi/nex-n2.5-mini:free",
+          "model": "nex-agi/nex-n2.5-mini:free",
+          "status": 404,
+          "durationMs": 84.87,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_inclusionai/ling-3.0-flash-vl:free",
+          "model": "inclusionai/ling-3.0-flash-vl:free",
+          "status": 404,
+          "durationMs": 307.14,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_openrouter/free",
+          "model": "openrouter/free",
+          "status": 200,
+          "durationMs": 2508.55,
+          "ok": true
+        }
+      ],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 2055.09,
+      "responseLength": 260,
+      "responseType": "schemes"
+    },
+    {
+      "queryType": "TEST_F",
+      "label": "Contextual Follow-up (Tenure)",
+      "query": "Can I get this loan for 5 years?",
+      "iteration": 3,
+      "isCold": false,
+      "status": "SUCCESS",
+      "e2eMs": 31871.33,
+      "ttfrMs": 31871.33,
+      "backendMs": 31866.07,
+      "llmTotalMs": 29532.46,
+      "llmRounds": 3,
+      "llmCalls": [
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 98.68,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_reducedTokens",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 65,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 200,
+          "durationMs": 29368.78,
+          "ok": true
+        }
+      ],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 2333.61,
+      "responseLength": 725,
+      "responseType": "schemes"
+    },
+    {
+      "queryType": "TEST_F",
+      "label": "Contextual Follow-up (Tenure)",
+      "query": "Can I get this loan for 5 years?",
+      "iteration": 4,
+      "isCold": false,
+      "status": "SUCCESS",
+      "e2eMs": 23215.1,
+      "ttfrMs": 23215.1,
+      "backendMs": 23209.98,
+      "llmTotalMs": 21213.02,
+      "llmRounds": 3,
+      "llmCalls": [
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 44.79,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_reducedTokens",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 119.47,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 200,
+          "durationMs": 21048.76,
+          "ok": true
+        }
+      ],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 1996.96,
+      "responseLength": 44,
+      "responseType": "schemes"
+    },
+    {
+      "queryType": "TEST_F",
+      "label": "Contextual Follow-up (Tenure)",
+      "query": "Can I get this loan for 5 years?",
+      "iteration": 5,
+      "isCold": false,
+      "status": "TIMEOUT",
+      "errorDetail": "Timeout after 45000ms",
+      "e2eMs": 45003.31,
+      "ttfrMs": 45003.31,
+      "backendMs": 0,
+      "llmTotalMs": 0,
+      "llmRounds": 0,
+      "llmCalls": [],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 0,
+      "responseType": "unknown"
+    },
+    {
+      "queryType": "TEST_G",
+      "label": "General Scheme Discovery",
+      "query": "What loan schemes are available to me?",
+      "iteration": 1,
+      "isCold": false,
+      "status": "TIMEOUT",
+      "errorDetail": "Timeout after 45000ms",
+      "e2eMs": 45007.63,
+      "ttfrMs": 45007.63,
+      "backendMs": 0,
+      "llmTotalMs": 0,
+      "llmRounds": 0,
+      "llmCalls": [],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 0,
+      "responseType": "unknown"
+    },
+    {
+      "queryType": "TEST_G",
+      "label": "General Scheme Discovery",
+      "query": "What loan schemes are available to me?",
+      "iteration": 2,
+      "isCold": false,
+      "status": "TIMEOUT",
+      "errorDetail": "Timeout after 45000ms",
+      "e2eMs": 45015.04,
+      "ttfrMs": 45015.04,
+      "backendMs": 0,
+      "llmTotalMs": 0,
+      "llmRounds": 0,
+      "llmCalls": [],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 0,
+      "responseType": "unknown"
+    },
+    {
+      "queryType": "TEST_G",
+      "label": "General Scheme Discovery",
+      "query": "What loan schemes are available to me?",
+      "iteration": 3,
+      "isCold": false,
+      "status": "SUCCESS",
+      "e2eMs": 17151.91,
+      "ttfrMs": 17151.91,
+      "backendMs": 17146.99,
+      "llmTotalMs": 112390.34,
+      "llmRounds": 4,
+      "llmCalls": [
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 83.84,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_reducedTokens",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 71.47,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 200,
+          "durationMs": 97242.44,
+          "ok": true
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 200,
+          "durationMs": 14992.59,
+          "ok": true
+        }
+      ],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 839,
+      "responseType": "text"
+    },
+    {
+      "queryType": "TEST_G",
+      "label": "General Scheme Discovery",
+      "query": "What loan schemes are available to me?",
+      "iteration": 4,
+      "isCold": false,
+      "status": "SUCCESS",
+      "e2eMs": 19677.72,
+      "ttfrMs": 19677.72,
+      "backendMs": 19672.76,
+      "llmTotalMs": 17686.47,
+      "llmRounds": 3,
+      "llmCalls": [
+        {
+          "callType": "llmChat_initial",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 52.18,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_reducedTokens",
+          "model": "google/gemini-2.5-flash",
+          "status": 402,
+          "durationMs": 60.27,
+          "ok": false
+        },
+        {
+          "callType": "llmChat_fallback_nvidia/nemotron-3.5-lightning:free",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "status": 200,
+          "durationMs": 17574.02,
+          "ok": true
+        }
+      ],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 1986.29,
+      "responseLength": 870,
+      "responseType": "text"
+    },
+    {
+      "queryType": "TEST_G",
+      "label": "General Scheme Discovery",
+      "query": "What loan schemes are available to me?",
+      "iteration": 5,
+      "isCold": false,
+      "status": "TIMEOUT",
+      "errorDetail": "Timeout after 45000ms",
+      "e2eMs": 45003.33,
+      "ttfrMs": 45003.33,
+      "backendMs": 0,
+      "llmTotalMs": 0,
+      "llmRounds": 0,
+      "llmCalls": [],
+      "toolTotalMs": 0,
+      "toolCallsCount": 0,
+      "toolCalls": [],
+      "dbTotalMs": 0,
+      "orchestrationOverheadMs": 0,
+      "responseLength": 0,
+      "responseType": "unknown"
+    }
+  ]
+}
