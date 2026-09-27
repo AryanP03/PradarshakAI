@@ -293,6 +293,7 @@ export default function PartnersTab() {
                 key={p.id}
                 partner={p as unknown as Parameters<typeof PartnerResultCard>[0]['partner']}
                 rank={i + 1}
+                searchedLocation={city}
               />
             ))}
           </div>

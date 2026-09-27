@@ -671,9 +671,14 @@ function PartnersContent() {
                 {filteredPartners.map((partner) => (
                   <PartnerResultCard
                     key={partner.id}
-                    partner={partner}
+                    partner={partner as any}
                     isSelected={selectedPartner?.id === partner.id}
-                    onSelect={() => setSelectedPartner(partner)}
+                    onSelect={() => setSelectedPartner(partner as any)}
+                    searchedLocation={
+                      activeLocation.coords
+                        ? `${activeLocation.coords.lat},${activeLocation.coords.lng}`
+                        : activeLocation.label
+                    }
                   />
                 ))}
               </div>

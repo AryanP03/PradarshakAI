@@ -563,6 +563,7 @@ function MessageBubble({
                 key={i}
                 partner={p as Parameters<typeof PartnerResultCard>[0]['partner']}
                 rank={i + 1}
+                searchedLocation={msg.toolData?.location as string | undefined}
               />
             ))}
           </div>

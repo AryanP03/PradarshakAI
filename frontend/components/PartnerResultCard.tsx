@@ -53,9 +53,10 @@ interface PartnerResultCardProps {
   isSelected?: boolean;
   onSelect?: () => void;
   rank?: number;
+  searchedLocation?: string;
 }
 
-export default function PartnerResultCard({ partner, isSelected, onSelect }: PartnerResultCardProps) {
+export default function PartnerResultCard({ partner, isSelected, onSelect, searchedLocation }: PartnerResultCardProps) {
   const { t } = useLanguage();
   const meta = TYPE_CONFIG[partner.partner_type] || TYPE_CONFIG.default;
   const Icon = meta.Icon;
@@ -63,6 +64,16 @@ export default function PartnerResultCard({ partner, isSelected, onSelect }: Par
 
   const categories = partner.eligible_categories || partner.supported_schemes || [];
   const isVerified = !partner.verification_status || partner.verification_status === 'verified';
+
+  const destinationAddress = [partner.name, partner.address, partner.city, partner.district, partner.state, partner.pin_code]
+    .filter(Boolean)
+    .join(', ');
+
+  const isCurrentLocation = searchedLocation?.trim().toLowerCase() === 'current location';
+
+  const mapsUrl = `https://www.google.com/maps/dir/?api=1${
+    (searchedLocation && !isCurrentLocation) ? `&origin=${encodeURIComponent(searchedLocation)}` : ''
+  }&destination=${encodeURIComponent(destinationAddress)}&travelmode=driving`;
 
   return (
     <div
@@ -312,7 +323,7 @@ export default function PartnerResultCard({ partner, isSelected, onSelect }: Par
         </div>
 
         {/* Action Buttons / Links */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
           {partner.phone && (
             <a
               href={`tel:${partner.phone}`}
@@ -355,6 +366,29 @@ export default function PartnerResultCard({ partner, isSelected, onSelect }: Par
             >
               <Globe size={12} />
               <span>{t('partner.website', 'Website')}</span>
+            </a>
+          )}
+          {destinationAddress && (
+            <a
+              href={mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+                padding: '6px 10px',
+                borderRadius: 8,
+                background: '#f1f5f9',
+                color: '#0b1f3a',
+                fontSize: 12,
+                fontWeight: 600,
+                textDecoration: 'none',
+              }}
+            >
+              <MapPin size={12} color="#ea580c" />
+              <span>{t('partner.maps', 'View on Google Maps')}</span>
             </a>
           )}
         </div>
