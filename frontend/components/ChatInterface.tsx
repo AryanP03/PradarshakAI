@@ -52,6 +52,7 @@ interface Message {
   quickActions?: ChatResponse['quickActions'];
   disclaimer?: string;
   speechText?: string;
+  toolData?: Record<string, unknown>;
   /** True only for freshly-received assistant replies — drives the typing
    *  animation. Messages loaded from chat history render instantly. */
   animate?: boolean;
@@ -563,7 +564,7 @@ function MessageBubble({
                 key={i}
                 partner={p as Parameters<typeof PartnerResultCard>[0]['partner']}
                 rank={i + 1}
-                searchedLocation={msg.toolData?.location as string | undefined}
+                searchedLocation={((msg.data?.location || msg.toolData?.location) as string | undefined)}
               />
             ))}
           </div>

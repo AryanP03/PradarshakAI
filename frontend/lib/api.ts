@@ -16,6 +16,7 @@ export interface ChatResponse {
   detectedLanguage: string;
   intent: string;
   speechText?: string;
+  toolData?: Record<string, unknown>;
 }
 
 export interface UserProfile {
