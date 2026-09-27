@@ -78,6 +78,7 @@ export default function ComparisonCard({
   const maxTenure = Math.max(...schemes.map((s) => Number(s.max_tenure_months) || 0));
 
   const rateRange = (s: Scheme) => {
+    if (s.interest_rate_min == null) return 'N/A';
     return s.interest_rate_min === s.interest_rate_max
       ? `${s.interest_rate_min}% ${t('scheme.per_annum')}`
       : `${s.interest_rate_min}–${s.interest_rate_max}% ${t('scheme.per_annum')}`;
@@ -162,7 +163,7 @@ export default function ComparisonCard({
     },
     {
       label: t('compare.income_limit'),
-      render: (s) => <span className="comparison-cell-value" style={{ fontWeight: 600 }}>≤ {fmt(s.max_income_lakh)}</span>,
+      render: (s) => <span className="comparison-cell-value" style={{ fontWeight: 600 }}>{s.max_income_lakh != null && s.max_income_lakh > 0 ? `≤ ${fmt(s.max_income_lakh)}` : 'No Limit'}</span>,
     },
     {
       label: t('compare.tenure'),

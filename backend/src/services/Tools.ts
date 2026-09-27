@@ -56,7 +56,7 @@ export const TOOL_DEFS: ToolDef[] = [
           gender: { type: 'string', enum: ['male', 'female'] },
           location: { type: 'string', description: 'City or district' },
           state: { type: 'string', description: 'State of residence of beneficiary (e.g. Maharashtra, Gujarat, Delhi, Tamil Nadu, etc.)' },
-          category_hint: { type: 'string', enum: ['education_loan', 'business_loan'], description: 'Set to education_loan for education/study queries, business_loan for business/trade queries' },
+          category_hint: { type: 'string', enum: ['education_loan', 'business_loan', 'housing', 'welfare'], description: 'Set to education_loan for education/study, business_loan for business/trade, housing for home purchase/construction, welfare for insurance/health/pension/general welfare' },
         },
       },
     },

@@ -685,11 +685,11 @@ The user wants to learn more about the following government/financial scheme:
 
 Scheme: ${s.name}
 Category: ${s.category}
-Interest Rate: ${s.interest_rate_min === s.interest_rate_max ? `${s.interest_rate_min}% p.a.` : `${s.interest_rate_min}%–${s.interest_rate_max}% p.a.`}
-Maximum Loan: ₹${s.max_loan_lakh} Lakh${s.min_loan_lakh ? ` (Minimum: ₹${s.min_loan_lakh} Lakh)` : ''}
-Family Annual Income Ceiling: ≤ ₹${s.max_income_lakh} Lakh
-Repayment Tenure: Up to ${s.max_tenure_months} months
-Moratorium / Grace Period: ${s.moratorium_months_min}–${s.moratorium_months_max} months
+Interest Rate: ${s.interest_rate_min == null ? 'N/A' : s.interest_rate_min === s.interest_rate_max ? `${s.interest_rate_min}% p.a.` : `${s.interest_rate_min}%–${s.interest_rate_max}% p.a.`}
+Maximum Loan: ${s.max_loan_lakh != null && s.max_loan_lakh > 0 ? `₹${s.max_loan_lakh} Lakh` : s.max_loan_lakh === 0 ? '₹0' : 'No Limit'}${s.min_loan_lakh ? ` (Minimum: ₹${s.min_loan_lakh} Lakh)` : ''}
+Family Annual Income Ceiling: ${s.max_income_lakh != null && s.max_income_lakh > 0 ? `≤ ₹${s.max_income_lakh} Lakh` : 'No Limit'}
+Repayment Tenure: ${s.max_tenure_months != null && s.max_tenure_months > 0 ? `Up to ${s.max_tenure_months} months` : 'Flexible'}
+Moratorium / Grace Period: ${!s.moratorium_months_max || s.moratorium_months_max === 0 ? 'None' : `${s.moratorium_months_min || 0}–${s.moratorium_months_max} months`}
 Target Beneficiaries: ${s.gender_eligibility === 'women_only' ? 'SC Women Only' : 'All SC Beneficiaries'}
 Eligible Activities: ${(s.eligible_project_types || []).join(', ')}
 Routing / Channel Partners: ${(s.channel_partner_types || []).join(', ')}

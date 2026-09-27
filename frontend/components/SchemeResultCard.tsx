@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, AlertTriangle, Calculator, Sparkles, BookOpen, FileText } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, Calculator, Sparkles, BookOpen, FileText, Globe } from 'lucide-react';
 import Interactive3DCard from './Interactive3DCard';
 import VoiceButton from './VoiceButton';
 import { useLanguage } from '@/context/LanguageContext';
@@ -31,6 +31,7 @@ interface Scheme {
   match_percentage?: number;
   matchReasons?: string[];
   warnings?: string[];
+  official_source_url?: string;
 }
 
 function getDisplayMatchPercentage(scheme: { score?: number; match_percentage?: number }): number {
@@ -162,15 +163,43 @@ export default function SchemeResultCard({
           </h3>
         </div>
 
-        {scheme.score !== undefined && (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-end',
-              flexShrink: 0,
-            }}
-          >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            flexShrink: 0,
+          }}
+        >
+          {scheme.official_source_url && (
+            <a
+              href={scheme.official_source_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '5px 10px',
+                borderRadius: 6,
+                background: '#f1f5f9',
+                border: '1px solid #e2e8f0',
+                color: '#475569',
+                fontSize: 11.5,
+                fontWeight: 600,
+                textDecoration: 'none',
+                transition: 'all 0.2s',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = '#e2e8f0')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = '#f1f5f9')}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Globe size={13} />
+              Visit Portal
+            </a>
+          )}
+          {scheme.score !== undefined && (
             <span
               style={{
                 fontSize: 13.5,
@@ -184,18 +213,17 @@ export default function SchemeResultCard({
             >
               {getDisplayMatchPercentage(scheme)}% {t('scheme.match')}
             </span>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* Metrics Row */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5">
         <div style={{ background: '#fbf9f8', border: '1px solid #e4e2e1', borderRadius: 8, padding: '10px 8px', textAlign: 'center' }}>
           <span style={{ fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', color: '#64748b', display: 'block', marginBottom: 2 }}>
             {t('scheme.max_loan')}
           </span>
           <strong style={{ fontSize: 14, fontWeight: 800, color: '#001e40' }}>
-            {fmt(scheme.max_loan_lakh * 100000)}
+            {scheme.max_loan_lakh != null && scheme.max_loan_lakh > 0 ? fmt(scheme.max_loan_lakh * 100000) : scheme.max_loan_lakh === 0 ? '₹0' : 'No Limit'}
           </strong>
         </div>
 
@@ -204,7 +232,9 @@ export default function SchemeResultCard({
             {t('scheme.interest_rate')}
           </span>
           <strong style={{ fontSize: 14, fontWeight: 800, color: '#15803d' }}>
-            {scheme.interest_rate_min === scheme.interest_rate_max
+            {scheme.interest_rate_min == null
+              ? 'N/A'
+              : scheme.interest_rate_min === scheme.interest_rate_max
               ? `${scheme.interest_rate_min}% ${t('scheme.per_annum')}`
               : `${scheme.interest_rate_min}–${scheme.interest_rate_max}%`}
           </strong>
@@ -215,7 +245,7 @@ export default function SchemeResultCard({
             {t('scheme.income_limit')}
           </span>
           <strong style={{ fontSize: 14, fontWeight: 800, color: '#43474f' }}>
-            ≤ {fmt(scheme.max_income_lakh * 100000)}
+            {scheme.max_income_lakh != null && scheme.max_income_lakh > 0 ? `≤ ${fmt(scheme.max_income_lakh * 100000)}` : 'No Limit'}
           </strong>
         </div>
       </div>

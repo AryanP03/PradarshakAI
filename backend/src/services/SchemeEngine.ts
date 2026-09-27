@@ -257,6 +257,9 @@ export async function fetchActiveSchemes(categoryHint?: string, userState?: stri
     query += ` AND category = $${params.length}`;
   } else if (categoryHint === 'business_loan') {
     query += " AND category NOT IN ('education_loan', 'skill_development', 'other_programme', 'welfare')";
+  } else if (categoryHint === 'housing') {
+    // Housing schemes are technically under 'welfare' in the DB schema
+    query += " AND category = 'welfare'";
   } else if (categoryHint) {
     params.push(categoryHint);
     query += ` AND category = $${params.length}`;
@@ -526,6 +529,30 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
     }
   }
 
+  // Rural / Urban semantic match
+  const ruralWords = ['rural', 'village', 'gaon', 'gram', 'gramin', 'गांव', 'ग्राम', 'ग्रामीण', 'ગામ', 'ಗ್ರಾಮ', 'ഗ്രാമം', 'கிராமம்', 'పల్లె', 'ଗାଁ', 'ਪਿੰਡ'];
+  const urbanWords = ['urban', 'city', 'town', 'municipal', 'metro', 'shahar', 'nagarpalika', 'शहर', 'नगर'];
+
+  const isRuralQuery = ruralWords.some((w) => normP.includes(w));
+  const isUrbanQuery = urbanWords.some((w) => normP.includes(w));
+  const isRuralScheme = normalizedTypes.some(t => t.includes('rural')) || /gramin|rural/i.test(scheme.name);
+  const isUrbanScheme = normalizedTypes.some(t => t.includes('urban')) || /urban/i.test(scheme.name);
+
+  if (isRuralQuery && isUrbanScheme && !isRuralScheme) {
+    tagMatchScore -= 60;
+  }
+  if (isUrbanQuery && isRuralScheme && !isUrbanScheme) {
+    tagMatchScore -= 60;
+  }
+  if (isRuralQuery && isRuralScheme) {
+    tagMatchScore += 45;
+    matchingTagCount++;
+  }
+  if (isUrbanQuery && isUrbanScheme) {
+    tagMatchScore += 45;
+    matchingTagCount++;
+  }
+
   // Housing specialized semantic match
   const housingWords = [
     'housing', 'house', 'home', 'awas', 'residential', 'shelter', 'flat', 'property',
@@ -593,11 +620,11 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
   const greenWords = ['green', 'electric', 'rickshaw', 'solar', 'biogas', 'polyhouse', 'organic', 'eco', 'renewable', 'ev', 'ई-रिक्शा', 'सौर', 'पर्यावरण'];
   const artisanWords = ['artisan', 'handicraft', 'weaving', 'craft', 'pottery', 'woodwork', 'sculpture', 'textile', 'carpet', 'embroidery', 'शिल्पकार', 'बुनकर', 'हस्तकला', 'हस्तशिल्प'];
   const businessWords = ['tailoring', 'shop', 'grocery', 'kirana', 'trade', 'enterprise', 'business', 'store', 'restaurant', 'hotel', 'manufacturing', 'repair', 'auto', 'rickshaw', 'सिलाई', 'दुकान', 'व्यापार', 'व्यवसाय', 'शिलाई', 'उद्योग'];
-  const agriWords = ['agriculture', 'farming', 'poultry', 'animal', 'cattle', 'horticulture', 'dairy', 'crop', 'fisheries', 'खेती', 'कृषि', 'डेयरी', 'पशुपालन', 'शेतकरी'];
+  const agriWords = ['agriculture', 'farming', 'farm', 'agro', 'poultry', 'animal', 'cattle', 'horticulture', 'dairy', 'crop', 'fisheries', 'खेती', 'कृषि', 'डेयरी', 'पशुपालन', 'शेतकरी'];
   const techWords = ['saas', 'software', 'tech', 'it', 'b2b', 'supplier', 'suppliers', 'supply', 'logistics', 'services', 'agency', 'wholesale', 'सॉफ्टवेयर', 'तकनीक', 'सप्लायर'];
   const educationWords = [
-    'education', 'study', 'college', 'school', 'engineering', 'medical', 'degree', 'student',
-    'scholarship', 'university', 'course', 'vocational', 'tuition', 'btech', 'mtech', 'mba', 'mbbs',
+    'education', 'study', 'college', 'school', 'engineering', 'mbbs', 'degree', 'student',
+    'scholarship', 'university', 'course', 'vocational', 'tuition', 'btech', 'mtech', 'mba',
     'शिक्षा', 'पढ़ाई', 'सिक्षा', 'शिक्षण', 'इंजीनियरिंग', 'कोर्स',
     'ಶಿಕ್ಷಣ', 'ಸಾಹಿತ್ಯ', 'ಅಧ್ಯಯನ', 'ಕಾಲೇಜು', 'ವಿದ್ಯಾಭ್ಯಾಸ', 'ಎಂಜಿನಿಯರಿಂಗ್',
     'શિક્ષણ', 'கல்வி', 'విద్య', 'വിദ്യാഭ്യാസം', 'ଶିକ୍ଷା', 'ਸਿੱਖਿਆ'
@@ -609,32 +636,39 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
   const isAgriScheme = normalizedTypes.some((t) => /agri|farm|dairy|poultry|crop|livestock|fisher|cattle|animal/.test(t));
   const isEducationScheme = scheme.category === 'education_loan' || scheme.education_required || normalizedTypes.some((t) => /education|course|degree|school|college|scholarship|study/.test(t));
 
-  if (educationWords.some((w) => normP.includes(w))) {
+  const matchWords = (words: string[]) => words.some(w => /^[a-z0-9]+$/i.test(w) ? new RegExp(`\\b${w}\\b`, 'i').test(normP) : normP.includes(w));
+
+  if (matchWords(educationWords)) {
     if (isEducationScheme) return Math.max(50, tagMatchScore);
     return -15;
   }
-  if (sanitationWords.some((w) => normP.includes(w))) {
+  if (matchWords(sanitationWords)) {
     if (isSanitationScheme) return Math.max(50, tagMatchScore);
     return 5;
   }
-  if (greenWords.some((w) => normP.includes(w))) {
+  if (matchWords(greenWords)) {
     if (isGreenScheme) return Math.max(50, tagMatchScore);
     return 10;
   }
-  if (artisanWords.some((w) => normP.includes(w))) {
+  if (matchWords(artisanWords)) {
     if (isArtisanScheme) return Math.max(50, tagMatchScore);
     return 10;
   }
-  if (agriWords.some((w) => normP.includes(w))) {
-    if (isAgriScheme) return Math.max(50, tagMatchScore);
+  if (matchWords(agriWords)) {
+    if (isAgriScheme) {
+      const isDedicatedAgri = /kisan|krishi|fasal|agri/i.test(scheme.name) || 
+        (normalizedTypes.filter(t => /agri|farm|dairy|poultry|crop|livestock|fisher|cattle|animal/.test(t)).length / Math.max(1, normalizedTypes.length)) > 0.4;
+      if (isDedicatedAgri) return Math.min(95, Math.max(85, tagMatchScore + 35));
+      return Math.max(50, tagMatchScore);
+    }
     if (scheme.category === 'entrepreneurship' || normalizedTypes.includes('manufacturing')) return 30;
     return 5;
   }
-  if (techWords.some((w) => normP.includes(w))) {
+  if (matchWords(techWords)) {
     if (normalizedTypes.some((t) => /services|technology|software|startup|innovation/.test(t))) return 40;
     return 5;
   }
-  if (businessWords.some((w) => normP.includes(w))) {
+  if (matchWords(businessWords)) {
     if (normP.includes('सिलाई') || normP.includes('tailoring') || normP.includes('शिलाई')) {
       if (normalizedTypes.some((t) => t.includes('tailoring'))) return 50;
     }
@@ -712,13 +746,13 @@ function educationScore(scheme: Scheme, isEducation: boolean): number {
   return 5;
 }
 
-function genderScore(scheme: Scheme, gender: string | undefined): { score: number; warning?: string } {
+function genderScore(scheme: Scheme, gender: string | undefined): { score: number; warning?: string; disqualified?: boolean } {
   const isWomenOnly = scheme.gender_eligibility === 'women_only' || scheme.name.toLowerCase().includes('mahila');
   if (isWomenOnly) {
     if (gender === 'female') {
       return { score: 25 };
     }
-    return { score: -300, warning: 'This scheme is exclusively for women applicants' };
+    return { score: -300, warning: 'This scheme is exclusively for women applicants', disqualified: true };
   }
   return { score: 0 };
 }
@@ -762,6 +796,7 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
   const scored = schemes
     .map((scheme): ScoredScheme => {
       let score = 0;
+      let tier: SchemeTier = 'ELIGIBLE_SUBOPTIMAL';
       const matchReasons: string[] = [];
       const warnings: string[] = [];
 
@@ -816,23 +851,27 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
         }
       }
 
-      let { score: gScore, warning: gWarn } = genderScore(scheme, entities.gender);
+      let { score: gScore, warning: gWarn, disqualified: gDisqualified } = genderScore(scheme, entities.gender);
       if (isDirectMatch && gScore < 0) {
         gScore = 0;
       }
       score += gScore;
       if (gWarn) warnings.push(gWarn);
+      if (gDisqualified) tier = 'HARD_DISQUALIFIED';
       else if (entities.gender === 'female' && gScore > 0) matchReasons.push('Exclusive concessional scheme for women entrepreneurs');
 
       score += Math.max(0, (10 - Number(scheme.interest_rate_min || 6)) * 2);
 
       // --- 3-TIER DETERMINISTIC CLASSIFICATION ---
-      let tier: SchemeTier = 'ELIGIBLE_SUBOPTIMAL';
       let disqualificationReason: string | undefined = undefined;
 
       const loanLakh = entities.loan_amount_rs ? entities.loan_amount_rs / 100000 : null;
       const incomeLakh = entities.family_income_rs ? entities.family_income_rs / 100000 : null;
       const isWomenOnly = scheme.gender_eligibility === 'women_only' || scheme.name.toLowerCase().includes('mahila');
+      
+      if (scheme.id === 3) {
+        console.log(`[DEBUG ID 3] isWomenOnly: ${isWomenOnly}, entities.gender: ${entities.gender}, name: ${scheme.name}`);
+      }
 
       const schemeMaxLoan = Number(scheme.max_loan_lakh || 0);
       const schemeMaxIncome = Number(scheme.max_income_lakh || 0);
@@ -841,11 +880,9 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
         ['tailor', 'tailoring', 'sewing', 'business', 'shop', 'kirana', 'dairy', 'machine', 'transport', 'auto', 'सिलाई', 'शिलाई', 'दुकान', 'व्यापार'].some(w => pNorm.includes(w));
 
       // Boundary check 0: State eligibility (Hard filter)
-      if (scheme.state && scheme.state !== 'Central') {
-        if (!userState || scheme.state.toLowerCase() !== userState.toLowerCase()) {
-          tier = 'HARD_DISQUALIFIED';
-          disqualificationReason = `This scheme is exclusively for residents of ${scheme.state}.`;
-        }
+      if (scheme.state && scheme.state !== 'Central' && (!userState || scheme.state.toLowerCase() !== userState.toLowerCase())) {
+        tier = 'HARD_DISQUALIFIED';
+        disqualificationReason = `This scheme is exclusively for residents of ${scheme.state}.`;
       }
       // Boundary check 1: Loan ceiling exceeded (e.g. ₹55L > ₹50L Term Loan cap) or non-loan scheme when loan requested
       else if (loanLakh && (schemeMaxLoan === 0 || loanLakh > schemeMaxLoan)) {
@@ -868,9 +905,9 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
         disqualificationReason = `Annual family income (₹${incomeLakh.toFixed(1)}L) exceeds the statutory eligibility cap of ₹${schemeMaxIncome.toFixed(1)}L/yr for this scheme.`;
       }
       // Boundary check 3: Gender exclusivity
-      else if (isWomenOnly && entities.gender && entities.gender !== 'female' && !isDirectMatch) {
+      else if (isWomenOnly && entities.gender && entities.gender !== 'female') {
         tier = 'HARD_DISQUALIFIED';
-        disqualificationReason = `This scheme is exclusively reserved for women entrepreneurs.`;
+        disqualificationReason = `This scheme is exclusively reserved for women applicants.`;
       }
       // Boundary check 4: Education requirement when completely non-educational
       else if (scheme.education_required && !isEducation && !isDirectMatch) {
