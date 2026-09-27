@@ -118,7 +118,9 @@ export default function SchemeCard({ scheme, onSelect, selected }: Props) {
             <span className="text-[11px] leading-tight text-muted truncate">{t('schemes.tenure', 'Tenure')}</span>
           </div>
           <span className="text-sm font-bold text-on-surface block">
-            {Math.round(scheme.max_tenure_months / 12)}yr
+            {scheme.max_tenure_months && scheme.max_tenure_months > 0
+              ? `${Math.round(scheme.max_tenure_months / 12)}yr`
+              : 'Flexible'}
           </span>
         </div>
       </div>

@@ -244,15 +244,19 @@ function SchemeCard({
 
         {/* Parameter Details */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, fontSize: 11.5, color: '#64748b', paddingTop: 2 }}>
-          <span style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: 6 }}>
-            {t('schemes.income_limit', 'Income limit:')} ≤ ₹{scheme.max_income_lakh}L/yr
-          </span>
-          <span style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: 6 }}>
-            {t('schemes.tenure', 'Tenure: up to')} {scheme.max_tenure_months} mo
-          </span>
-          {scheme.moratorium_months_max > 0 && (
+          {scheme.max_income_lakh != null && scheme.max_income_lakh > 0 && (
             <span style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: 6 }}>
-              {t('schemes.moratorium', 'Moratorium:')} {scheme.moratorium_months_min}–{scheme.moratorium_months_max} mo
+              {t('schemes.income_limit', 'Income limit:')} ≤ ₹{scheme.max_income_lakh}L/yr
+            </span>
+          )}
+          {scheme.max_tenure_months != null && scheme.max_tenure_months > 0 && (
+            <span style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: 6 }}>
+              {t('schemes.tenure', 'Tenure: up to')} {scheme.max_tenure_months} mo
+            </span>
+          )}
+          {scheme.moratorium_months_max != null && scheme.moratorium_months_max > 0 && (
+            <span style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: 6 }}>
+              {t('schemes.moratorium', 'Moratorium:')} {scheme.moratorium_months_min ?? 0}–{scheme.moratorium_months_max} mo
             </span>
           )}
         </div>

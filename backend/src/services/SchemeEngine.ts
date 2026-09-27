@@ -40,12 +40,15 @@ export interface Scheme {
   state?: string;
   level?: string;
   family_income_limit?: string | null;
+  education_level?: string | null;
+  education_levels?: string[] | null;
 }
 
 export type SchemeTier = 'ELIGIBLE_OPTIMAL' | 'ELIGIBLE_SUBOPTIMAL' | 'HARD_DISQUALIFIED';
 
 export interface ScoredScheme extends Scheme {
   score: number;
+  match_percentage?: number;
   tier: SchemeTier;
   matchReasons: string[];
   warnings: string[];
@@ -129,6 +132,83 @@ export const CITY_STATE_MAP: Record<string, string> = {
   // Chhattisgarh
   'raipur': 'Chhattisgarh', 'bhilai': 'Chhattisgarh', 'bilaspur': 'Chhattisgarh', 'korba': 'Chhattisgarh', 'durg': 'Chhattisgarh', 'cg': 'Chhattisgarh'
 };
+
+export type EducationLevelStage =
+  | 'pre_matric'
+  | 'post_matric'
+  | 'undergraduate'
+  | 'postgraduate'
+  | 'doctoral'
+  | 'overseas'
+  | 'vocational'
+  | 'not_applicable';
+
+export function normalizeEducationLevel(level?: string | null): EducationLevelStage | null {
+  if (!level) return null;
+  const l = level.trim().toLowerCase().replace(/[- ]/g, '_');
+  if (['school', 'pre_matric', 'prematric', '9th', '10th', 'matric'].includes(l)) return 'pre_matric';
+  if (['post_matric', 'postmatric', '11th', '12th', 'intermediate', 'higher_secondary'].includes(l)) return 'post_matric';
+  if (['undergraduate', 'college', 'bachelors', 'degree', 'graduation', 'higher_education'].includes(l)) return 'undergraduate';
+  if (['postgraduate', 'masters', 'post_graduate'].includes(l)) return 'postgraduate';
+  if (['doctoral', 'phd', 'doctorate', 'mphil', 'research'].includes(l)) return 'doctoral';
+  if (['overseas', 'abroad', 'foreign', 'international'].includes(l)) return 'overseas';
+  if (['vocational', 'iti', 'polytechnic', 'diploma'].includes(l)) return 'vocational';
+  return null;
+}
+
+export function detectEducationLevel(text?: string | null): EducationLevelStage | null {
+  if (!text || !text.trim()) return null;
+  const lower = text.toLowerCase();
+
+  // 1. Overseas / Abroad (Highest priority for explicit foreign/international study)
+  if (/\b(abroad|overseas|foreign|international|usa|uk|germany|canada|australia|विदेश|बाहेर)\b/i.test(lower)) {
+    return 'overseas';
+  }
+
+  // 2. Doctoral / Research / PhD / MPhil
+  if (/\b(phd|ph\.d|doctoral|doctorate|m\.?phil|fellowship|research|शोध|रिसर्च)\b/i.test(lower)) {
+    return 'doctoral';
+  }
+
+  // 3. Postgraduate / Masters / MBA / MTech / MCA / MD / MS
+  if (/\b(postgraduate|post-graduate|post_graduate|masters|master|mba|mtech|m\.tech|mca|msc|m\.sc|ma|m\.a|md|ms|post-grad|स्नातकोत्तर|पदव्युत्तर)\b/i.test(lower)) {
+    return 'postgraduate';
+  }
+
+  // 4. Pre-Matric (Class 9, Class 10, School, Pre-Matric)
+  if (
+    /\b(pre-matric|pre_matric|prematric|class\s*9|class\s*10|class\s*ix|class\s*x|9th|10th|school|middle\s*school|primary|पूर्व-मैट्रिक|शाळा)\b/i.test(lower) &&
+    !/\b(after\s*10th|post-matric|higher\s*education|college|abroad)\b/i.test(lower)
+  ) {
+    return 'pre_matric';
+  }
+
+  // 5. Post-Matric (Class 11, Class 12, Intermediate, +2, Junior College, Higher Secondary)
+  if (/\b(post-matric|post_matric|postmatric|class\s*11|class\s*12|class\s*xi|class\s*xii|11th|12th|intermediate|inter|\+2|junior\s*college|higher\s*secondary|उत्तर-मैट्रिक)\b/i.test(lower)) {
+    return 'post_matric';
+  }
+
+  // 6. Vocational / ITI / Polytechnic / Skill Course
+  if (/\b(vocational|iti|polytechnic|trade\s*course|skill\s*training|diploma|व्यावसायिक)\b/i.test(lower)) {
+    return 'vocational';
+  }
+
+  // 7. Undergraduate / Higher Education / College / Degree / BTech / MBBS / Graduation
+  if (/\b(higher\s*education|college|undergraduate|under-graduate|bachelors|bachelor|degree|btech|b\.tech|be|b\.e|mbbs|bba|bca|bsc|b\.sc|ba|b\.a|bcom|b\.com|graduation|उच्च\s*शिक्षा|महाविद्यालय|पदवी)\b/i.test(lower)) {
+    return 'undergraduate';
+  }
+
+  return null;
+}
+
+export function schemeSupportsLevel(scheme: Scheme, targetLevel: EducationLevelStage): boolean {
+  if (scheme.education_level === targetLevel) return true;
+  if (scheme.education_levels && scheme.education_levels.includes(targetLevel)) return true;
+  if (targetLevel === 'undergraduate' && scheme.education_levels?.includes('higher_education')) return true;
+  if (targetLevel === 'postgraduate' && scheme.education_levels?.includes('higher_education')) return true;
+  if (targetLevel === 'post_matric' && (scheme.education_level === 'undergraduate' || scheme.education_levels?.includes('post_matric'))) return true;
+  return false;
+}
 
 export function resolveUserState(entities: UserEntities): string | null {
   if (entities.state && entities.state.trim()) {
@@ -298,9 +378,12 @@ export function identifySpecificScheme(
   let matchedScheme: Scheme | null = null;
   const words = normAscii.split(' ').filter(Boolean);
 
+  const NON_SCHEME_ACRONYMS = new Set(['sc', 'st', 'obc', 'ebc', 'dnt', 'vjnt', 'pwd', 'central', 'state', 'gujarat', 'maharashtra', 'rajasthan', 'punjab', 'delhi', 'mp', 'up', 'hp', 'ap']);
+
   for (const s of activeSchemes) {
     const parensMatch = s.name.match(/\(([^)]+)\)/);
-    const acronym = parensMatch ? normalizeSchemeText(parensMatch[1]) : '';
+    let acronym = parensMatch ? normalizeSchemeText(parensMatch[1]) : '';
+    if (NON_SCHEME_ACRONYMS.has(acronym)) acronym = '';
     const baseName = normalizeSchemeText(s.name.replace(/\([^)]+\)/, ''));
     const fullName = normalizeSchemeText(s.name);
     const shortName = s.short_name ? normalizeSchemeText(s.short_name) : '';
@@ -355,10 +438,12 @@ export async function fetchSchemeByName(name: string): Promise<Scheme | null> {
   const all = await fetchActiveSchemes();
   const normInput = normalizeSchemeText(name);
   const normMultiInput = normalizeMultilingualText(name);
+  const NON_SCHEME_ACRONYMS = new Set(['sc', 'st', 'obc', 'ebc', 'dnt', 'vjnt', 'pwd', 'central', 'state', 'gujarat', 'maharashtra', 'rajasthan', 'punjab', 'delhi', 'mp', 'up', 'hp', 'ap']);
 
   for (const s of all) {
     const parensMatch = s.name.match(/\(([^)]+)\)/);
-    const acronym = parensMatch ? normalizeSchemeText(parensMatch[1]) : '';
+    let acronym = parensMatch ? normalizeSchemeText(parensMatch[1]) : '';
+    if (NON_SCHEME_ACRONYMS.has(acronym)) acronym = '';
     const baseName = normalizeSchemeText(s.name.replace(/\([^)]+\)/, ''));
     const fullName = normalizeSchemeText(s.name);
     const shortName = s.short_name ? normalizeSchemeText(s.short_name) : '';
@@ -392,7 +477,9 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
   const pTokens = normP.split(/\s+/).filter(Boolean);
 
   const parensMatch = scheme.name.match(/\(([^)]+)\)/);
-  const acronym = parensMatch ? parensMatch[1].trim() : '';
+  let acronym = parensMatch ? normalizeSchemeText(parensMatch[1]) : '';
+  const NON_SCHEME_ACRONYMS = new Set(['sc', 'st', 'obc', 'ebc', 'dnt', 'vjnt', 'pwd', 'central', 'state', 'gujarat', 'maharashtra', 'rajasthan', 'punjab', 'delhi', 'mp', 'up', 'hp', 'ap']);
+  if (NON_SCHEME_ACRONYMS.has(acronym)) acronym = '';
   const baseName = scheme.name.replace(/\([^)]+\)/, '').trim();
 
   const normAcronym = normalizeSchemeText(acronym);
@@ -422,6 +509,10 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
 
   for (const tag of normalizedTypes) {
     if (!tag) continue;
+    // Exclude 'poly house' from false matching residential housing queries
+    if (tag === 'poly house' && (normP.includes('house') || normP.includes('housing') || normP.includes('awas')) && !normP.includes('poly')) {
+      continue;
+    }
     if (normP.includes(tag) || tag.includes(normP)) {
       tagMatchScore += 45;
       matchingTagCount++;
@@ -431,6 +522,68 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
     const hasWordMatch = tagWords.some((tw) => pTokens.includes(tw) || normP.includes(tw));
     if (hasWordMatch) {
       tagMatchScore += 30;
+      matchingTagCount++;
+    }
+  }
+
+  // Housing specialized semantic match
+  const housingWords = [
+    'housing', 'house', 'home', 'awas', 'residential', 'shelter', 'flat', 'property',
+    'आवास', 'मकान', 'घर', 'गृह'
+  ];
+  const isHousingQuery = housingWords.some((w) => normP.includes(w));
+  const isHousingScheme = normalizedTypes.some((t) => /housing|rural housing|urban housing|affordable housing/.test(t) || /\bawas\b/.test(t)) || (/\b(awas|housing)\b/i.test(scheme.name) && !/chhatrawas/i.test(scheme.name));
+
+  if (isHousingQuery) {
+    if (isHousingScheme) {
+      tagMatchScore += 65;
+      matchingTagCount++;
+      return Math.max(85, 45 + tagMatchScore);
+    }
+    // Heavy negative penalty for non-housing schemes when housing is explicitly requested
+    return -75;
+  }
+
+  // PhD / Doctoral / Fellowship specialized semantic match
+  const phdWords = ['phd', 'ph.d', 'doctoral', 'doctorate', 'm.phil', 'mphil', 'fellowship', 'research'];
+  const isPhdQuery = phdWords.some((w) => normP.includes(w));
+  const isFellowshipScheme = normalizedTypes.some((t) => /phd|mphil|fellowship|research/.test(t)) ||
+    scheme.education_level === 'doctoral' ||
+    (scheme.name.toLowerCase().includes('fellowship') && !scheme.name.toLowerCase().includes('overseas'));
+
+  if (isPhdQuery) {
+    if (isFellowshipScheme) {
+      tagMatchScore += 75;
+      matchingTagCount++;
+    } else if (scheme.education_level === 'overseas' && !normP.includes('abroad') && !normP.includes('overseas')) {
+      // De-prioritize overseas schemes when domestic PhD is requested
+      tagMatchScore -= 30;
+    }
+  }
+
+  // Overseas / Study Abroad semantic match
+  const overseasWords = ['abroad', 'overseas', 'foreign', 'international', 'विदेश', 'बाहेर'];
+  if (overseasWords.some((w) => normP.includes(w))) {
+    if (
+      normalizedTypes.includes('overseas') ||
+      scheme.education_level === 'overseas' ||
+      (scheme.education_levels && scheme.education_levels.includes('overseas'))
+    ) {
+      tagMatchScore += 55;
+      matchingTagCount++;
+    }
+  }
+
+  // Higher education semantic match
+  if (normP.includes('higher education') || normP.includes('higher_education') || normP.includes('उच्च शिक्षा')) {
+    if (
+      normalizedTypes.includes('higher_education') ||
+      scheme.education_levels?.includes('higher_education') ||
+      scheme.education_level === 'undergraduate' ||
+      scheme.education_level === 'overseas' ||
+      scheme.education_level === 'doctoral'
+    ) {
+      tagMatchScore += 45;
       matchingTagCount++;
     }
   }
@@ -578,16 +731,31 @@ const MULTILINGUAL_EDUCATION_WORDS = [
   'શિક્ષણ', 'கல்வி', 'విద్య', 'വിദ്യാഭ്യാസം', 'ଶିକ୍ଷା', 'ਸਿੱਖਿਆ'
 ];
 
+export function computeMatchPercentage(rawScore: number, tier: SchemeTier): number {
+  if (tier === 'HARD_DISQUALIFIED') {
+    return Math.max(10, Math.min(38, Math.round(rawScore <= 0 ? 15 : 20 + (rawScore / 40) * 15)));
+  }
+  const clamped = Math.max(50, Math.min(320, rawScore));
+  const normalized = 55 + Math.round(((clamped - 50) / 270) * 43);
+  return Math.min(98, Math.max(50, normalized));
+}
+
 export function scoreSchemes(schemes: Scheme[], entities: UserEntities, categoryHint?: string): ScoredScheme[] {
   const pNorm = (entities.purpose || '').toLowerCase();
+  const detectedLevel = detectEducationLevel(entities.purpose) || normalizeEducationLevel(entities.education_level);
   const isEduCategory = categoryHint === 'education_loan' || (schemes.length > 0 && schemes.every((s) => s.category === 'education_loan'));
   const isEduPurpose = MULTILINGUAL_EDUCATION_WORDS.some((w) => pNorm.includes(w.toLowerCase()));
   const isEducation = !!(
     isEduCategory ||
     isEduPurpose ||
+    detectedLevel ||
     entities.education_level ||
     entities.course
   );
+
+  const housingWords = ['housing', 'house', 'home', 'awas', 'residential', 'shelter', 'flat', 'property', 'आवास', 'मकान', 'घर', 'गृह'];
+  const isHousingQuery = categoryHint === 'housing' || housingWords.some((w) => pNorm.includes(w));
+  const isPhdQuery = ['phd', 'ph.d', 'doctoral', 'doctorate', 'm.phil', 'mphil', 'fellowship', 'research'].some((w) => pNorm.includes(w));
 
   const userState = resolveUserState(entities);
 
@@ -596,6 +764,17 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
       let score = 0;
       const matchReasons: string[] = [];
       const warnings: string[] = [];
+
+      const normalizedTypes = (scheme.eligible_project_types || []).map((t) => (t || '').toLowerCase().replace(/_/g, ' '));
+      const isHousingScheme = normalizedTypes.some((t) => /housing|rural housing|urban housing|affordable housing/.test(t) || /\bawas\b/.test(t)) || (/\b(awas|housing)\b/i.test(scheme.name) && !/chhatrawas/i.test(scheme.name));
+      const isFellowship = normalizedTypes.some((t) => /phd|mphil|fellowship|research/.test(t)) ||
+        scheme.education_level === 'doctoral' ||
+        (scheme.name.toLowerCase().includes('fellowship') && !scheme.name.toLowerCase().includes('overseas'));
+
+      if (isPhdQuery && isFellowship) {
+        score += 60;
+        matchReasons.push('Purpose-built doctoral research fellowship');
+      }
 
       const pScore = purposeMatchScore(scheme, entities.purpose);
       score += pScore;
@@ -619,6 +798,23 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
       }
       score += eScore;
       if ((isEducation || isDirectMatch) && scheme.education_required) matchReasons.push('Designed for education/vocational financing');
+
+      // Education level categorical check & scoring
+      const isEduScheme = scheme.category === 'education_loan' ||
+        scheme.education_required ||
+        (scheme.education_level && scheme.education_level !== 'not_applicable');
+
+      let levelMatch = false;
+      if (detectedLevel && isEduScheme) {
+        if (schemeSupportsLevel(scheme, detectedLevel)) {
+          levelMatch = true;
+          score += 60;
+          matchReasons.push(`Specifically matches your requested ${detectedLevel.replace('_', ' ')} education level`);
+        } else {
+          score -= 80;
+          warnings.push(`This scheme is designated for ${scheme.education_level?.replace('_', ' ') || 'other'} stage, not for ${detectedLevel.replace('_', ' ')}.`);
+        }
+      }
 
       let { score: gScore, warning: gWarn } = genderScore(scheme, entities.gender);
       if (isDirectMatch && gScore < 0) {
@@ -653,10 +849,13 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
       }
       // Boundary check 1: Loan ceiling exceeded (e.g. ₹55L > ₹50L Term Loan cap) or non-loan scheme when loan requested
       else if (loanLakh && (schemeMaxLoan === 0 || loanLakh > schemeMaxLoan)) {
-        tier = 'HARD_DISQUALIFIED';
-        disqualificationReason = schemeMaxLoan === 0
-          ? `${scheme.name} is a non-loan skill training or social welfare programme with no loan facility (₹0 cap). It cannot provide the requested loan of ₹${loanLakh.toFixed(1)}L.`
-          : `Requested loan amount (₹${loanLakh.toFixed(1)}L) exceeds the maximum statutory ceiling of ₹${schemeMaxLoan.toFixed(1)}L for ${scheme.name}.`;
+        const isFellowshipOrGrant = scheme.interest_rate_min === 0 || scheme.education_level === 'doctoral' || (scheme.eligible_project_types || []).includes('fellowship');
+        if (!isFellowshipOrGrant) {
+          tier = 'HARD_DISQUALIFIED';
+          disqualificationReason = schemeMaxLoan === 0
+            ? `${scheme.name} is a non-loan skill training or social welfare programme with no loan facility (₹0 cap). It cannot provide the requested loan of ₹${loanLakh.toFixed(1)}L.`
+            : `Requested loan amount (₹${loanLakh.toFixed(1)}L) exceeds the maximum statutory ceiling of ₹${schemeMaxLoan.toFixed(1)}L for ${scheme.name}.`;
+        }
       }
       // Boundary check 1b: Business query vs non-loan welfare / skill training
       else if (isBusinessQuery && (scheme.category === 'skill_development' || scheme.category === 'welfare' || scheme.category === 'welfare_programme' || scheme.category === 'other_programme' || scheme.education_required)) {
@@ -678,6 +877,16 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
         tier = 'HARD_DISQUALIFIED';
         disqualificationReason = `This scheme requires enrollment in an eligible technical, vocational, or professional course.`;
       }
+      // Boundary check 4b: Education level mismatch (Hard filter when specific level was stated)
+      else if (detectedLevel && isEduScheme && !levelMatch) {
+        tier = 'HARD_DISQUALIFIED';
+        disqualificationReason = `Education level mismatch: This scheme is for ${scheme.education_level?.replace('_', ' ') || 'domestic/other'} education, not for ${detectedLevel.replace('_', ' ')}.`;
+      }
+      // Boundary check 4c: Housing query vs non-housing scheme (Hard filter)
+      else if (isHousingQuery && !isHousingScheme) {
+        tier = 'HARD_DISQUALIFIED';
+        disqualificationReason = `${scheme.name} is a commercial/business/transport scheme, not an eligible housing scheme for purchasing or constructing a house.`;
+      }
       // Qualified schemes: Segment into OPTIMAL (score >= 80) vs SUBOPTIMAL (score 50–79)
       else if (score >= 80) {
         tier = 'ELIGIBLE_OPTIMAL';
@@ -694,7 +903,8 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
         }
       }
 
-      return { ...scheme, score, tier, matchReasons, warnings, disqualificationReason };
+      const match_percentage = computeMatchPercentage(score, tier);
+      return { ...scheme, score, match_percentage, tier, matchReasons, warnings, disqualificationReason };
     })
     .filter((s) => s.score > -30)
     .sort((a, b) => {
@@ -745,14 +955,7 @@ export async function recommendSchemes(entities: UserEntities, categoryHint?: st
   console.log(`[SCHEME_SERVICE] scoreSchemes returned ${scored.length} scored schemes:`, scored.slice(0, 5).map(s => `${s.name}(score=${s.score},tier=${s.tier},state=${s.state})`).join(', '));
 
   if (scored.length === 0) {
-    const fallbackAll = await fetchActiveSchemes(undefined, userState);
-    return fallbackAll.slice(0, limit).map((s) => ({
-      ...s,
-      score: 50,
-      tier: 'ELIGIBLE_SUBOPTIMAL' as SchemeTier,
-      matchReasons: ['Official Concessional Scheme'],
-      warnings: [],
-    }));
+    return [];
   }
 
   const eligible = scored.filter((s) => s.tier !== 'HARD_DISQUALIFIED');
@@ -760,5 +963,5 @@ export async function recommendSchemes(entities: UserEntities, categoryHint?: st
     return eligible.slice(0, limit);
   }
 
-  return scored.slice(0, limit);
+  return [];
 }

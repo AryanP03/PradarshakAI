@@ -27,6 +27,7 @@ export interface Scheme {
   coverage_percent?: number | null;
   gender_eligibility?: string | null;
   score?: number | null;
+  match_percentage?: number | null;
   eligible_project_types?: string[] | null;
   channel_partner_types?: string[] | null;
 }
@@ -83,6 +84,7 @@ export default function ComparisonCard({
   };
 
   const moratorium = (s: Scheme) => {
+    if (!s.moratorium_months_max || Number(s.moratorium_months_max) === 0) return '—';
     return s.moratorium_months_min === s.moratorium_months_max
       ? `${s.moratorium_months_min} ${t('scheme.months')}`
       : `${s.moratorium_months_min}–${s.moratorium_months_max} ${t('scheme.months')}`;
@@ -97,8 +99,15 @@ export default function ComparisonCard({
   }[] = [
     {
       label: t('compare.match_score'),
-      render: (s) =>
-        s.score != null ? (
+      render: (s) => {
+        const pct = s.match_percentage != null && s.match_percentage > 0
+          ? Math.round(Number(s.match_percentage))
+          : s.score != null
+            ? (s.score > 100
+                ? Math.min(98, Math.max(50, 55 + Math.round(((Math.min(320, Math.max(50, s.score)) - 50) / 270) * 43)))
+                : Math.round(Number(s.score)))
+            : null;
+        return pct != null ? (
           <span
             style={{
               fontWeight: 800,
@@ -110,11 +119,12 @@ export default function ComparisonCard({
               fontSize: 12,
             }}
           >
-            {Math.round(Number(s.score))}% {t('scheme.match')}
+            {pct}% {t('scheme.match')}
           </span>
         ) : (
           <span style={{ color: 'var(--muted)' }}>—</span>
-        ),
+        );
+      },
     },
     {
       label: t('compare.max_loan'),
@@ -157,11 +167,14 @@ export default function ComparisonCard({
     {
       label: t('compare.tenure'),
       render: (s) => {
+        const hasTenure = s.max_tenure_months != null && Number(s.max_tenure_months) > 0;
         const isBest = Number(s.max_tenure_months) === maxTenure && maxTenure > 0;
         return (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
             <span className="comparison-cell-value">
-              {t('scheme.tenure_up_to')} {s.max_tenure_months} {t('scheme.months')}
+              {hasTenure
+                ? `${t('scheme.tenure_up_to')} ${s.max_tenure_months} ${t('scheme.months')}`
+                : '—'}
             </span>
             {isBest && schemes.length > 1 && (
               <span className="badge-longest-tenure">

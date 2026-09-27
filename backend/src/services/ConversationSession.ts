@@ -147,9 +147,14 @@ export function extractAndUpdateFacts(
 
   // Update loan amount if extracted (or if user corrects previous amount)
   if (extractedAmount !== undefined) {
-    facts.loan_amount_rs = extractedAmount;
-    facts.loan_amount_text = extractedAmountText;
-    facts.loan_amount_type = isApproximate ? 'approximate' : 'exact';
+    const isIncomeContext = /income|earn|salary|kamai|aay|vetan/i.test(lowerMsg);
+    if (isIncomeContext) {
+      facts.family_income_rs = extractedAmount;
+    } else {
+      facts.loan_amount_rs = extractedAmount;
+      facts.loan_amount_text = extractedAmountText;
+      facts.loan_amount_type = isApproximate ? 'approximate' : 'exact';
+    }
   }
 
   // 3. Business / Trade Category Extraction
@@ -173,7 +178,14 @@ export function extractAndUpdateFacts(
   } else if (/rickshaw|auto|ev|transport|driver/i.test(lowerMsg)) {
     facts.business_type = 'transport / e-rickshaw';
     facts.category_hint = 'business_loan';
-  } else if (/education|college|school|university|b\.?tech|m\.?tech|mbbs|degree|course|vocational|fees/i.test(lowerMsg)) {
+  } else if (/hous|home|awas|flat|shelter|property|residential|मकान|घर|आवास|গৃহ/i.test(lowerMsg)) {
+    facts.category_hint = 'housing';
+    facts.purpose = 'housing / home purchase';
+    if (facts.business_type) {
+      console.log(`[CONTEXT] Intent switch: clearing prior business_type="${facts.business_type}" → housing`);
+      delete facts.business_type;
+    }
+  } else if (/education|college|school|university|b\.?tech|m\.?tech|mbbs|degree|course|vocational|fees|phd|doctorate/i.test(lowerMsg)) {
     // Education intent detected — override any prior business context
     facts.category_hint = 'education_loan';
     // Clear business_type so it doesn't contaminate education queries

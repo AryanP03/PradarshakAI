@@ -28,8 +28,20 @@ interface Scheme {
   coverage_percent?: number;
   gender_eligibility?: string;
   score?: number;
+  match_percentage?: number;
   matchReasons?: string[];
   warnings?: string[];
+}
+
+function getDisplayMatchPercentage(scheme: { score?: number; match_percentage?: number }): number {
+  if (scheme.match_percentage != null && scheme.match_percentage > 0) {
+    return Math.min(100, Math.round(scheme.match_percentage));
+  }
+  if (scheme.score == null) return 80;
+  if (scheme.score <= 40) return Math.max(15, Math.round(scheme.score));
+  if (scheme.score <= 100) return Math.min(100, Math.round(scheme.score));
+  const clamped = Math.max(50, Math.min(320, scheme.score));
+  return Math.min(98, Math.max(50, 55 + Math.round(((clamped - 50) / 270) * 43)));
 }
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
@@ -170,7 +182,7 @@ export default function SchemeResultCard({
                 borderRadius: 6,
               }}
             >
-              {Math.max(0, Math.min(100, Math.round(scheme.score)))}% {t('scheme.match')}
+              {getDisplayMatchPercentage(scheme)}% {t('scheme.match')}
             </span>
           </div>
         )}
@@ -268,19 +280,27 @@ export default function SchemeResultCard({
       )}
 
       {/* Parameter Chips */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, fontSize: 11.5, color: '#64748b' }}>
-        <span style={{ background: '#f0eded', padding: '3px 8px', borderRadius: 4 }}>
-          {t('scheme.tenure_up_to')} {scheme.max_tenure_months} {t('scheme.months')}
-        </span>
-        <span style={{ background: '#f0eded', padding: '3px 8px', borderRadius: 4 }}>
-          {t('scheme.moratorium_prefix')} {scheme.moratorium_months_min}–{scheme.moratorium_months_max} {t('scheme.months')}
-        </span>
-        {scheme.gender_eligibility === 'women_only' && (
-          <span style={{ background: '#fdf2f8', color: '#be185d', fontWeight: 700, padding: '3px 8px', borderRadius: 4 }}>
-            {t('scheme.women_exclusive')}
-          </span>
-        )}
-      </div>
+      {((scheme.max_tenure_months != null && scheme.max_tenure_months > 0) ||
+        (scheme.moratorium_months_max != null && scheme.moratorium_months_max > 0) ||
+        scheme.gender_eligibility === 'women_only') && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, fontSize: 11.5, color: '#64748b' }}>
+          {scheme.max_tenure_months != null && scheme.max_tenure_months > 0 && (
+            <span style={{ background: '#f0eded', padding: '3px 8px', borderRadius: 4 }}>
+              {t('scheme.tenure_up_to')} {scheme.max_tenure_months} {t('scheme.months')}
+            </span>
+          )}
+          {scheme.moratorium_months_max != null && scheme.moratorium_months_max > 0 && (
+            <span style={{ background: '#f0eded', padding: '3px 8px', borderRadius: 4 }}>
+              {t('scheme.moratorium_prefix')} {scheme.moratorium_months_min ?? 0}–{scheme.moratorium_months_max} {t('scheme.months')}
+            </span>
+          )}
+          {scheme.gender_eligibility === 'women_only' && (
+            <span style={{ background: '#fdf2f8', color: '#be185d', fontWeight: 700, padding: '3px 8px', borderRadius: 4 }}>
+              {t('scheme.women_exclusive')}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Visually Attached Scheme Action Area */}
       <div

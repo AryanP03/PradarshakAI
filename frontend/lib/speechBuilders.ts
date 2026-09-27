@@ -6,6 +6,20 @@
 
 import { getLocalizedSchemeName, getLocalizedSchemeDesc, getLocalizedDocumentItem } from './translations';
 
+function getSpeechMatchPct(s: any): number | null {
+  if (s.match_percentage != null && !isNaN(Number(s.match_percentage))) {
+    return Math.round(Number(s.match_percentage));
+  }
+  if (s.score != null && !isNaN(Number(s.score))) {
+    const raw = Number(s.score);
+    if (raw <= 40) return Math.max(15, Math.round(raw));
+    if (raw <= 100) return Math.round(raw);
+    const clamped = Math.max(50, Math.min(320, raw));
+    return Math.min(98, Math.max(50, 55 + Math.round(((clamped - 50) / 270) * 43)));
+  }
+  return null;
+}
+
 export function buildSchemeSpeech(s: any, lang: string = 'en'): string {
   if (!s) return '';
   const schemeName = getLocalizedSchemeName(s.name, lang) || s.name || '';
@@ -17,14 +31,15 @@ export function buildSchemeSpeech(s: any, lang: string = 'en'): string {
   const rateStr = rateMin != null && rateMax != null
     ? (rateMin === rateMax ? `${rateMin}` : `${rateMin} ते ${rateMax}`)
     : '';
-  const tenure = s.max_tenure_months;
+  const tenure = s.max_tenure_months != null && Number(s.max_tenure_months) > 0 ? Number(s.max_tenure_months) : null;
   const morMin = s.moratorium_months_min;
-  const morMax = s.moratorium_months_max;
+  const morMax = s.moratorium_months_max != null && Number(s.moratorium_months_max) > 0 ? Number(s.moratorium_months_max) : null;
   const desc = getLocalizedSchemeDesc(s.name, s.description || '', lang);
+  const matchPct = getSpeechMatchPct(s);
 
   if (lang === 'mr') {
     if (schemeName) parts.push(`${schemeName}.`);
-    if (s.score != null) parts.push(`पात्रता जुळणी: ${Math.round(Number(s.score))} टक्के.`);
+    if (matchPct != null) parts.push(`पात्रता जुळणी: ${matchPct} टक्के.`);
     if (maxLoan != null) {
       const loanStr = maxLoan >= 1 ? `${maxLoan} लाख रुपये` : `${Math.round(maxLoan * 100000)} रुपये`;
       parts.push(`कमाल कर्ज मर्यादा: ${loanStr}.`);
@@ -46,7 +61,7 @@ export function buildSchemeSpeech(s: any, lang: string = 'en'): string {
 
   if (lang === 'hi') {
     if (schemeName) parts.push(`${schemeName}.`);
-    if (s.score != null) parts.push(`पात्रता मिलान: ${Math.round(Number(s.score))} प्रतिशत.`);
+    if (matchPct != null) parts.push(`पात्रता मिलान: ${matchPct} प्रतिशत.`);
     if (maxLoan != null) {
       const loanStr = maxLoan >= 1 ? `${maxLoan} लाख रुपये` : `${Math.round(maxLoan * 100000)} रुपये`;
       parts.push(`अधिकतम ऋण सीमा: ${loanStr}.`);
@@ -68,7 +83,7 @@ export function buildSchemeSpeech(s: any, lang: string = 'en'): string {
 
   if (lang === 'bn') {
     if (schemeName) parts.push(`${schemeName}।`);
-    if (s.score != null) parts.push(`যোগ্যতার মিল: ${Math.round(Number(s.score))} শতাংশ।`);
+    if (matchPct != null) parts.push(`যোগ্যতার মিল: ${matchPct} শতাংশ।`);
     if (maxLoan != null) {
       const loanStr = maxLoan >= 1 ? `${maxLoan} লাখ টাকা` : `${Math.round(maxLoan * 100000)} টাকা`;
       parts.push(`সর্বোচ্চ ঋণের পরিমাণ: ${loanStr}।`);
@@ -90,7 +105,7 @@ export function buildSchemeSpeech(s: any, lang: string = 'en'): string {
 
   if (lang === 'gu') {
     if (schemeName) parts.push(`${schemeName}.`);
-    if (s.score != null) parts.push(`પાત્રતા મેળ: ${Math.round(Number(s.score))} ટકા.`);
+    if (matchPct != null) parts.push(`પાત્રતા મેળ: ${matchPct} ટકા.`);
     if (maxLoan != null) {
       const loanStr = maxLoan >= 1 ? `${maxLoan} લાખ રૂપિયા` : `${Math.round(maxLoan * 100000)} રૂપિયા`;
       parts.push(`મહત્તમ લોન મર્યાદા: ${loanStr}.`);
@@ -114,8 +129,8 @@ export function buildSchemeSpeech(s: any, lang: string = 'en'): string {
   if (s.name) {
     parts.push(`${s.name}.`);
   }
-  if (s.score != null) {
-    parts.push(`Match score: ${Math.round(Number(s.score))} percent.`);
+  if (matchPct != null) {
+    parts.push(`Match score: ${matchPct} percent.`);
   }
   if (maxLoan != null) {
     const loanStr = maxLoan >= 1 ? `${maxLoan} lakh rupees` : `${Math.round(maxLoan * 100000)} rupees`;
@@ -132,8 +147,8 @@ export function buildSchemeSpeech(s: any, lang: string = 'en'): string {
     const cleanDesc = s.description.replace(/[#*`_\[\]]/g, '').trim();
     if (cleanDesc) parts.push(cleanDesc);
   }
-  if (s.max_tenure_months) {
-    parts.push(`Repayment tenure: up to ${s.max_tenure_months} months.`);
+  if (tenure) {
+    parts.push(`Repayment tenure: up to ${tenure} months.`);
   }
   if (morMin != null && morMax != null) {
     const morStr = morMin === morMax ? `${morMin} months` : `${morMin} to ${morMax} months`;

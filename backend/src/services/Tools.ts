@@ -43,7 +43,7 @@ export const TOOL_DEFS: ToolDef[] = [
     type: 'function',
     function: {
       name: 'recommend_schemes',
-      description: 'Search and score NSFDC government loan schemes from the database. Call this whenever the user asks for broad scheme suggestions, options, business ideas, financial assistance discovery, or asks "what schemes are available". Do NOT call this when the user is asking about ONE specific named scheme.',
+      description: 'Search and score government loan and welfare schemes from the database. Call this whenever the user asks for broad scheme suggestions, options, housing, business ideas, financial assistance discovery, or asks "what schemes are available". Do NOT call this when the user is asking about ONE specific named scheme.',
       parameters: {
         type: 'object',
         properties: {
