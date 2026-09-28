@@ -47,6 +47,7 @@ export interface ConversationFacts {
   loan_amount_text?: string;     // e.g. '₹1 Lakh'
   family_income_rs?: number;     // annual in rupees
   location?: string;             // city/district
+  state?: string;                // state of residence (e.g. 'Rajasthan', 'Goa')
   gender?: string;
   category_hint?: string;        // 'business_loan' | 'education_loan' | 'general'
   education_level?: string;
