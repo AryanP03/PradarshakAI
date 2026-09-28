@@ -11,6 +11,7 @@ try {
 
 // Strict Brand Name Requirement
 export const BRAND_NAME = 'PradarshakAI';
+export const LOGO_URL = process.env.LOGO_URL?.trim() || 'https://pradarshakai.vercel.app/Pradarshak_logo_full.jpeg';
 
 const uploadDir = path.join(__dirname, '../../uploads');
 
@@ -173,11 +174,16 @@ export async function sendVerificationOtpEmail(to: string, otp: string, expiryMi
           
           <!-- Government / Institutional Header -->
           <tr>
-            <td style="background-color:#001e40; padding:28px 32px 24px; text-align:center; border-bottom:4px solid #fe9832;">
-              <div style="color:#ffffff; font-size:24px; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px;">
-                ${BRAND_NAME}
+            <td style="background-color:#001e40; padding:24px 28px 20px; text-align:center; border-bottom:4px solid #fe9832;">
+              <div style="text-align:center; margin-bottom:10px;">
+                <img
+                  src="${LOGO_URL}"
+                  alt="${BRAND_NAME}"
+                  width="260"
+                  style="width:260px; max-width:92%; height:auto; border-radius:12px; background-color:#ffffff; padding:6px 12px; box-shadow:0 4px 14px rgba(0,0,0,0.3); display:inline-block; border:1px solid rgba(255,255,255,0.25); vertical-align:middle;"
+                />
               </div>
-              <div style="color:#cbd5e1; font-size:12px; font-weight:500; text-transform:uppercase; letter-spacing:0.04em;">
+              <div style="color:#cbd5e1; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em;">
                 National SC Finance & Development Corporation • Government of India
               </div>
             </td>
@@ -313,11 +319,16 @@ export async function sendPasswordResetOtpEmail(to: string, otp: string, expiryM
       <td align="center">
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:580px; background-color:#ffffff; border-radius:14px; overflow:hidden; box-shadow:0 6px 24px rgba(11,31,58,0.08); border:1px solid #e2e8f0;">
           <tr>
-            <td style="background-color:#001e40; padding:28px 32px 24px; text-align:center; border-bottom:4px solid #fe9832;">
-              <div style="color:#ffffff; font-size:24px; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px;">
-                ${BRAND_NAME}
+            <td style="background-color:#001e40; padding:24px 28px 20px; text-align:center; border-bottom:4px solid #fe9832;">
+              <div style="text-align:center; margin-bottom:10px;">
+                <img
+                  src="${LOGO_URL}"
+                  alt="${BRAND_NAME}"
+                  width="260"
+                  style="width:260px; max-width:92%; height:auto; border-radius:12px; background-color:#ffffff; padding:6px 12px; box-shadow:0 4px 14px rgba(0,0,0,0.3); display:inline-block; border:1px solid rgba(255,255,255,0.25); vertical-align:middle;"
+                />
               </div>
-              <div style="color:#cbd5e1; font-size:12px; font-weight:500; text-transform:uppercase; letter-spacing:0.04em;">
+              <div style="color:#cbd5e1; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em;">
                 National SC Finance & Development Corporation • Government of India
               </div>
             </td>
@@ -494,11 +505,16 @@ export async function sendRegistrationSuccessEmail(data: RegistrationEmailData):
           
           <!-- Government Institutional Header -->
           <tr>
-            <td style="background-color:#001e40; padding:28px 32px 24px; text-align:center; border-bottom:4px solid #fe9832;">
-              <div style="color:#ffffff; font-size:25px; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px;">
-                ${BRAND_NAME}
+            <td style="background-color:#001e40; padding:24px 28px 20px; text-align:center; border-bottom:4px solid #fe9832;">
+              <div style="text-align:center; margin-bottom:10px;">
+                <img
+                  src="${LOGO_URL}"
+                  alt="${BRAND_NAME}"
+                  width="260"
+                  style="width:260px; max-width:92%; height:auto; border-radius:12px; background-color:#ffffff; padding:6px 12px; box-shadow:0 4px 14px rgba(0,0,0,0.3); display:inline-block; border:1px solid rgba(255,255,255,0.25); vertical-align:middle;"
+                />
               </div>
-              <div style="color:#cbd5e1; font-size:12px; font-weight:500; text-transform:uppercase; letter-spacing:0.04em;">
+              <div style="color:#cbd5e1; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em;">
                 National SC Finance & Development Corporation • Government of India
               </div>
             </td>

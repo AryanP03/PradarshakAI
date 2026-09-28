@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { llmCall } from '../lib/openrouter';
+import { llmCall } from '../lib/groq';
 import { calculateFinancialPlan, BorrowerMode } from '../services/FinancialEngine';
 
 const router = Router();

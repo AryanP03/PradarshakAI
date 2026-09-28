@@ -3,16 +3,16 @@ dotenv.config({ path: '../.env' });
 import { TOOL_DEFS } from '../services/Tools';
 
 async function test() {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+  const apiKey = process.env.GROQ_API_KEY;
+  const model = 'openai/gpt-oss-120b';
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://sih-channel-finance.app',
     },
     body: JSON.stringify({
-      model: 'google/gemini-2.5-flash',
+      model: model,
       max_tokens: 300,
       messages: [
         {

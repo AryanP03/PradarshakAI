@@ -252,18 +252,8 @@ export async function fetchActiveSchemes(categoryHint?: string, userState?: stri
   let query = 'SELECT * FROM schemes WHERE active = TRUE';
   const params: (string | number)[] = [];
 
-  if (categoryHint === 'education_loan') {
-    params.push('education_loan');
-    query += ` AND category = $${params.length}`;
-  } else if (categoryHint === 'business_loan') {
-    query += " AND category NOT IN ('education_loan', 'skill_development', 'other_programme', 'welfare')";
-  } else if (categoryHint === 'housing') {
-    // Housing schemes are technically under 'welfare' in the DB schema
-    query += " AND category = 'welfare'";
-  } else if (categoryHint) {
-    params.push(categoryHint);
-    query += ` AND category = $${params.length}`;
-  }
+  // We fetch all active schemes to avoid hiding candidates due to incorrect category hints from the LLM.
+  // The advanced semantic scoring in scoreSchemes() will naturally sort and filter based on purpose and limits.
 
   if (userState) {
     params.push(userState);
@@ -510,6 +500,12 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
   let tagMatchScore = 0;
   let matchingTagCount = 0;
 
+  const GENERIC_TAG_STOPWORDS = new Set([
+    'insurance', 'loan', 'scheme', 'schemes', 'support', 'training', 'development',
+    'programme', 'program', 'assistance', 'credit', 'finance', 'subsidy', 'fund',
+    'services', 'centre', 'benefit', 'benefits', 'project', 'activities'
+  ]);
+
   for (const tag of normalizedTypes) {
     if (!tag) continue;
     // Exclude 'poly house' from false matching residential housing queries
@@ -521,7 +517,7 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
       matchingTagCount++;
       continue;
     }
-    const tagWords = tag.split(/\s+/).filter((w) => w.length > 2);
+    const tagWords = tag.split(/\s+/).filter((w) => w.length > 2 && !GENERIC_TAG_STOPWORDS.has(w));
     const hasWordMatch = tagWords.some((tw) => pTokens.includes(tw) || normP.includes(tw));
     if (hasWordMatch) {
       tagMatchScore += 30;
@@ -571,6 +567,78 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
     return -75;
   }
 
+  // Health & Medical Insurance specialized semantic match
+  const healthWords = [
+    'health', 'medical', 'hospital', 'hospitalisation', 'hospitalization',
+    'treatment', 'illness', 'disease', 'surgery', 'doctor', 'medicine',
+    'ayushman', 'swasthya', 'arogya', 'mediclaim', 'healthcare',
+    'स्वास्थ्य', 'आरोग्य', 'इलाज', 'दवा', 'दवाई', 'अस्पताल', 'बीमारी'
+  ];
+  const isHealthInsuranceQuery = /\b(health\s*insurance|mediclaim|health\s*cover|medical\s*insurance|hospitalisation|hospitalization)\b/i.test(normP) ||
+    ((normP.includes('health') || normP.includes('medical') || normP.includes('swasthya') || normP.includes('arogya') || normP.includes('स्वास्थ्य') || normP.includes('आरोग्य')) &&
+     (normP.includes('insurance') || normP.includes('bima') || normP.includes('बीमा')));
+  const isHealthQuery = healthWords.some((w) => normP.includes(w));
+
+  const isHealthInsuranceScheme = normalizedTypes.some((t) => /health_insurance|medical_treatment|hospitalisation|hospitalization/.test(t)) ||
+    /\b(ayushman|jan arogya|swasthya bima)\b/i.test(scheme.name);
+  const isHealthScheme = isHealthInsuranceScheme ||
+    normalizedTypes.some((t) => /health|medical|swasthya|arogya/.test(t)) ||
+    /\b(ayushman|arogya|swasthya|jan arogya)\b/i.test(scheme.name);
+
+  if (isHealthInsuranceQuery) {
+    if (isHealthInsuranceScheme) {
+      tagMatchScore += 80;
+      matchingTagCount++;
+      return Math.max(90, 45 + tagMatchScore);
+    }
+    return -80;
+  }
+
+  if (isHealthQuery) {
+    if (isHealthScheme) {
+      tagMatchScore += 80;
+      matchingTagCount++;
+      return Math.max(90, 45 + tagMatchScore);
+    }
+    // Heavy negative penalty for non-health schemes (especially crop insurance, general bank accounts, skill programmes)
+    return -80;
+  }
+
+  // Pension & Senior Citizen Social Security specialized semantic match
+  const pensionWords = [
+    'pension', 'old age', 'elderly', 'senior citizen', 'retirement', 'retire',
+    'widow pension', 'disability pension', 'nsap', 'vridha', 'vriddha',
+    'पेंशन', 'वृद्धावस्था', 'बुजुर्ग', 'वरिष्ठ नागरिक', 'निवृत्ती वेतन'
+  ];
+  const isPensionQuery = pensionWords.some((w) => normP.includes(w));
+  const isPensionScheme = normalizedTypes.some((t) => /pension|elderly|old_age|senior_citizen|social_security/.test(t)) ||
+    /\b(pension|nsap|social assistance|old age)\b/i.test(scheme.name);
+
+  if (isPensionQuery) {
+    if (isPensionScheme) {
+      tagMatchScore += 80;
+      matchingTagCount++;
+      return Math.max(90, 45 + tagMatchScore);
+    }
+    // Heavy negative penalty for non-pension schemes (skill development, startups, business loans, etc.)
+    return -80;
+  }
+
+  // Scholarship specialized semantic match
+  const scholarshipWords = ['scholarship', 'scholarships', 'छात्रवृत्ति', 'शिष्यवृत्ती', 'वृत्ति'];
+  const isScholarshipQuery = scholarshipWords.some((w) => normP.includes(w));
+  if (isScholarshipQuery) {
+    const isScholarshipScheme = /scholarship|fellowship|छात्रवृत्ति/i.test(scheme.name) ||
+      (scheme.education_level && scheme.education_level !== 'not_applicable') ||
+      normalizedTypes.some((t) => /scholarship|fellowship/.test(t));
+    if (isScholarshipScheme) {
+      tagMatchScore += 65;
+      matchingTagCount++;
+    } else {
+      return -70;
+    }
+  }
+
   // PhD / Doctoral / Fellowship specialized semantic match
   const phdWords = ['phd', 'ph.d', 'doctoral', 'doctorate', 'm.phil', 'mphil', 'fellowship', 'research'];
   const isPhdQuery = phdWords.some((w) => normP.includes(w));
@@ -598,6 +666,21 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
     ) {
       tagMatchScore += 55;
       matchingTagCount++;
+    }
+  }
+
+  // Grant / Interest-free semantic match
+  const grantWords = ['grant', 'grants', 'no loan', 'not a loan', 'no repayment', 'non repayable', 'interest free', 'interest-free', 'zero interest', '0%', '0 percent', 'अनुदान', 'बिनव्याजी'];
+  if (grantWords.some(w => normP.includes(w))) {
+    const isGrant = Number(scheme.interest_rate_min) === 0 || 
+                    (scheme.description && /grant|interest-free|0%|no repayment/i.test(scheme.description)) ||
+                    (scheme.notes && /grant|interest-free|0%|no repayment/i.test(scheme.notes));
+    if (isGrant) {
+      tagMatchScore += 85;
+      matchingTagCount++;
+    } else if (scheme.interest_rate_min != null && Number(scheme.interest_rate_min) > 0) {
+      // Heavily penalize standard loans when grant/interest-free is explicitly requested
+      tagMatchScore -= 50;
     }
   }
 
@@ -791,6 +874,18 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
   const isHousingQuery = categoryHint === 'housing' || housingWords.some((w) => pNorm.includes(w));
   const isPhdQuery = ['phd', 'ph.d', 'doctoral', 'doctorate', 'm.phil', 'mphil', 'fellowship', 'research'].some((w) => pNorm.includes(w));
 
+  const healthWords = ['health', 'medical', 'hospital', 'hospitalisation', 'hospitalization', 'treatment', 'illness', 'disease', 'surgery', 'doctor', 'medicine', 'ayushman', 'swasthya', 'arogya', 'mediclaim', 'healthcare', 'स्वास्थ्य', 'आरोग्य', 'इलाज', 'दवा', 'दवाई', 'अस्पताल', 'बीमारी'];
+  const isHealthInsuranceQuery = /\b(health\s*insurance|mediclaim|health\s*cover|medical\s*insurance|hospitalisation|hospitalization)\b/i.test(pNorm) ||
+    ((pNorm.includes('health') || pNorm.includes('medical') || pNorm.includes('swasthya') || pNorm.includes('arogya') || pNorm.includes('स्वास्थ्य') || pNorm.includes('आरोग्य')) &&
+     (pNorm.includes('insurance') || pNorm.includes('bima') || pNorm.includes('बीमा')));
+  const isHealthQuery = healthWords.some((w) => pNorm.includes(w));
+
+  const pensionWords = ['pension', 'old age', 'elderly', 'senior citizen', 'retirement', 'retire', 'widow pension', 'disability pension', 'nsap', 'vridha', 'vriddha', 'पेंशन', 'वृद्धावस्था', 'बुजुर्ग', 'वरिष्ठ नागरिक', 'निवृत्ती वेतन'];
+  const isPensionQuery = pensionWords.some((w) => pNorm.includes(w));
+
+  const scholarshipWords = ['scholarship', 'scholarships', 'छात्रवृत्ति', 'शिष्यवृत्ती', 'वृत्ति'];
+  const isScholarshipQuery = scholarshipWords.some((w) => pNorm.includes(w));
+
   const userState = resolveUserState(entities);
 
   const scored = schemes
@@ -806,9 +901,36 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
         scheme.education_level === 'doctoral' ||
         (scheme.name.toLowerCase().includes('fellowship') && !scheme.name.toLowerCase().includes('overseas'));
 
+      const isHealthInsuranceScheme = normalizedTypes.some((t) => /health_insurance|medical_treatment|hospitalisation|hospitalization/.test(t)) ||
+        /\b(ayushman|jan arogya|swasthya bima)\b/i.test(scheme.name);
+      const isHealthScheme = isHealthInsuranceScheme ||
+        normalizedTypes.some((t) => /health|medical|swasthya|arogya/.test(t)) ||
+        /\b(ayushman|arogya|swasthya|jan arogya)\b/i.test(scheme.name);
+
+      const isPensionScheme = normalizedTypes.some((t) => /pension|elderly|old_age|senior_citizen|social_security/.test(t)) ||
+        /\b(pension|nsap|social assistance|old age)\b/i.test(scheme.name);
+
+      const isScholarshipScheme = /scholarship|fellowship|छात्रवृत्ति/i.test(scheme.name) ||
+        (scheme.education_level && scheme.education_level !== 'not_applicable') ||
+        normalizedTypes.some((t) => /scholarship|fellowship/.test(t));
+
       if (isPhdQuery && isFellowship) {
         score += 60;
         matchReasons.push('Purpose-built doctoral research fellowship');
+      }
+
+      if (isHealthInsuranceQuery && isHealthInsuranceScheme) {
+        matchReasons.push('Comprehensive health / medical insurance coverage');
+      } else if (isHealthQuery && isHealthScheme) {
+        matchReasons.push('Health and medical assistance scheme');
+      }
+
+      if (isPensionQuery && isPensionScheme) {
+        matchReasons.push('Social security pension for elderly/eligible beneficiaries');
+      }
+
+      if (isScholarshipQuery && isScholarshipScheme) {
+        matchReasons.push('Educational scholarship support');
       }
 
       const pScore = purposeMatchScore(scheme, entities.purpose);
@@ -909,12 +1031,30 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
         tier = 'HARD_DISQUALIFIED';
         disqualificationReason = `This scheme is exclusively reserved for women applicants.`;
       }
+      // Boundary check 3b: Age limits
+      else if (entities.age && scheme.age_min && entities.age < scheme.age_min) {
+        tier = 'HARD_DISQUALIFIED';
+        disqualificationReason = `Applicant age (${entities.age}) is below the minimum entry age of ${scheme.age_min} for this scheme.`;
+      }
+      else if (entities.age && scheme.age_max && entities.age > scheme.age_max) {
+        tier = 'HARD_DISQUALIFIED';
+        disqualificationReason = `Applicant age (${entities.age}) is above the maximum entry age of ${scheme.age_max} for this scheme.`;
+      }
+      // Boundary check 3c: Senior citizen (age >= 60) for youth/vocational skill training
+      else if (entities.age && entities.age >= 60 && scheme.category === 'skill_development') {
+        tier = 'HARD_DISQUALIFIED';
+        disqualificationReason = `${scheme.name} is a vocational skill training programme designed for youth and working-age applicants, not for senior citizens.`;
+      }
       // Boundary check 4: Education requirement when completely non-educational
       else if (scheme.education_required && !isEducation && !isDirectMatch) {
         tier = 'HARD_DISQUALIFIED';
         disqualificationReason = `This scheme requires enrollment in an eligible technical, vocational, or professional course.`;
       }
       // Boundary check 4b: Education level mismatch (Hard filter when specific level was stated)
+      else if (detectedLevel && !isEduScheme) {
+        tier = 'HARD_DISQUALIFIED';
+        disqualificationReason = `${scheme.name} is a non-educational scheme, not an educational scholarship for ${detectedLevel.replace('_', ' ')} students.`;
+      }
       else if (detectedLevel && isEduScheme && !levelMatch) {
         tier = 'HARD_DISQUALIFIED';
         disqualificationReason = `Education level mismatch: This scheme is for ${scheme.education_level?.replace('_', ' ') || 'domestic/other'} education, not for ${detectedLevel.replace('_', ' ')}.`;
@@ -924,11 +1064,41 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
         tier = 'HARD_DISQUALIFIED';
         disqualificationReason = `${scheme.name} is a commercial/business/transport scheme, not an eligible housing scheme for purchasing or constructing a house.`;
       }
-      // Qualified schemes: Segment into OPTIMAL (score >= 80) vs SUBOPTIMAL (score 50–79)
-      else if (score >= 80) {
-        tier = 'ELIGIBLE_OPTIMAL';
-      } else {
-        tier = 'ELIGIBLE_SUBOPTIMAL';
+      // Boundary check 4d: Health insurance query vs non-health-insurance scheme (Hard filter)
+      else if (isHealthInsuranceQuery && !isHealthInsuranceScheme) {
+        tier = 'HARD_DISQUALIFIED';
+        disqualificationReason = `${scheme.name} is not a health insurance scheme.`;
+      }
+      else if (isHealthQuery && !isHealthScheme) {
+        tier = 'HARD_DISQUALIFIED';
+        disqualificationReason = `${scheme.name} is not a health or medical scheme.`;
+      }
+      // Boundary check 4e: Pension / Senior citizen query vs non-pension scheme (Hard filter)
+      else if (isPensionQuery && !isPensionScheme) {
+        tier = 'HARD_DISQUALIFIED';
+        disqualificationReason = `${scheme.name} is not a pension or senior citizen social security scheme.`;
+      }
+      // Boundary check 4f: Scholarship query vs non-scholarship scheme (Hard filter)
+      else if (isScholarshipQuery && !isScholarshipScheme) {
+        tier = 'HARD_DISQUALIFIED';
+        disqualificationReason = `${scheme.name} is a loan or commercial scheme, not an educational student scholarship.`;
+      }
+      else {
+        // Qualified schemes: Segment into OPTIMAL vs SUBOPTIMAL
+        // An optimal scheme must have a strong overall score AND a positive relevance connection to the purpose if a specific purpose was specified
+        const hasSpecificPurpose = Boolean(
+          entities.purpose &&
+          entities.purpose.trim().length > 3 &&
+          !/^(loan|schemes?|business|start\s*a?\s*business|any|best|help|funds?|government\s*schemes?|yojana)$/i.test(entities.purpose.trim())
+        );
+
+        const hasGenuinePurposeMatch = pScore >= 40 || isDirectMatch || isHealthScheme || isPensionScheme || isScholarshipScheme || isHousingScheme || isFellowship;
+
+        if (score >= 80 && (!hasSpecificPurpose || hasGenuinePurposeMatch)) {
+          tier = 'ELIGIBLE_OPTIMAL';
+        } else {
+          tier = 'ELIGIBLE_SUBOPTIMAL';
+        }
       }
 
       if (tier === 'HARD_DISQUALIFIED') {
@@ -996,8 +1166,37 @@ export async function recommendSchemes(entities: UserEntities, categoryHint?: st
   }
 
   const eligible = scored.filter((s) => s.tier !== 'HARD_DISQUALIFIED');
-  if (eligible.length > 0) {
-    return eligible.slice(0, limit);
+  if (eligible.length === 0) {
+    return [];
+  }
+
+  // 1. Segment into OPTIMAL vs SUBOPTIMAL
+  const optimal = eligible.filter((s) => s.tier === 'ELIGIBLE_OPTIMAL');
+
+  // Rule: If optimal matches exist, return ONLY optimal matches (up to limit). NEVER pad with suboptimal!
+  if (optimal.length > 0) {
+    return optimal.slice(0, limit);
+  }
+
+  // 2. If NO optimal matches exist, check if any suboptimal matches clear the genuine relevance threshold.
+  // A scheme is only worth showing if it has real relevance signals (genuine positive purpose match or domain match)
+  const worthySuboptimal = eligible.filter((s) => {
+    if (s.score < 60) return false;
+    const hasPurposeMatch = s.matchReasons.some((r) =>
+      r.includes('Purpose') ||
+      r.includes('matches') ||
+      r.includes('education') ||
+      r.includes('fellowship') ||
+      r.includes('Designed for') ||
+      r.includes('coverage') ||
+      r.includes('pension') ||
+      r.includes('scholarship')
+    );
+    return hasPurposeMatch;
+  });
+
+  if (worthySuboptimal.length > 0) {
+    return worthySuboptimal.slice(0, limit);
   }
 
   return [];

@@ -14,12 +14,11 @@ async function testModel(model: string) {
   console.log(`\nTesting ${model}...`);
   const start = Date.now();
   try {
-    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://sih-channel-finance.app',
       },
       body: JSON.stringify({
         model,

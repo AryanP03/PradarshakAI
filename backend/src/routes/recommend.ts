@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { readonlyPool } from '../db/pool';
-import { llmCall } from '../lib/openrouter';
+import { llmCall } from '../lib/groq';
 import { recommendSchemes } from '../services/SchemeEngine';
 import type { UserEntities } from '../services/ConversationSession';
 

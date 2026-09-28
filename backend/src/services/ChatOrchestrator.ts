@@ -5,8 +5,8 @@ import type { Session, UserProfileContext, ConversationFacts } from './Conversat
 import { TOOL_DEFS, executeTool } from './Tools';
 import { fetchSchemeById, fetchSchemeByName, fetchActiveSchemes, normalizeSchemeText, identifySpecificScheme } from './SchemeEngine';
 import type { Scheme, ScoredScheme } from './SchemeEngine';
-import { llmChat } from '../lib/openrouter';
-import type { ChatMessage } from '../lib/openrouter';
+import { llmChat } from '../lib/groq';
+import type { ChatMessage } from '../lib/groq';
 import { getLanguageConfig } from '../config/languages';
 import { resolveEffectiveLanguage } from './LanguageResolver';
 
@@ -240,25 +240,44 @@ NATURAL INDIAN CODE-MIXING & TONE:
 - Keep common technical, educational, financial terms, scheme names, and acronyms in English/standard form when natural.
 - Do NOT use archaic, unnatural, or overly formal translations simply to force every word into ${langName}. Sound like a helpful Indian government-scheme assistant speaking naturally.
 
-NUMERICAL FACT SAFETY (critical):
-- Never invent, alter, or substitute numerical figures (loan amounts, interest rates, moratorium periods, income limits).
-- If the user asks for a specific loan amount (e.g. ₹3 Lakh), state their requested figure accurately. If the scheme ceiling is lower (e.g. ₹2.5 Lakh), explicitly contrast their request with the scheme maximum (e.g. "You requested ₹3 Lakh, while this scheme provides up to ₹2.5 Lakh"). Never silently change their requested amount to match the ceiling.
+STRICT AVOIDANCE OF NUMERICAL/STRUCTURED DATA IN CHAT PROSE (CRITICAL ARCHITECTURE REQUIREMENT):
+- The chat message text must NEVER repeat structured data that already appears on the scheme card rendered below it.
+- Specifically, the written response should NEVER state: interest rate, maximum loan amount, income eligibility limit, moratorium period, repayment tenure, or the list of required documents. All of these already render on the scheme card itself, and repeating them in prose is strictly forbidden.
+- Instead, the chat message text should focus PURELY on:
+  1. Why this scheme is a good fit for what the user specifically asked for.
+  2. Any eligibility nuance worth flagging in plain language (e.g., a warning if they're borderline on a limit, or a note about why one scheme was chosen over another).
+  3. Next-step guidance (asking for their city to find a channel partner, offering to calculate an EMI, etc.).
+- Because you are no longer allowed to state numeric scheme facts in the text, hallucinating contradictory numbers (e.g., an incorrect income limit) becomes structurally impossible. Do NOT circumvent this by approximating or recalling facts independently. Focus entirely on the qualitative fit.
 
 TOOLS & GROUNDING (critical):
 - You have tools that return REAL data from the database and real financial math: get_scheme_details, recommend_schemes, calculate_emi, find_partners, get_required_documents, compare_schemes.
 - NEVER invent or guess interest rates, loan limits, moratorium periods, EMI figures, partner names, addresses, or distances. Any time you need one of these, call the matching tool and use ONLY what it returns.
+- HARD CONSTRAINTS (CRITICAL ARCHITECTURE REQUIREMENT):
+  * NEVER mention any scheme by name that is not returned by your tools. 
+  * If the user asks for a scheme (e.g., "grant scheme", "medical emergency") YOU MUST CALL a tool to search the database. Do not answer from general knowledge.
+  * If the tool returns zero matches or poor matches, state clearly "no exact match found in our database" and present the closest options returned by the tool. DO NOT invent unverified schemes like "Startup India Seed Fund" or "state-level MSME grant programmes".
+  * You MUST NOT include numbers (income limit, loan amount, interest rate, tenure, etc.) or lists of required documents in your generated text when discussing a scheme, as these are strictly rendered by the UI scheme cards.
+  * NEVER pass "null" or empty strings as values in your tool arguments. If you do not have the information, simply omit the parameter entirely.
+  * CRITICAL SCHEME CARDS AND CHAT PROSE SYNCHRONIZATION:
+    - The UI cards below your response will render EXACTLY and ONLY the schemes returned in the tool output \`data.schemes\`.
+    - Your written text response MUST describe EVERY scheme that appears in \`data.schemes\`, and MUST NOT describe, mention, or recommend ANY scheme that is NOT in \`data.schemes\`.
+    - If \`data.schemes\` has 1 scheme, your text must describe ONLY that 1 scheme.
+    - If \`data.schemes\` has 2 or 3 schemes, your text must describe all of them and only them.
+    - If \`data.schemes\` is empty (0 schemes), you MUST honestly state in your response: "I couldn't find a scheme that directly matches this in our database." (or in \${langName}). Do NOT recommend, name, or invent any schemes when none are returned.
+    - Never state in your text that a scheme doesn't fit or is disqualified if that scheme is in \`data.schemes\`.
 - Tool Selection Rules:
   * Call get_scheme_details when the user asks about ONE specific scheme by name, acronym, or follow-up question (e.g. "Tell me about MSY", "What is the interest rate of MSY?", "Who is eligible for Mahila Samriddhi Yojana?", "What are the rules for MCF?"). In your response, explain ONLY that specific scheme and do NOT suggest or list alternative schemes unless explicitly requested.
-  * Call recommend_schemes when the user describes a business/education plan, asks for suggestions/options, or asks open-ended discovery questions (e.g. "Which scheme is best for me?", "What loan schemes are available for women?", "I need ₹2 lakh for a tailoring business").
+  * Call recommend_schemes when the user describes a business/education plan, asks for suggestions/options, or asks open-ended discovery questions (e.g. "Which scheme is best for me?", "What loan schemes are available for women?", "I need ₹2 lakh for a tailoring business", "I want a grant, not a loan").
   * Call compare_schemes ONLY when the user explicitly asks to compare two or more distinct schemes (e.g. "Compare SUY and VETLS", "Compare MSY with other schemes"). Never call compare_schemes for a single scheme query.
-- If a tool needs information you don't have anywhere in this conversation, do NOT call it with a guessed value — instead, ask the user ONE short, warm, specific question to get exactly that missing piece, in ${langName}. Do not list multiple questions at once.
+- If a tool needs information you don't have anywhere in this conversation, do NOT call it with a guessed value — instead, ask the user ONE short, warm, specific question to get exactly that missing piece, in \${langName}. Do not list multiple questions at once.
 - If you already have enough from earlier in the conversation (including any "Known context" note or "STRUCTURED CONVERSATION CONTEXT" above), go ahead and call the tool — NEVER re-ask for something already given.
+- CRITICAL TOOL LOOP PREVENTION: You may only call a tool ONCE per conversation turn. Once you receive the tool response (e.g., scheme results), you MUST immediately formulate your final conversational text response. Do NOT call the same tool again.
 - Application process steps and general NSFDC background are safe to explain directly without a tool call — they aren't scheme-specific numbers.
 
 STYLE:
 - Warmly acknowledge the user's business idea, educational goal, or situation.
 - Never say "Based on your profile" or "you are eligible" before real data confirms it — say "for this purpose..." or "based on what you've shared...".
-- Keep replies concise, warm, and clear (a few sentences, not an essay), in ${langName}.
+- Keep replies concise, warm, and clear (a few sentences, not an essay), in \${langName}.
 - Do not mention tool names, JSON, or internal mechanics to the user.
 - Write in plain conversational prose only, like a person speaking — NEVER use Markdown formatting of any kind: no "#" or "##" headings, no "**bold**", no tables or "|" pipes, no "---" horizontal rules, no bullet lists with "-" or "*", no numbered lists.
 
@@ -269,6 +288,21 @@ INSTITUTIONAL JURISDICTION (GRAM PANCHAYAT vs. NSFDC CHANNELS):
   * Direct digital channel routing through Pradarshak AI eliminates middleman cuts (dalals), guarantees 0% commission deductions, ensures direct DBT/escrow bank disbursement, and protects beneficiaries from predatory informal moneylenders.
 `.trim();
 }
+
+
+export const NO_SCHEME_MATCH_MESSAGE: Record<string, string> = {
+  en: "I couldn't find a scheme that directly matches this in our database.",
+  hi: 'मुझे हमारे डेटाबेस में इससे सीधे मेल खाने वाली कोई योजना नहीं मिली।',
+  mr: 'आमच्या डेटाबेसमध्ये याच्याशी थेट जुळणारी कोणतीही योजना आढळली नाही.',
+  bn: 'আমাদের ডাটাবেসে এর সাথে সরাসরি মিলে এমন কোনো প্রকল্প খুঁজে পাওয়া যায়নি।',
+  gu: 'અમારા ડેટાબેઝમાં આની સાથે સીધી રીતે મેળ ખાતી કોઈ યોજના મળી નથી.',
+  kn: 'ನಮ್ಮ ಡೇಟಾಬೇಸ್‌ನಲ್ಲಿ ಇದಕ್ಕೆ ನೇರವಾಗಿ ಹೊಂದಾಣಿಕೆಯಾಗುವ ಯಾವುದೇ ಯೋಜನೆ ಕಂಡುಬಂದಿಲ್ಲ.',
+  ml: 'ഞങ്ങളുടെ ഡാറ്റാബേസിൽ ഇതിന് നേരിട്ട് അനുയോജ്യമായ ഒരു പദ്ധതിയും കണ്ടെത്താനായില്ല.',
+  od: 'ଆମ ଡାଟାବେସରେ ଏହା ସହିତ ସିଧାସଳଖ ମେଳ ଖାଉଥିବା କୌଣସି ଯୋଜନା ମିଳିଲା ନାହିଁ।',
+  pa: 'ਸਾਡੇ ਡਾਟਾਬੇਸ ਵਿੱਚ ਇਸ ਨਾਲ ਸਿੱਧਾ ਮੇਲ ਖਾਂਦੀ ਕੋਈ ਸਕੀਮ ਨਹੀਂ ਮਿਲੀ।',
+  ta: 'எங்கள் தரவுத்தளத்தில் இதற்கு நேரடியாக பொருந்தக்கூடிய எந்தவொரு திட்டமும் கிடைக்கவில்லை.',
+  te: 'మా డేటాబేస్‌లో దీనికి నేరుగా సరిపోయే పథకం ఏదీ కనిపించలేదు.',
+};
 
 // ── Type/intent inference from which tool ran ──────────────────────────────────
 
@@ -526,9 +560,23 @@ export async function resolveComparisonFromQuery(
 export function cleanAndFormatPostRecommendation(
   text: string,
   lang: string = 'en',
-  hasLoanAmount: boolean = false
+  hasLoanAmount: boolean = false,
+  schemesCount: number = 1
 ): string {
   let cleaned = text.trim();
+
+  if (schemesCount === 0) {
+    if (
+      !cleaned ||
+      cleaned === 'Here are the recommended schemes matching your inquiry.' ||
+      cleaned === 'आपकी आवश्यकता के अनुसार उपयुक्त योजनाएं नीचे प्रदर्शित की गई हैं।' ||
+      cleaned === 'तुमच्या गरजेनुसार योग्य योजना खाली दाखवल्या आहेत.' ||
+      cleaned === 'আপনার প্রয়োজনীয়তা অনুযায়ী উপযুক্ত প্রকল্পগুলি নীচে প্রদর্শিত হয়েছে।'
+    ) {
+      return NO_SCHEME_MATCH_MESSAGE[lang] || NO_SCHEME_MATCH_MESSAGE.en;
+    }
+    return cleaned;
+  }
 
   // 1. Strip generic asking for course or loan amount if loan amount or business is known
   cleaned = cleaned.replace(/Could you (?:please )?share your intended course and required loan amount[^.?!\r\n]*[.?!\r\n]?/gi, '');
@@ -890,14 +938,17 @@ Explain clearly and warmly that during the ${morat}-month moratorium no principa
       }
 
       try {
+        const calledTools = new Set<string>();
         for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
-          const assistantMsg = await llmChat({ messages, tools: TOOL_DEFS, maxTokens: 700 });
+          const availableTools = TOOL_DEFS.filter(t => !calledTools.has(t.function.name));
+          const assistantMsg = await llmChat({ messages, tools: availableTools.length > 0 ? availableTools : undefined, maxTokens: 700 });
 
           if (assistantMsg.tool_calls && assistantMsg.tool_calls.length > 0) {
             console.log(`[ROUTER] LLM round ${round}: tool_calls=[${assistantMsg.tool_calls.map(tc => tc.function.name).join(', ')}]`);
             messages.push({ role: 'assistant', content: assistantMsg.content ?? null, tool_calls: assistantMsg.tool_calls });
 
             for (const call of assistantMsg.tool_calls) {
+              calledTools.add(call.function.name);
               let args: Record<string, unknown> = {};
               try {
                 args = JSON.parse(call.function.arguments || '{}');
@@ -1086,38 +1137,29 @@ Explain clearly and warmly that during the ${morat}-month moratorium no principa
         }
       } catch (llmErr) {
         console.warn('[ChatOrchestrator] LLM call fallback triggered:', (llmErr as Error)?.message);
-        if (specificSchemeRes.isSpecificSchemeQuery && specificSchemeRes.scheme) {
-          const fallbackResult = await executeTool('get_scheme_details', {
-            scheme_id: specificSchemeRes.scheme.id,
-            scheme_name: specificSchemeRes.scheme.name,
-            query_focus: specificSchemeRes.queryFocus || 'overview',
-          });
-          lastToolName = fallbackResult.toolName;
-          lastToolData = fallbackResult.data;
+        if (lastToolName === 'recommend_schemes' && lastToolData?.schemes) {
+          const schemesCount = Array.isArray(lastToolData.schemes) ? (lastToolData.schemes as any[]).length : 0;
+          if (schemesCount === 0) {
+            finalText = NO_SCHEME_MATCH_MESSAGE[session.language] || NO_SCHEME_MATCH_MESSAGE.en;
+          } else {
+            finalText = session.language === 'hi'
+              ? 'आपकी आवश्यकता के अनुसार उपयुक्त योजनाएं नीचे प्रदर्शित की गई हैं।'
+              : session.language === 'mr'
+              ? 'तुमच्या गरजेनुसार योग्य योजना खाली दाखवल्या आहेत.'
+              : session.language === 'bn'
+              ? 'আপনার প্রয়োজনীয়তা অনুযায়ী উপযুক্ত প্রকল্পগুলি নীচে প্রদর্শিত হয়েছে।'
+              : 'Here are the recommended schemes matching your inquiry.';
+          }
+        } else if (lastToolName === 'get_scheme_details' && lastToolData?.scheme) {
           finalText = session.language === 'hi'
-            ? `${specificSchemeRes.scheme.name} का विवरण नीचे दिया गया है।`
+            ? `${(lastToolData.scheme as Scheme).name} की जानकारी नीचे दी गई है।`
             : session.language === 'mr'
-            ? `${specificSchemeRes.scheme.name} चा तपशील खाली दिला आहे.`
-            : `Here are the details for ${specificSchemeRes.scheme.name}.`;
-          speechText = finalText;
+            ? `${(lastToolData.scheme as Scheme).name} ची माहिती खाली दिली आहे.`
+            : `Here are the details for ${(lastToolData.scheme as Scheme).name}.`;
         } else {
-          const fallbackResult = await executeTool('recommend_schemes', {
-            query: session.knownFacts?.business_type || message,
-            loan_amount_rs: session.knownFacts?.loan_amount_rs,
-            purpose: session.knownFacts?.purpose || session.knownFacts?.business_type,
-            family_income_rs: session.knownFacts?.family_income_rs || (effectiveUserContext?.salary ? Number(effectiveUserContext.salary) : undefined),
-            location: session.knownFacts?.location || effectiveUserContext?.district || effectiveUserContext?.city,
-            category_hint: session.knownFacts?.business_type ? 'business_loan' : undefined,
-          });
-          lastToolName = fallbackResult.toolName;
-          lastToolData = fallbackResult.data;
-          finalText = session.language === 'hi'
-            ? 'आपकी आवश्यकता के अनुसार उपयुक्त योजनाएं नीचे प्रदर्शित की गई हैं।'
-            : session.language === 'mr'
-            ? 'तुमच्या गरजेनुसार योग्य योजना खाली दाखवल्या आहेत.'
-            : 'Here are the recommended schemes matching your inquiry.';
-          speechText = finalText;
+          finalText = LOCALIZED_ERROR_MESSAGES[session.language] || LOCALIZED_ERROR_MESSAGES.en;
         }
+        speechText = finalText;
       }
     }
   }
@@ -1157,13 +1199,18 @@ Explain clearly and warmly that during the ${morat}-month moratorium no principa
       );
       speechText = finalText;
     } else if (lastToolName === 'recommend_schemes' && lastToolData?.schemes) {
-      finalText = session.language === 'hi'
-        ? 'आपकी आवश्यकता के अनुसार उपयुक्त योजनाएं नीचे प्रदर्शित की गई हैं।'
-        : session.language === 'mr'
-        ? 'तुमच्या गरजेनुसार योग्य योजना खाली दाखवल्या आहेत.'
-        : session.language === 'bn'
-        ? 'আপনার প্রয়োজনীয়তা অনুযায়ী উপযুক্ত প্রকল্পগুলি নীচে প্রদর্শিত হয়েছে।'
-        : 'Here are the recommended schemes matching your inquiry.';
+      const schemesCount = Array.isArray(lastToolData.schemes) ? (lastToolData.schemes as any[]).length : 0;
+      if (schemesCount === 0) {
+        finalText = NO_SCHEME_MATCH_MESSAGE[session.language] || NO_SCHEME_MATCH_MESSAGE.en;
+      } else {
+        finalText = session.language === 'hi'
+          ? 'आपकी आवश्यकता के अनुसार उपयुक्त योजनाएं नीचे प्रदर्शित की गई हैं।'
+          : session.language === 'mr'
+          ? 'तुमच्या गरजेनुसार योग्य योजना खाली दाखवल्या आहेत.'
+          : session.language === 'bn'
+          ? 'আপনার প্রয়োজনীয়তা অনুযায়ী উপযুক্ত প্রকল্পগুলি নীচে প্রদর্শিত হয়েছে।'
+          : 'Here are the recommended schemes matching your inquiry.';
+      }
       speechText = finalText;
     } else {
       // ── SMART FALLBACK ──
@@ -1231,13 +1278,17 @@ Explain clearly and warmly that during the ${morat}-month moratorium no principa
             const schemeCount = Array.isArray(smartFallbackResult.data?.schemes) ? (smartFallbackResult.data.schemes as any[]).length : 0;
             console.log(`[RESPONSE] Smart fallback returned ${schemeCount} schemes`);
 
-            finalText = session.language === 'hi'
-              ? 'आपकी आवश्यकता के अनुसार उपयुक्त योजनाएं नीचे प्रदर्शित की गई हैं।'
-              : session.language === 'mr'
-              ? 'तुमच्या गरजेनुसार योग्य योजना खाली दाखवल्या आहेत.'
-              : session.language === 'bn'
-              ? 'আপনার প্রয়োজনীয়তা অনুযায়ী উপযুক্ত প্রকল্পগুলি নীচে প্রদর্শিত হয়েছে।'
-              : 'Here are the recommended schemes matching your inquiry.';
+            if (schemeCount === 0) {
+              finalText = NO_SCHEME_MATCH_MESSAGE[session.language] || NO_SCHEME_MATCH_MESSAGE.en;
+            } else {
+              finalText = session.language === 'hi'
+                ? 'आपकी आवश्यकता के अनुसार उपयुक्त योजनाएं नीचे प्रदर्शित की गई हैं।'
+                : session.language === 'mr'
+                ? 'तुमच्या गरजेनुसार योग्य योजना खाली दाखवल्या आहेत.'
+                : session.language === 'bn'
+                ? 'আপনার প্রয়োজনীয়তা অনুযায়ী উপযুক্ত প্রকল্পগুলি নীচে প্রদর্শিত হয়েছে।'
+                : 'Here are the recommended schemes matching your inquiry.';
+            }
             speechText = finalText;
           } catch (fallbackErr) {
             console.error('[ROUTER] Smart fallback also failed:', (fallbackErr as Error)?.message);
@@ -1255,10 +1306,12 @@ Explain clearly and warmly that during the ${morat}-month moratorium no principa
   }
 
   if (lastToolName === 'recommend_schemes') {
+    const schemesCount = Array.isArray(lastToolData?.schemes) ? (lastToolData.schemes as any[]).length : 0;
     finalText = cleanAndFormatPostRecommendation(
       finalText,
       session.language,
-      session.knownFacts?.loan_amount_rs != null
+      session.knownFacts?.loan_amount_rs != null,
+      schemesCount
     );
   }
 

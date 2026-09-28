@@ -3,7 +3,7 @@ import { detectLanguage } from '../services/IntentClassifier';
 import { geocodeCity } from '../services/LocationService';
 import { mapSarvamSTTResponse } from '../services/STTService';
 import { resolveEffectiveLanguage } from '../services/LanguageResolver';
-import { OpenRouterError } from '../lib/openrouter';
+import { GroqError } from '../lib/groq';
 import { LOCALIZED_ERROR_MESSAGES, buildSystemPrompt } from '../services/ChatOrchestrator';
 import { calculateFinancialPlan } from '../services/FinancialEngine';
 import type { Scheme } from '../services/SchemeEngine';
@@ -398,17 +398,17 @@ assert(amravatiPt !== null && Math.abs(amravatiPt.lat - 20.9374) < 0.01, 'Amrava
 const nagpurPt = geocodeCity('nagpur');
 assert(nagpurPt !== null && Math.abs(nagpurPt.lat - 21.1458) < 0.01, 'Nagpur coordinates accurately mapped');
 
-// ── 6. OpenRouter Error Handling & Token Budget Robustness Tests ──
-console.log('\n🛡️ Testing OpenRouter Error Handling & Token Budget Robustness:');
+// ── 6. Groq Error Handling & Token Budget Robustness Tests ──
+console.log('\n🛡️ Testing Groq Error Handling & Token Budget Robustness:');
 
-const creditErr = new OpenRouterError(402, 'This request requires more credits, or fewer max_tokens. You requested up to 700 tokens, but can only afford 675. Key: sk-or-v1-abcdef123456789');
+const creditErr = new GroqError(402, 'This request requires more credits, or fewer max_tokens. You requested up to 700 tokens, but can only afford 675. Key: gsk-abcdef123456789');
 assert(creditErr.status === 402 && creditErr.isCreditError === true, 'HTTP 402 correctly classified as credit/budget error');
-assert(!creditErr.message.includes('sk-or-v1-abcdef123456789') && creditErr.message.includes('[REDACTED]'), 'Secret API key is masked in error message');
+assert(!creditErr.message.includes('gsk-abcdef123456789') && creditErr.message.includes('[REDACTED]'), 'Secret API key is masked in error message');
 
-const rateLimitErr = new OpenRouterError(429, 'Rate limit exceeded');
+const rateLimitErr = new GroqError(429, 'Rate limit exceeded');
 assert(rateLimitErr.status === 429 && rateLimitErr.isRateLimit === true && rateLimitErr.isCreditError === false, 'HTTP 429 correctly classified as rate limit error');
 
-const serverErr = new OpenRouterError(503, 'Service Unavailable');
+const serverErr = new GroqError(503, 'Service Unavailable');
 assert(serverErr.status === 503 && serverErr.isServerError === true, 'HTTP 5xx correctly classified as server error');
 
 const all11Langs = ['en', 'hi', 'mr', 'bn', 'gu', 'kn', 'ml', 'od', 'pa', 'ta', 'te'];

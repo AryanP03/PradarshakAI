@@ -1,4 +1,4 @@
-import type { ToolDef } from '../lib/openrouter';
+import type { ToolDef } from '../lib/groq';
 import { recommendSchemes, fetchActiveSchemes, fetchSchemeByName, fetchSchemeById } from './SchemeEngine';
 import type { ScoredScheme, Scheme } from './SchemeEngine';
 import { geocode, findNearbyPartners } from './LocationService';
@@ -31,9 +31,9 @@ export const TOOL_DEFS: ToolDef[] = [
       parameters: {
         type: 'object',
         properties: {
-          scheme_id: { type: 'number', description: 'Numeric ID of the specific scheme if known' },
+          scheme_id: { type: ['number', 'null'], description: 'Numeric ID of the specific scheme if known' },
           scheme_name: { type: 'string', description: 'Exact or partial name, acronym, or local name of the scheme (e.g. "MSY", "Mahila Samriddhi Yojana", "MCF", "ELS")' },
-          query_focus: { type: 'string', enum: ['overview', 'interest_rate', 'eligibility', 'documents', 'tenure', 'loan_amount'], description: 'What specific aspect the user is asking about' },
+          query_focus: { type: ['string', 'null'], enum: ['overview', 'interest_rate', 'eligibility', 'documents', 'tenure', 'loan_amount', null], description: 'What specific aspect the user is asking about' },
         },
         required: ['scheme_name'],
       },
@@ -48,15 +48,16 @@ export const TOOL_DEFS: ToolDef[] = [
         type: 'object',
         properties: {
           query: { type: 'string', description: 'The user\'s search query or question about schemes' },
-          purpose: { type: 'string', description: 'Loan purpose, business type, or trade (e.g. tailoring, dairy, retail shop, education)' },
-          loan_amount_rs: { type: 'number', description: 'Requested loan amount in rupees' },
-          family_income_rs: { type: 'number', description: 'Annual family income in rupees' },
-          education_level: { type: 'string', enum: ['school', 'diploma', 'undergraduate', 'postgraduate'] },
-          course: { type: 'string' },
-          gender: { type: 'string', enum: ['male', 'female'] },
-          location: { type: 'string', description: 'City or district' },
-          state: { type: 'string', description: 'State of residence of beneficiary (e.g. Maharashtra, Gujarat, Delhi, Tamil Nadu, etc.)' },
-          category_hint: { type: 'string', enum: ['education_loan', 'business_loan', 'housing', 'welfare'], description: 'Set to education_loan for education/study, business_loan for business/trade, housing for home purchase/construction, welfare for insurance/health/pension/general welfare' },
+          purpose: { type: ['string', 'null'], description: 'Loan purpose, business type, or trade (e.g. tailoring, dairy, retail shop, education)' },
+          loan_amount_rs: { type: ['number', 'null'], description: 'Requested loan amount in rupees' },
+          family_income_rs: { type: ['number', 'null'], description: 'Annual family income in rupees' },
+          education_level: { type: ['string', 'null'], enum: ['school', 'diploma', 'undergraduate', 'postgraduate', null] },
+          course: { type: ['string', 'null'] },
+          gender: { type: ['string', 'null'], enum: ['male', 'female', null] },
+          age: { type: ['number', 'null'], description: 'Age of the applicant in years' },
+          location: { type: ['string', 'null'], description: 'City or district' },
+          state: { type: ['string', 'null'], description: 'State of residence of beneficiary (e.g. Maharashtra, Gujarat, Delhi, Tamil Nadu, etc.)' },
+          category_hint: { type: ['string', 'null'], enum: ['education_loan', 'business_loan', 'housing', 'welfare', null], description: 'Set to education_loan for education/study, business_loan for business/trade, housing for home purchase/construction, welfare for insurance/health/pension/general welfare' },
         },
       },
     },
@@ -70,9 +71,9 @@ export const TOOL_DEFS: ToolDef[] = [
         type: 'object',
         properties: {
           loan_amount_rs: { type: 'number', description: 'Principal loan amount in rupees' },
-          interest_rate_pct: { type: 'number', description: 'Annual interest rate percent' },
-          tenure_months: { type: 'number', description: 'Repayment tenure in months' },
-          moratorium_months: { type: 'number', description: 'Moratorium/grace period in months, 0 if none' },
+          interest_rate_pct: { type: ['number', 'null'], description: 'Annual interest rate percent' },
+          tenure_months: { type: ['number', 'null'], description: 'Repayment tenure in months' },
+          moratorium_months: { type: ['number', 'null'], description: 'Moratorium/grace period in months, 0 if none' },
         },
         required: ['loan_amount_rs'],
       },
@@ -87,7 +88,7 @@ export const TOOL_DEFS: ToolDef[] = [
         type: 'object',
         properties: {
           location: { type: 'string', description: 'City or district name' },
-          category: { type: 'string', description: 'Scheme category filter' },
+          category: { type: ['string', 'null'], description: 'Scheme category filter' },
         },
         required: ['location'],
       },
@@ -101,9 +102,9 @@ export const TOOL_DEFS: ToolDef[] = [
       parameters: {
         type: 'object',
         properties: {
-          scheme_id: { type: 'number', description: 'Numeric ID of the scheme' },
-          scheme_name: { type: 'string', description: 'Name of the scheme' },
-          is_education: { type: 'boolean', description: 'True if for education loan' },
+          scheme_id: { type: ['number', 'null'], description: 'Numeric ID of the scheme' },
+          scheme_name: { type: ['string', 'null'], description: 'Name of the scheme' },
+          is_education: { type: ['boolean', 'null'], description: 'True if for education loan' },
         },
       },
     },
@@ -116,8 +117,8 @@ export const TOOL_DEFS: ToolDef[] = [
       parameters: {
         type: 'object',
         properties: {
-          scheme_ids: { type: 'array', items: { type: 'number' }, description: 'Array of scheme IDs' },
-          scheme_names: { type: 'array', items: { type: 'string' }, description: 'Array of scheme names' },
+          scheme_ids: { type: ['array', 'null'], items: { type: 'number' }, description: 'Array of scheme IDs' },
+          scheme_names: { type: ['array', 'null'], items: { type: 'string' }, description: 'Array of scheme names' },
         },
       },
     },
@@ -207,6 +208,7 @@ export async function executeTool(name: string, args: Record<string, unknown>): 
         education_level: args.education_level as string | undefined,
         course: args.course as string | undefined,
         gender: (args.gender as string | undefined) || (isWomen ? 'female' : undefined),
+        age: args.age as number | undefined,
         location: args.location as string | undefined,
         state: args.state as string | undefined,
       };

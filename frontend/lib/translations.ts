@@ -102,7 +102,7 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
     // Schemes Page
     'schemes.badge': 'Schemes Catalogue',
     'schemes.title': 'Government Concessional Loan Schemes',
-    'schemes.desc': 'Explore government-supported financial assistance programs available through the NSFDC ecosystem for Scheduled Caste beneficiaries.',
+    'schemes.desc': 'Discover government schemes, financial assistance, subsidies, scholarships, and loans available to Scheduled Caste beneficiaries across India.',
     'schemes.curated_note': 'Showing a curated selection of 10 key schemes from the broader NSFDC scheme portfolio.',
     'schemes.curated_ai_action': 'Ask the AI Assistant',
     'schemes.curated_ai_desc': 'to discover other applicable schemes based on your income, purpose, education, or business needs.',

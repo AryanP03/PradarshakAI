@@ -2,8 +2,8 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '../.env' });
 
 async function run() {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  const res = await fetch('https://openrouter.ai/api/v1/models', {
+  const apiKey = process.env.GROQ_API_KEY;
+  const res = await fetch('https://api.groq.com/openai/v1/models', {
     headers: { 'Authorization': `Bearer ${apiKey}` }
   });
   const data = await res.json();

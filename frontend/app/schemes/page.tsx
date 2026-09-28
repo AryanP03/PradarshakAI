@@ -10,7 +10,8 @@ import {
   Layers,
   ArrowRight,
   MessageCircle,
-  RotateCcw
+  RotateCcw,
+  ChevronDown
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { getLocalizedSchemeName, getLocalizedSchemeDesc } from '@/lib/translations';
@@ -355,6 +356,11 @@ export default function SchemesPage() {
   const [typeFilter, setTypeFilter] = useState<'all' | 'financing' | 'informational'>('all');
   const [catFilter, setCatFilter] = useState<string[]>([]);
   const [genderFilter, setGenderFilter] = useState<'all' | 'women_only'>('all');
+  const [visibleCount, setVisibleCount] = useState(7);
+
+  useEffect(() => {
+    setVisibleCount(7);
+  }, [search, typeFilter, catFilter, genderFilter]);
 
   useEffect(() => {
     fetch(`${BASE}/schemes`)
@@ -423,6 +429,7 @@ export default function SchemesPage() {
     setCatFilter([]);
     setGenderFilter('all');
     setSearch('');
+    setVisibleCount(7);
   }
 
   const hasActiveFilters = typeFilter !== 'all' || catFilter.length > 0 || genderFilter !== 'all' || search;
@@ -475,11 +482,11 @@ export default function SchemesPage() {
           </h1>
 
           <p style={{ fontSize: 15, color: '#64748b', maxWidth: 840, lineHeight: 1.6, margin: 0 }}>
-            {t('schemes.desc', 'Explore government-supported financial assistance programs available through the NSFDC ecosystem for Scheduled Caste beneficiaries.')}
+            {t('schemes.desc', 'Discover government schemes, financial assistance, subsidies, scholarships, and loans available to Scheduled Caste beneficiaries across India.')}
           </p>
 
           <p style={{ fontSize: 13.5, color: '#475569', lineHeight: 1.55, margin: '2px 0 0', maxWidth: 900 }}>
-            {t('schemes.catalog_note', 'Browse the complete catalog of 198+ Central and State Government schemes.')}{' '}
+            {t('schemes.catalog_note', 'Browse the complete catalog of 200+ Central and State Government schemes.')}{' '}
             <a
               href="/chat"
               style={{ color: '#0369a1', fontWeight: 700, textDecoration: 'underline' }}
@@ -506,7 +513,7 @@ export default function SchemesPage() {
                 transition: 'all 150ms ease',
               }}
             >
-              {t('schemes.tab_all', 'All Catalog')} ({schemeList.length})
+              {t('schemes.tab_all', 'All Catalog')}
             </button>
             <button
               onClick={() => setTypeFilter('financing')}
@@ -523,7 +530,7 @@ export default function SchemesPage() {
                 transition: 'all 150ms ease',
               }}
             >
-              {t('schemes.tab_financing', '🟢 Financing Schemes')} ({schemeList.filter(s => s.scheme_type !== 'informational' && s.channel_partner_applicable !== false).length})
+              {t('schemes.tab_financing', '🟢 Financing Schemes')}
             </button>
             <button
               onClick={() => setTypeFilter('informational')}
@@ -540,7 +547,7 @@ export default function SchemesPage() {
                 transition: 'all 150ms ease',
               }}
             >
-              {t('schemes.tab_informational', '🔵 Informational Programmes')} ({schemeList.filter(s => s.scheme_type === 'informational' || s.channel_partner_applicable === false).length})
+              {t('schemes.tab_informational', '🔵 Informational Programmes')}
             </button>
           </div>
         </div>
@@ -737,15 +744,54 @@ export default function SchemesPage() {
             </button>
           </div>
         ) : (
-          <div className="scheme-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: 24 }}>
-            {filtered.map((scheme) => (
-              <SchemeCard
-                key={scheme.id}
-                scheme={scheme}
-                onChat={handleSchemeInquire}
-              />
-            ))}
-          </div>
+          <>
+            <div className="scheme-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: 24 }}>
+              {filtered.slice(0, visibleCount).map((scheme) => (
+                <SchemeCard
+                  key={scheme.id}
+                  scheme={scheme}
+                  onChat={handleSchemeInquire}
+                />
+              ))}
+            </div>
+
+            {visibleCount < filtered.length && (
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 36, marginBottom: 20 }}>
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((prev) => prev + 7)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '12px 28px',
+                    borderRadius: 12,
+                    background: '#0b1f3a',
+                    color: '#ffffff',
+                    fontSize: 14,
+                    fontWeight: 700,
+                    border: 'none',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 14px rgba(11,31,58,0.15)',
+                    transition: 'all 150ms ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = '#1e3a8a';
+                    (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
+                    (e.currentTarget as HTMLElement).style.boxShadow = '0 6px 20px rgba(11,31,58,0.2)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = '#0b1f3a';
+                    (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                    (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 14px rgba(11,31,58,0.15)';
+                  }}
+                >
+                  <span>{t('schemes.view_more', 'View More')}</span>
+                  <ChevronDown size={16} />
+                </button>
+              </div>
+            )}
+          </>
         )}
       </main>
 

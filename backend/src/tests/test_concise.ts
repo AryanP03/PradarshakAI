@@ -85,7 +85,7 @@ const conciseTools = [
 ];
 
 async function test() {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   const prompt = `You are Pradarshak AI Financial Advisor (NSFDC, Govt. of India). Help Scheduled Caste beneficiaries find subsidized loan schemes, EMIs, partners, and documents.
 AUTHENTICATED BENEFICIARY PROFILE:
 - Name: Aryan Phanse | Category: SC | Annual Income: ₹1,89,525 (verified ceiling ≤ ₹5L)
@@ -103,15 +103,16 @@ RULES:
 
   console.log('Testing prompt length:', prompt.length);
 
-  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+  const apiKey = process.env.GROQ_API_KEY;
+  const model = 'openai/gpt-oss-120b';
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://sih-channel-finance.app',
     },
     body: JSON.stringify({
-      model: 'google/gemini-2.5-flash',
+      model: model,
       max_tokens: 150,
       messages: [
         { role: 'system', content: prompt },
