@@ -206,7 +206,6 @@ export function schemeSupportsLevel(scheme: Scheme, targetLevel: EducationLevelS
   if (scheme.education_levels && scheme.education_levels.includes(targetLevel)) return true;
   if (targetLevel === 'undergraduate' && scheme.education_levels?.includes('higher_education')) return true;
   if (targetLevel === 'postgraduate' && scheme.education_levels?.includes('higher_education')) return true;
-  if (targetLevel === 'post_matric' && (scheme.education_level === 'undergraduate' || scheme.education_levels?.includes('post_matric'))) return true;
   return false;
 }
 
@@ -624,6 +623,32 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
     return -80;
   }
 
+  // Laptop & Digital Device specialized semantic match
+  const laptopWords = ['laptop', 'laptops', 'computer', 'computers', 'pc', 'tablet', 'tablets', 'लैपटॉप', 'कंप्यूटर'];
+  const isLaptopQuery = laptopWords.some((w) => normP.includes(w));
+  if (isLaptopQuery) {
+    const isLaptopScheme = /laptop|computer/i.test(scheme.name) ||
+      normalizedTypes.some((t) => /laptop|computer|technology/.test(t));
+    if (isLaptopScheme) {
+      tagMatchScore += 80;
+      matchingTagCount++;
+      return Math.max(95, 50 + tagMatchScore);
+    }
+    // General non-laptop schemes receive a penalty when laptop is specifically requested
+    tagMatchScore -= 35;
+  }
+
+  // Academic Merit & Marks specialized semantic match
+  const meritWords = ['merit', 'meritorious', 'marks', 'percentage', 'topper', 'मेधावी', 'प्रतिभाशाली'];
+  const isMeritQuery = meritWords.some((w) => normP.includes(w));
+  if (isMeritQuery) {
+    const isMeritScheme = /merit|meritorious|मेधावी/i.test(scheme.name) || /merit|marks|60%/i.test(scheme.notes || '');
+    if (isMeritScheme) {
+      tagMatchScore += 35;
+      matchingTagCount++;
+    }
+  }
+
   // Scholarship specialized semantic match
   const scholarshipWords = ['scholarship', 'scholarships', 'छात्रवृत्ति', 'शिष्यवृत्ती', 'वृत्ति'];
   const isScholarshipQuery = scholarshipWords.some((w) => normP.includes(w));
@@ -651,7 +676,6 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
       tagMatchScore += 75;
       matchingTagCount++;
     } else if (scheme.education_level === 'overseas' && !normP.includes('abroad') && !normP.includes('overseas')) {
-      // De-prioritize overseas schemes when domestic PhD is requested
       tagMatchScore -= 30;
     }
   }
@@ -679,7 +703,6 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
       tagMatchScore += 85;
       matchingTagCount++;
     } else if (scheme.interest_rate_min != null && Number(scheme.interest_rate_min) > 0) {
-      // Heavily penalize standard loans when grant/interest-free is explicitly requested
       tagMatchScore -= 50;
     }
   }
@@ -703,6 +726,11 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
   const greenWords = ['green', 'electric', 'rickshaw', 'solar', 'biogas', 'polyhouse', 'organic', 'eco', 'renewable', 'ev', 'ई-रिक्शा', 'सौर', 'पर्यावरण'];
   const artisanWords = ['artisan', 'handicraft', 'weaving', 'craft', 'pottery', 'woodwork', 'sculpture', 'textile', 'carpet', 'embroidery', 'शिल्पकार', 'बुनकर', 'हस्तकला', 'हस्तशिल्प'];
   const businessWords = ['tailoring', 'shop', 'grocery', 'kirana', 'trade', 'enterprise', 'business', 'store', 'restaurant', 'hotel', 'manufacturing', 'repair', 'auto', 'rickshaw', 'सिलाई', 'दुकान', 'व्यापार', 'व्यवसाय', 'शिलाई', 'उद्योग'];
+  const livelihoodWords = [
+    'work', 'working', 'job', 'livelihood', 'self employment', 'self-employment', 'swarojgar',
+    'income generation', 'income generating', 'small business', 'enterprise', 'start work', 'money for work',
+    'funds for work', 'kaam', 'kam', 'काम', 'धंधा', 'कामधंधा', 'आजीविका', 'स्वरोजगार', 'रोजगार'
+  ];
   const agriWords = ['agriculture', 'farming', 'farm', 'agro', 'poultry', 'animal', 'cattle', 'horticulture', 'dairy', 'crop', 'fisheries', 'खेती', 'कृषि', 'डेयरी', 'पशुपालन', 'शेतकरी'];
   const techWords = ['saas', 'software', 'tech', 'it', 'b2b', 'supplier', 'suppliers', 'supply', 'logistics', 'services', 'agency', 'wholesale', 'सॉफ्टवेयर', 'तकनीक', 'सप्लायर'];
   const educationWords = [
@@ -712,6 +740,11 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
     'ಶಿಕ್ಷಣ', 'ಸಾಹಿತ್ಯ', 'ಅಧ್ಯಯನ', 'ಕಾಲೇಜು', 'ವಿದ್ಯಾಭ್ಯಾಸ', 'ಎಂಜಿನಿಯರಿಂಗ್',
     'શિક્ષણ', 'கல்வி', 'విద్య', 'വിദ്യാഭ്യാസം', 'ଶିକ୍ଷା', 'ਸਿੱਖਿਆ'
   ];
+
+  const isMultiPurposeConcessional =
+    scheme.category === 'micro_finance' ||
+    scheme.category === 'entrepreneurship' ||
+    /mcf|micro credit|term loan|udyam nidhi|swarojgar|finance and development|rscfdc/i.test(scheme.name);
 
   const isSanitationScheme = normalizedTypes.some((t) => /sanitation|waste|sewage|toilet|clean|scavenger/.test(t));
   const isGreenScheme = normalizedTypes.some((t) => /green|solar|renewable|electric|rickshaw|biogas|eco/.test(t));
@@ -751,13 +784,25 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
     if (normalizedTypes.some((t) => /services|technology|software|startup|innovation/.test(t))) return 40;
     return 5;
   }
+  if (matchWords(livelihoodWords)) {
+    const isLivelihoodScheme =
+      isMultiPurposeConcessional ||
+      normalizedTypes.some((t) => /self_employment|small_trade|micro_finance|business|service|livelihood|transport/.test(t));
+    if (isLivelihoodScheme) {
+      return Math.min(95, Math.max(55, 40 + tagMatchScore));
+    }
+    if (isEducationScheme || scheme.category === 'skill_development' || scheme.category === 'welfare') {
+      return -40;
+    }
+    return 20;
+  }
   if (matchWords(businessWords)) {
     if (normP.includes('सिलाई') || normP.includes('tailoring') || normP.includes('शिलाई')) {
       if (normalizedTypes.some((t) => t.includes('tailoring'))) return 50;
     }
     if (matchingTagCount > 0) return Math.min(95, 35 + tagMatchScore);
-    if (isAgriScheme) return -30;
-    if (isSanitationScheme || isArtisanScheme) return -15;
+    if (!isMultiPurposeConcessional && isAgriScheme) return -30;
+    if (!isMultiPurposeConcessional && (isSanitationScheme || isArtisanScheme)) return -15;
     if (isEducationScheme || scheme.category === 'skill_development' || scheme.category === 'welfare') return -50;
     if (scheme.category === 'entrepreneurship' || scheme.category === 'micro_finance') return 40;
     return 15;
@@ -767,14 +812,30 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
     return Math.min(95, 30 + tagMatchScore);
   }
 
-  if (isSanitationScheme || isArtisanScheme || isAgriScheme) return -30;
-  if (isGreenScheme) return -15;
+  // Only penalize dedicated narrow schemes when a non-matching query is run; never penalize multi-purpose schemes
+  if (!isMultiPurposeConcessional) {
+    const isDedicatedAgri = /kisan|krishi|fasal/i.test(scheme.name) || (normalizedTypes.filter(t => /agri|farm|dairy|poultry|crop|livestock|fisher|cattle|animal/.test(t)).length / Math.max(1, normalizedTypes.length)) > 0.4;
+    const isDedicatedSanitation = (normalizedTypes.filter(t => /sanitation|waste|sewage|toilet|clean|scavenger/.test(t)).length / Math.max(1, normalizedTypes.length)) > 0.4;
+    const isDedicatedArtisan = (normalizedTypes.filter(t => /artisan|handicraft|weaving|craft|pottery|leather|wood_work|textile|embroidery/.test(t)).length / Math.max(1, normalizedTypes.length)) > 0.4;
+
+    if (isDedicatedSanitation || isDedicatedArtisan || isDedicatedAgri) return -30;
+    if (isGreenScheme) return -15;
+  }
 
   return 15;
 }
 
 function incomeScore(scheme: Scheme, incomeRs: number | undefined): { score: number; warning?: string } {
-  if (!incomeRs) return { score: 10 };
+  if (!incomeRs) {
+    // When income is unspecified, rank based on accessibility/breadth of eligibility cap
+    if (scheme.max_income_lakh == null || Number(scheme.max_income_lakh) === 0) {
+      return { score: 15 }; // Universal / merit-based (no income barrier)
+    }
+    const cap = Number(scheme.max_income_lakh);
+    if (cap >= 6.0) return { score: 12 }; // Broad income ceiling (e.g. ₹8L Top Class)
+    if (cap >= 2.5) return { score: 10 }; // Standard moderate ceiling (e.g. ₹2.5L Post-Matric)
+    return { score: 7 }; // Strict low income ceiling (e.g. ₹1L EBC)
+  }
   const incomeLakh = incomeRs / 100000;
 
   if (incomeLakh > 5.0 && scheme.level === 'Central') {
@@ -966,10 +1027,11 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
         if (schemeSupportsLevel(scheme, detectedLevel)) {
           levelMatch = true;
           score += 60;
-          matchReasons.push(`Specifically matches your requested ${detectedLevel.replace('_', ' ')} education level`);
+          const schemeLevelLabel = (scheme.education_level || detectedLevel).replace(/_/g, ' ');
+          matchReasons.push(`Specifically matches your requested ${detectedLevel.replace(/_/g, ' ')} education level (${schemeLevelLabel})`);
         } else {
           score -= 80;
-          warnings.push(`This scheme is designated for ${scheme.education_level?.replace('_', ' ') || 'other'} stage, not for ${detectedLevel.replace('_', ' ')}.`);
+          warnings.push(`This scheme is designated for ${scheme.education_level?.replace(/_/g, ' ') || 'other'} stage, not for ${detectedLevel.replace(/_/g, ' ')}.`);
         }
       }
 
@@ -982,7 +1044,37 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
       if (gDisqualified) tier = 'HARD_DISQUALIFIED';
       else if (entities.gender === 'female' && gScore > 0) matchReasons.push('Exclusive concessional scheme for women entrepreneurs');
 
-      score += Math.max(0, (10 - Number(scheme.interest_rate_min || 6)) * 2);
+      // State relevance bonus
+      if (userState && scheme.state && scheme.state.toLowerCase() === userState.toLowerCase()) {
+        score += 35;
+        matchReasons.push(`Specifically tailored for residents of ${scheme.state}`);
+      }
+
+      // SC / Social Category preference bonus
+      const pLower = (entities.purpose || '').toLowerCase();
+      const isScQuery = /\b(sc|scheduled\s*caste|dalit)\b/i.test(pLower);
+      if (isScQuery) {
+        if (scheme.for_sc || /\bsc\b|scheduled caste/i.test(scheme.name)) {
+          score += 15;
+          matchReasons.push('Exclusively designated for Scheduled Caste (SC) beneficiaries');
+        } else if (/\bebc\b|economically backward/i.test(scheme.name)) {
+          score -= 25; // Deduct for EBC scheme when SC is requested
+        }
+      }
+
+      // Non-loan interest rate treatment
+      const isNonLoanOrGrant = scheme.scheme_type === 'scholarship' ||
+        scheme.scheme_type === 'grant' ||
+        scheme.scheme_type === 'in_kind' ||
+        scheme.max_loan_lakh == null ||
+        Number(scheme.max_loan_lakh) === 0 ||
+        /scholarship|fellowship|laptop/i.test(scheme.name);
+
+      const effectiveRate = scheme.interest_rate_min != null
+        ? Number(scheme.interest_rate_min)
+        : (isNonLoanOrGrant ? 0 : 6);
+
+      score += Math.max(0, (10 - effectiveRate) * 2);
 
       // --- 3-TIER DETERMINISTIC CLASSIFICATION ---
       let disqualificationReason: string | undefined = undefined;
@@ -1089,12 +1181,17 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
         const hasSpecificPurpose = Boolean(
           entities.purpose &&
           entities.purpose.trim().length > 3 &&
-          !/^(loan|schemes?|business|start\s*a?\s*business|any|best|help|funds?|government\s*schemes?|yojana)$/i.test(entities.purpose.trim())
+          !/^(loan|schemes?|business|start\s*a?\s*business|any|best|help|funds?|government\s*schemes?|yojana|work|money\s*for\s*work|general\s*work)$/i.test(entities.purpose.trim())
         );
 
-        const hasGenuinePurposeMatch = pScore >= 40 || isDirectMatch || isHealthScheme || isPensionScheme || isScholarshipScheme || isHousingScheme || isFellowship;
+        const isLivelihoodScheme =
+          scheme.category === 'micro_finance' ||
+          scheme.category === 'entrepreneurship' ||
+          /mcf|micro credit|term loan|udyam nidhi|swarojgar|finance and development|rscfdc/i.test(scheme.name);
 
-        if (score >= 80 && (!hasSpecificPurpose || hasGenuinePurposeMatch)) {
+        const hasGenuinePurposeMatch = pScore >= 35 || isDirectMatch || isHealthScheme || isPensionScheme || isScholarshipScheme || isHousingScheme || isFellowship || isLivelihoodScheme;
+
+        if (score >= 70 && (!hasSpecificPurpose || hasGenuinePurposeMatch)) {
           tier = 'ELIGIBLE_OPTIMAL';
         } else {
           tier = 'ELIGIBLE_SUBOPTIMAL';
@@ -1179,9 +1276,9 @@ export async function recommendSchemes(entities: UserEntities, categoryHint?: st
   }
 
   // 2. If NO optimal matches exist, check if any suboptimal matches clear the genuine relevance threshold.
-  // A scheme is only worth showing if it has real relevance signals (genuine positive purpose match or domain match)
+  // A scheme is only worth showing if it has real relevance signals (genuine positive purpose match, domain match, or state/caste eligibility)
   const worthySuboptimal = eligible.filter((s) => {
-    if (s.score < 60) return false;
+    if (s.score < 50) return false;
     const hasPurposeMatch = s.matchReasons.some((r) =>
       r.includes('Purpose') ||
       r.includes('matches') ||
@@ -1190,7 +1287,9 @@ export async function recommendSchemes(entities: UserEntities, categoryHint?: st
       r.includes('Designed for') ||
       r.includes('coverage') ||
       r.includes('pension') ||
-      r.includes('scholarship')
+      r.includes('scholarship') ||
+      r.includes('tailored for residents') ||
+      r.includes('Scheduled Caste')
     );
     return hasPurposeMatch;
   });

@@ -3,7 +3,7 @@ import type { Language } from './IntentClassifier';
 import { getOrCreate, updateSession, extractAndUpdateFacts } from './ConversationSession';
 import type { Session, UserProfileContext, ConversationFacts } from './ConversationSession';
 import { TOOL_DEFS, executeTool } from './Tools';
-import { fetchSchemeById, fetchSchemeByName, fetchActiveSchemes, normalizeSchemeText, identifySpecificScheme } from './SchemeEngine';
+import { fetchSchemeById, fetchSchemeByName, fetchActiveSchemes, normalizeSchemeText, identifySpecificScheme, detectEducationLevel, resolveUserState } from './SchemeEngine';
 import type { Scheme, ScoredScheme } from './SchemeEngine';
 import { llmChat } from '../lib/groq';
 import type { ChatMessage } from '../lib/groq';
@@ -1010,8 +1010,12 @@ Explain clearly and warmly that during the ${morat}-month moratorium no principa
                     args.gender = effectiveUserContext.gender.toLowerCase();
                   }
 
-                  if (!args.education_level && (session.knownFacts?.education_level || effectiveUserContext?.education_level)) {
-                    args.education_level = session.knownFacts?.education_level || effectiveUserContext?.education_level;
+                  if (!args.education_level) {
+                    args.education_level = detectEducationLevel(message) || session.knownFacts?.education_level || effectiveUserContext?.education_level;
+                  }
+
+                  if (!args.state) {
+                    args.state = resolveUserState({ purpose: message }) || session.knownFacts?.state || effectiveUserContext?.state;
                   }
 
                   if (!args.category_hint) {

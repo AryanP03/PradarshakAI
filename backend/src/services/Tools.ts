@@ -1,5 +1,5 @@
 import type { ToolDef } from '../lib/groq';
-import { recommendSchemes, fetchActiveSchemes, fetchSchemeByName, fetchSchemeById } from './SchemeEngine';
+import { recommendSchemes, fetchActiveSchemes, fetchSchemeByName, fetchSchemeById, detectEducationLevel, resolveUserState } from './SchemeEngine';
 import type { ScoredScheme, Scheme } from './SchemeEngine';
 import { geocode, findNearbyPartners } from './LocationService';
 import type { UserEntities } from './ConversationSession';
@@ -51,13 +51,12 @@ export const TOOL_DEFS: ToolDef[] = [
           purpose: { type: ['string', 'null'], description: 'Loan purpose, business type, or trade (e.g. tailoring, dairy, retail shop, education)' },
           loan_amount_rs: { type: ['number', 'null'], description: 'Requested loan amount in rupees' },
           family_income_rs: { type: ['number', 'null'], description: 'Annual family income in rupees' },
-          education_level: { type: ['string', 'null'], enum: ['school', 'diploma', 'undergraduate', 'postgraduate', null] },
+          education_level: { type: ['string', 'null'], enum: ['pre_matric', 'post_matric', 'school', 'diploma', 'undergraduate', 'postgraduate', 'doctoral', 'overseas', 'vocational', null] },
           course: { type: ['string', 'null'] },
           gender: { type: ['string', 'null'], enum: ['male', 'female', null] },
           age: { type: ['number', 'null'], description: 'Age of the applicant in years' },
           location: { type: ['string', 'null'], description: 'City or district' },
-          state: { type: ['string', 'null'], description: 'State of residence of beneficiary (e.g. Maharashtra, Gujarat, Delhi, Tamil Nadu, etc.)' },
-          category_hint: { type: ['string', 'null'], enum: ['education_loan', 'business_loan', 'housing', 'welfare', null], description: 'Set to education_loan for education/study, business_loan for business/trade, housing for home purchase/construction, welfare for insurance/health/pension/general welfare' },
+          category_hint: { type: ['string', 'null'], enum: ['education', 'education_loan', 'business', 'business_loan', 'housing', 'welfare', null], description: 'Set to education_loan (or education) for education/study/scholarship/laptop, business_loan (or business) for business/trade, housing for home purchase/construction, welfare for insurance/health/pension/general welfare' },
         },
       },
     },
@@ -170,7 +169,8 @@ export async function executeTool(name: string, args: Record<string, unknown>): 
     }
 
     case 'recommend_schemes': {
-      const rawPurpose = ((args.purpose || args.query || '') as string).trim();
+      const parts = [args.purpose, args.query].filter(Boolean) as string[];
+      const rawPurpose = parts.join(' ').trim();
       const lowerPurpose = rawPurpose.toLowerCase();
 
       const isEdu =
@@ -187,6 +187,7 @@ export async function executeTool(name: string, args: Record<string, unknown>): 
         lowerPurpose.includes('btech') ||
         lowerPurpose.includes('mba') ||
         lowerPurpose.includes('mbbs') ||
+        lowerPurpose.includes('laptop') ||
         lowerPurpose.includes('विद्या') ||
         lowerPurpose.includes('शिक्षा') ||
         lowerPurpose.includes('शिक्षण') ||
@@ -199,18 +200,24 @@ export async function executeTool(name: string, args: Record<string, unknown>): 
         lowerPurpose.includes('mahila') ||
         lowerPurpose.includes('महिला');
 
-      const categoryHint = (args.category_hint as string | undefined) || (isEdu ? 'education_loan' : undefined);
+      let rawCat = (args.category_hint as string | undefined);
+      if (rawCat === 'education') rawCat = 'education_loan';
+      if (rawCat === 'business') rawCat = 'business_loan';
+      const categoryHint = rawCat || (isEdu ? 'education_loan' : undefined);
+
+      const detectedEdu = (args.education_level as string | undefined) || detectEducationLevel(rawPurpose);
+      const detectedState = (args.state as string | undefined) || resolveUserState({ purpose: rawPurpose, location: args.location as string | undefined });
 
       const entities: UserEntities = {
         purpose: rawPurpose || undefined,
         loan_amount_rs: args.loan_amount_rs as number | undefined,
         family_income_rs: args.family_income_rs as number | undefined,
-        education_level: args.education_level as string | undefined,
+        education_level: detectedEdu || undefined,
         course: args.course as string | undefined,
         gender: (args.gender as string | undefined) || (isWomen ? 'female' : undefined),
         age: args.age as number | undefined,
         location: args.location as string | undefined,
-        state: args.state as string | undefined,
+        state: detectedState || undefined,
       };
       const schemes: ScoredScheme[] = await recommendSchemes(entities, categoryHint);
 
