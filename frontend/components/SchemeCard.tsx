@@ -100,7 +100,7 @@ export default function SchemeCard({ scheme, onSelect, selected }: Props) {
             <span className="text-[11px] leading-tight text-muted truncate">{t('schemes.max_loan', 'Max Loan')}</span>
           </div>
           <span className="text-sm font-bold text-on-surface block">
-            {scheme.max_loan_lakh != null && scheme.max_loan_lakh > 0 ? `₹${scheme.max_loan_lakh}L` : scheme.max_loan_lakh === 0 ? '₹0' : 'No Limit'}
+            {scheme.max_loan_lakh != null && scheme.max_loan_lakh > 0 ? `₹${scheme.max_loan_lakh}L` : scheme.max_loan_lakh === 0 ? '₹0' : t('scheme.no_limit', 'No Limit')}
           </span>
         </div>
         <div className="text-center border-x border-outline-variant/30 min-w-0">
@@ -110,7 +110,7 @@ export default function SchemeCard({ scheme, onSelect, selected }: Props) {
           </div>
           <span className="text-sm font-bold text-success block">
             {scheme.interest_rate_min == null
-              ? 'N/A'
+              ? t('scheme.na', 'N/A')
               : scheme.interest_rate_min === scheme.interest_rate_max
               ? `${scheme.interest_rate_min}%`
               : `${scheme.interest_rate_min}–${scheme.interest_rate_max}%`}

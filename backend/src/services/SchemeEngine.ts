@@ -916,6 +916,43 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
   }
   if (matchWords(agriWords)) {
     if (isAgriScheme) {
+      const getAgriSubTypes = (text: string): Set<string> => {
+        const normText = text.toLowerCase();
+        const types = new Set<string>();
+        if (/\b(crop|cultivation|seed|seeds|farming|farm|kisan|krishi|fasal|शेतकरी|खेती|पीक)\b/i.test(normText)) types.add('crop');
+        if (/\b(livestock|dairy|cattle|cow|cows|buffalo|poultry|goat|sheep|piggery|fodder|animal|milk|पशुपालन|दूध|मुर्गी)\b/i.test(normText)) types.add('livestock');
+        if (/\b(fish|fisheries|aquaculture|मछली)\b/i.test(normText)) types.add('fisheries');
+        if (/\b(horticulture|poly\s*house|polyhouse|organic|vermicompost|vegetable|fruit|बागवानी)\b/i.test(normText)) types.add('horticulture');
+        if (/\b(cold\s*storage|warehouse|processing|logistics|post-harvest|post\s*harvest|भंडारण)\b/i.test(normText)) types.add('infrastructure');
+        if (/\b(tractor|drip|sprinkler|irrigation|equipment|machinery|ट्रैक्टर|सिंचाई)\b/i.test(normText)) types.add('equipment');
+        if (/\b(welfare|insurance|pension|kalia|kmy)\b/i.test(normText)) types.add('welfare');
+        return types;
+      };
+
+      const querySubTypes = getAgriSubTypes(normP);
+      if (querySubTypes.size === 0) {
+        querySubTypes.add('crop');
+        querySubTypes.add('equipment');
+      }
+
+      const schemeText = (scheme.name + " " + normalizedTypes.join(" ") + " " + (scheme.description||"") + " " + (scheme.notes||"")).toLowerCase();
+      const schemeSubTypes = getAgriSubTypes(schemeText);
+      if (schemeSubTypes.size === 0 && /\b(agriculture|agri)\b/i.test(schemeText)) {
+        schemeSubTypes.add('crop');
+      }
+
+      let subTypeMatch = false;
+      for (const qs of querySubTypes) {
+        if (schemeSubTypes.has(qs)) {
+          subTypeMatch = true;
+          break;
+        }
+      }
+
+      if (!subTypeMatch && schemeSubTypes.size > 0) {
+         return -75;
+      }
+
       const isDedicatedAgri = /kisan|krishi|fasal|agri/i.test(scheme.name) || 
         (normalizedTypes.filter(t => /agri|farm|dairy|poultry|crop|livestock|fisher|cattle|animal/.test(t)).length / Math.max(1, normalizedTypes.length)) > 0.4;
       if (isDedicatedAgri) return Math.min(95, Math.max(85, tagMatchScore + 35));
@@ -1223,6 +1260,13 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
         } else if (pScore >= 35) {
           score += 10;
           matchReasons.push(`State-level scheme for residents of ${scheme.state}`);
+        }
+        
+        const agriWords = ['agriculture', 'farming', 'farm', 'agro', 'poultry', 'animal', 'cattle', 'horticulture', 'dairy', 'crop', 'fisheries', 'खेती', 'कृषि', 'डेयरी', 'पशुपालन', 'शेतकरी'];
+        const isAgriQuery = agriWords.some(w => pNorm.includes(w));
+        const isAgriScheme = normalizedTypes.some((t) => /agri|farm|dairy|poultry|crop|livestock|fisher|cattle|animal/.test(t)) || /kisan|krishi|fasal/i.test(scheme.name);
+        if (isAgriQuery && isAgriScheme && pScore >= 35) {
+            score += 100;
         }
       }
 

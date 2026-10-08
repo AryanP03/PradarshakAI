@@ -169,8 +169,11 @@ export function extractAndUpdateFacts(
   if (/tailor|tailoring|sewing|boutique|garment|cloth|सिलाई|शिलाई/i.test(lowerMsg)) {
     facts.business_type = 'tailoring';
     facts.category_hint = 'business_loan';
-  } else if (/dairy|cattle|cow|buffalo|milk|farming|agriculture|खेती|डेयरी|पशुपालन/i.test(lowerMsg)) {
+  } else if (/dairy|cattle|cow|buffalo|milk|poultry|goat|sheep|piggery|fodder|animal|डेयरी|पशुपालन/i.test(lowerMsg)) {
     facts.business_type = 'dairy & animal husbandry';
+    facts.category_hint = 'business_loan';
+  } else if (/farming|agriculture|crop|cultivation|seed|tractor|poly\s*house|horticulture|खेती|कृषि|किसान|फसल|बागवानी|शेतकरी|पीक/i.test(lowerMsg)) {
+    facts.business_type = 'agriculture & farming';
     facts.category_hint = 'business_loan';
   } else if (/stationery|bookstore|book\s*shop|books\b|किताब|पुस्तक/i.test(lowerMsg)) {
     facts.business_type = 'stationery and bookstore';

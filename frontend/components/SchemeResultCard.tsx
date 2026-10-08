@@ -218,7 +218,7 @@ export default function SchemeResultCard({
               onClick={(e) => e.stopPropagation()}
             >
               <Globe size={14} />
-              Visit Portal
+              {t('scheme.visit_portal', 'Visit Portal')}
             </a>
           )}
         </div>
@@ -247,7 +247,7 @@ export default function SchemeResultCard({
             {t('scheme.max_loan')}
           </span>
           <strong style={{ fontSize: 14, fontWeight: 800, color: '#001e40' }}>
-            {scheme.max_loan_lakh != null && scheme.max_loan_lakh > 0 ? fmt(scheme.max_loan_lakh * 100000) : scheme.max_loan_lakh === 0 ? '₹0' : 'No Limit'}
+            {scheme.max_loan_lakh != null && scheme.max_loan_lakh > 0 ? fmt(scheme.max_loan_lakh * 100000) : scheme.max_loan_lakh === 0 ? '₹0' : t('scheme.no_limit', 'No Limit')}
           </strong>
         </div>
 
@@ -257,7 +257,7 @@ export default function SchemeResultCard({
           </span>
           <strong style={{ fontSize: 14, fontWeight: 800, color: '#15803d' }}>
             {scheme.interest_rate_min == null
-              ? 'N/A'
+              ? t('scheme.na', 'N/A')
               : scheme.interest_rate_min === scheme.interest_rate_max
               ? `${scheme.interest_rate_min}% ${t('scheme.per_annum')}`
               : `${scheme.interest_rate_min}–${scheme.interest_rate_max}%`}
@@ -269,7 +269,7 @@ export default function SchemeResultCard({
             {t('scheme.income_limit')}
           </span>
           <strong style={{ fontSize: 14, fontWeight: 800, color: '#43474f' }}>
-            {scheme.max_income_lakh != null && scheme.max_income_lakh > 0 ? `≤ ${fmt(scheme.max_income_lakh * 100000)}` : 'No Limit'}
+            {scheme.max_income_lakh != null && scheme.max_income_lakh > 0 ? `≤ ${fmt(scheme.max_income_lakh * 100000)}` : t('scheme.no_limit', 'No Limit')}
           </strong>
         </div>
       </div>

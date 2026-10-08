@@ -32,8 +32,8 @@ export interface Scheme {
   channel_partner_types?: string[] | null;
 }
 
-function fmt(lakh: number | null | undefined) {
-  if (lakh == null || isNaN(Number(lakh))) return 'N/A';
+function fmt(lakh: number | null | undefined, naStr: string = 'N/A') {
+  if (lakh == null || isNaN(Number(lakh))) return naStr;
   const l = Number(lakh);
   if (l >= 1) return `₹${l} Lakh`;
   return `₹${(l * 100000).toLocaleString('en-IN')}`;
@@ -78,7 +78,7 @@ export default function ComparisonCard({
   const maxTenure = Math.max(...schemes.map((s) => Number(s.max_tenure_months) || 0));
 
   const rateRange = (s: Scheme) => {
-    if (s.interest_rate_min == null) return 'N/A';
+    if (s.interest_rate_min == null) return t('scheme.na', 'N/A');
     return s.interest_rate_min === s.interest_rate_max
       ? `${s.interest_rate_min}% ${t('scheme.per_annum')}`
       : `${s.interest_rate_min}–${s.interest_rate_max}% ${t('scheme.per_annum')}`;
@@ -134,7 +134,7 @@ export default function ComparisonCard({
     },
     {
       label: t('compare.income_limit'),
-      render: (s) => <span className="comparison-cell-value" style={{ fontWeight: 600 }}>{s.max_income_lakh != null && s.max_income_lakh > 0 ? `≤ ${fmt(s.max_income_lakh)}` : 'No Limit'}</span>,
+      render: (s) => <span className="comparison-cell-value" style={{ fontWeight: 600 }}>{s.max_income_lakh != null && s.max_income_lakh > 0 ? `≤ ${fmt(s.max_income_lakh, t('scheme.na', 'N/A'))}` : t('scheme.no_limit', 'No Limit')}</span>,
     },
     {
       label: t('compare.tenure'),

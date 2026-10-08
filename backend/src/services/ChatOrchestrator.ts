@@ -9,6 +9,7 @@ import { llmChat } from '../lib/groq';
 import type { ChatMessage } from '../lib/groq';
 import { getLanguageConfig } from '../config/languages';
 import { resolveEffectiveLanguage } from './LanguageResolver';
+import { translateText } from './TranslationService';
 
 /**
  * ChatOrchestrator.ts
@@ -243,6 +244,11 @@ NATURAL INDIAN CODE-MIXING & TONE:
 - If the user writes in code-mixed language (e.g. Hinglish or mixed English with Indian terms like 'engineering', 'education loan', 'Aadhaar', 'NSFDC', 'EMI', 'college', 'PMFME'), maintain a natural conversational style.
 - Keep common technical, educational, financial terms, scheme names, and acronyms in English/standard form when natural.
 - Do NOT use archaic, unnatural, or overly formal translations simply to force every word into ${langName}. Sound like a helpful Indian government-scheme assistant speaking naturally.
+
+TRANSLATION & LANGUAGE INTEGRITY:
+- When mentioning loans in Hindi, use 'ऋण' or 'लोन', NEVER 'जुर्माने' (which means fines).
+- If the user's caste/category is missing or unrecognized (e.g., speech-to-text heard 'निजी जाति' instead of 'अनुसूचित जाति'), do not assume anything. Ask one short confirmation question and list likely STT confusions like 'अनुसूचित जाति' (SC) or 'अनुसूचित जनजाति' (ST).
+- When translating regional agriculture terms to English purpose for tool calls, translate them literally (e.g. खेती = farming/cultivation, not 'farm animals' or 'dairy').
 
 STRICT AVOIDANCE OF NUMERICAL/STRUCTURED DATA IN CHAT PROSE (CRITICAL ARCHITECTURE REQUIREMENT):
 - The chat message text must NEVER repeat structured data that already appears on the scheme card rendered below it.
@@ -740,12 +746,18 @@ export function localizeMatchReason(reason: string, lang: string): string {
   return reason;
 }
 
-export function localizeSchemesForResponse(schemes: any[], lang: string): any[] {
+export async function localizeSchemesForResponse(schemes: any[], lang: string): Promise<any[]> {
   if (!schemes || schemes.length === 0 || lang === 'en') return schemes;
-  return schemes.map((s) => ({
+  return Promise.all(schemes.map(async (s) => ({
     ...s,
-    matchReasons: ((s.matchReasons || []) as string[]).map((r: string) => localizeMatchReason(r, lang)),
-  }));
+    name: await translateText(s.name, lang),
+    description: await translateText(s.description, lang),
+    matchReasons: await Promise.all(((s.matchReasons || []) as string[]).map(async (r: string) => {
+      const basicLoc = localizeMatchReason(r, lang);
+      if (basicLoc !== r) return basicLoc;
+      return await translateText(r, lang);
+    })),
+  })));
 }
 
 const MAX_TOOL_ROUNDS = 3;
@@ -1513,7 +1525,10 @@ Explain why these specific schemes fit the user's previously stated profile and 
   }
 
   if (lastToolData && Array.isArray(lastToolData.schemes)) {
-    lastToolData.schemes = localizeSchemesForResponse(lastToolData.schemes as Scheme[], session.language);
+    lastToolData.schemes = await localizeSchemesForResponse(lastToolData.schemes as Scheme[], session.language);
+  } else if (lastToolData && lastToolData.scheme) {
+    const locArr = await localizeSchemesForResponse([lastToolData.scheme as Scheme], session.language);
+    lastToolData.scheme = locArr[0];
   }
 
   const isStateSpecificRequest = Boolean(

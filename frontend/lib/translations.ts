@@ -3,6 +3,9 @@ export type Language = LanguageCode;
 
 export const TRANSLATIONS: Record<string, Record<string, string>> = {
   en: {
+    'scheme.no_limit': 'No Limit',
+    'scheme.na': 'N/A',
+    'scheme.visit_portal': 'Visit Portal',
     // Brand & Global
     'brand.name': 'PradarshakAI',
     'brand.tag': 'SIH • NSFDC',
@@ -679,6 +682,9 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
   },
 
   hi: {
+    'scheme.no_limit': 'कोई सीमा नहीं',
+    'scheme.na': 'लागू नहीं',
+    'scheme.visit_portal': 'पोर्टल पर जाएं',
     // Brand & Global
     'brand.name': 'प्रदर्शक AI',
     'brand.tag': 'SIH • NSFDC',
@@ -1346,6 +1352,9 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
   },
 
   mr: {
+    'scheme.no_limit': 'कोणतीही मर्यादा नाही',
+    'scheme.na': 'लागू नाही',
+    'scheme.visit_portal': 'पोर्टलला भेट द्या',
     // Brand & Global
     'brand.name': 'प्रदर्शक AI',
     'brand.tag': 'SIH • NSFDC',
@@ -2014,6 +2023,9 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
   },
 
   bn: {
+    'scheme.no_limit': 'কোন সীমা নেই',
+    'scheme.na': 'প্রযোজ্য নয়',
+    'scheme.visit_portal': 'পোর্টাল ভিজিট করুন',
     // Brand & Global
     'brand.name': 'প্রদর্শক AI',
     'brand.tag': 'SIH • NSFDC',
@@ -2537,6 +2549,9 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
   },
 
   gu: {
+    'scheme.no_limit': 'કોઈ મર્યાદા નથી',
+    'scheme.na': 'લાગુ નથી',
+    'scheme.visit_portal': 'પોર્ટલની મુલાકાત લો',
     // Brand & Global
     'brand.name': 'પ્રદર્શક AI',
     'brand.tag': 'SIH • NSFDC',
@@ -2942,6 +2957,9 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
   },
 
   kn: {
+    'scheme.no_limit': 'ಯಾವುದೇ ಮಿತಿಯಿಲ್ಲ',
+    'scheme.na': 'ಅನ್ವಯಿಸುವುದಿಲ್ಲ',
+    'scheme.visit_portal': 'ಪೋರ್ಟಲ್ ಭೇಟಿ ನೀಡಿ',
     // Brand & Global
     'brand.name': 'ಪ್ರದರ್ಶಕ್ AI',
     'brand.tag': 'SIH • NSFDC',
@@ -3347,6 +3365,9 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
   },
 
   ml: {
+    'scheme.no_limit': 'പരിധിയില്ല',
+    'scheme.na': 'ബാധകമല്ല',
+    'scheme.visit_portal': 'പോർട്ടൽ സന്ദർശിക്കുക',
     // Brand & Global
     'brand.name': 'പ്രദർശക് AI',
     'brand.tag': 'SIH • NSFDC',
@@ -3752,6 +3773,9 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
   },
 
   od: {
+    'scheme.no_limit': 'କୌଣସି ସୀମା ନାହିଁ',
+    'scheme.na': 'ପ୍ରଯୁଜ୍ୟ ନୁହେଁ',
+    'scheme.visit_portal': 'ପୋର୍ଟାଲ୍ ପରିଦର୍ଶନ କରନ୍ତୁ',
     // Brand & Global
     'brand.name': 'ପ୍ରଦର୍ଶକ AI',
     'brand.tag': 'SIH • NSFDC',
@@ -4157,6 +4181,9 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
   },
 
   pa: {
+    'scheme.no_limit': 'ਕੋਈ ਸੀਮਾ ਨਹੀਂ',
+    'scheme.na': 'ਲਾਗੂ ਨਹੀਂ',
+    'scheme.visit_portal': 'ਪੋਰਟਲ ਤੇ ਜਾਓ',
     // Brand & Global
     'brand.name': 'ਪ੍ਰਦਰਸ਼ਕ AI',
     'brand.tag': 'SIH • NSFDC',
@@ -4562,6 +4589,9 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
   },
 
   ta: {
+    'scheme.no_limit': 'எந்த எல்லையும் இல்லை',
+    'scheme.na': 'பொருந்தாது',
+    'scheme.visit_portal': 'போர்ட்டலைப் பார்வையிடவும்',
     // Brand & Global
     'brand.name': 'പ്രദർശക് AI',
     'brand.tag': 'SIH • NSFDC',
@@ -4967,6 +4997,9 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
   },
 
   te: {
+    'scheme.no_limit': 'పరిమితి లేదు',
+    'scheme.na': 'వర్తించదు',
+    'scheme.visit_portal': 'పోర్టల్ సందర్శించండి',
     // Brand & Global
     'brand.name': 'ప్రదర్శక్ AI',
     'brand.tag': 'SIH • NSFDC',
