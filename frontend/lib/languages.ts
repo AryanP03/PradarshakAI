@@ -60,3 +60,49 @@ export function isValidLanguageCode(code?: string): code is LanguageCode {
     (l) => l.id === normalized || l.sarvamSttCode.toLowerCase() === normalized || l.sarvamTtsCode.toLowerCase() === normalized
   );
 }
+
+export function detectLanguageFromText(text: string, defaultLang: string = 'en'): string {
+  if (!text) return defaultLang;
+  
+  let hindiCount = 0;
+  let bengaliCount = 0;
+  let gujaratiCount = 0;
+  let kannadaCount = 0;
+  let malayalamCount = 0;
+  let odiaCount = 0;
+  let punjabiCount = 0;
+  let tamilCount = 0;
+  let teluguCount = 0;
+  
+  for (let i = 0; i < text.length; i++) {
+    const code = text.charCodeAt(i);
+    if (code >= 0x0900 && code <= 0x097F) hindiCount++;
+    else if (code >= 0x0980 && code <= 0x09FF) bengaliCount++;
+    else if (code >= 0x0A80 && code <= 0x0AFF) gujaratiCount++;
+    else if (code >= 0x0C80 && code <= 0x0CFF) kannadaCount++;
+    else if (code >= 0x0D00 && code <= 0x0D7F) malayalamCount++;
+    else if (code >= 0x0B00 && code <= 0x0B7F) odiaCount++;
+    else if (code >= 0x0A00 && code <= 0x0A7F) punjabiCount++;
+    else if (code >= 0x0B80 && code <= 0x0BFF) tamilCount++;
+    else if (code >= 0x0C00 && code <= 0x0C7F) teluguCount++;
+  }
+
+  const maxCount = Math.max(hindiCount, bengaliCount, gujaratiCount, kannadaCount, malayalamCount, odiaCount, punjabiCount, tamilCount, teluguCount);
+  
+  if (maxCount > text.length * 0.05) { 
+    if (maxCount === bengaliCount) return 'bn';
+    if (maxCount === gujaratiCount) return 'gu';
+    if (maxCount === kannadaCount) return 'kn';
+    if (maxCount === malayalamCount) return 'ml';
+    if (maxCount === odiaCount) return 'od';
+    if (maxCount === punjabiCount) return 'pa';
+    if (maxCount === tamilCount) return 'ta';
+    if (maxCount === teluguCount) return 'te';
+    if (maxCount === hindiCount) {
+      if (defaultLang === 'mr') return 'mr'; 
+      return 'hi';
+    }
+  }
+  
+  return 'en';
+}

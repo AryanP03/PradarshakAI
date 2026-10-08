@@ -2,7 +2,7 @@ import { getLanguageConfig } from '../config/languages';
 
 const SARVAM_TTS_URL = 'https://api.sarvam.ai/text-to-speech';
 
-function sanitizeTextForSpeech(text: string): string {
+function sanitizeTextForSpeech(text: string, langCode: string = 'en'): string {
   let cleaned = text
     .replace(/\*\*([^*]+)\*\*/g, '$1') // Bold
     .replace(/\*([^*]+)\*/g, '$1') // Italics
@@ -10,10 +10,18 @@ function sanitizeTextForSpeech(text: string): string {
     .replace(/#{1,6}\s+/g, '') // Headings
     .replace(/^\s*[-*]\s+/gm, '') // Bullet lists
     .replace(/^\s*\d+\.\s+/gm, '') // Numbered lists
-    .replace(/₹/g, 'Rupees ') // Currency symbol
-    .replace(/%/g, ' percent') // Percent symbol
     .replace(/\s+/g, ' ') // Collapse whitespace
     .trim();
+
+  if (langCode === 'hi') {
+    cleaned = cleaned.replace(/₹\s*(\d+(?:\.\d+)?)/g, '$1 रुपये').replace(/₹/g, 'रुपये ').replace(/%/g, ' प्रतिशत');
+  } else if (langCode === 'mr') {
+    cleaned = cleaned.replace(/₹\s*(\d+(?:\.\d+)?)/g, '$1 रुपये').replace(/₹/g, 'रुपये ').replace(/%/g, ' टक्के');
+  } else if (langCode === 'bn') {
+    cleaned = cleaned.replace(/₹\s*(\d+(?:\.\d+)?)/g, '$1 টাকা').replace(/₹/g, 'টাকা ').replace(/%/g, ' শতাংশ');
+  } else {
+    cleaned = cleaned.replace(/₹\s*(\d+(?:\.\d+)?)/g, 'Rupees $1').replace(/₹/g, 'Rupees ').replace(/%/g, ' percent');
+  }
 
   return cleaned;
 }
@@ -24,14 +32,14 @@ export async function generateSpeech(text: string, language: string): Promise<Bu
     throw new Error('SARVAM_API_KEY is not configured on the backend');
   }
 
-  const cleanText = sanitizeTextForSpeech(text);
-  if (!cleanText) {
-    throw new Error('Text parameter cannot be empty after sanitization');
-  }
-
   const langConfig = getLanguageConfig(language);
   if (!langConfig) {
     throw new Error(`Unsupported language code: "${language}"`);
+  }
+
+  const cleanText = sanitizeTextForSpeech(text, langConfig.id);
+  if (!cleanText) {
+    throw new Error('Text parameter cannot be empty after sanitization');
   }
 
   const targetLanguageCode = langConfig.sarvamTtsCode;

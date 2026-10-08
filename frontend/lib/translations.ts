@@ -5823,6 +5823,30 @@ const SCHEME_NAMES_LOCALIZED: Record<string, Record<string, string>> = {
     ta: 'சிறப்பு கல்விக் கடன் திட்டம் (SELS)',
     te: 'ప్రత్యేక విద్యా రుణ పథకం (SELS)',
   },
+  'National Fellowship for Scheduled Caste Students': {
+    hi: 'अनुसूचित जाति के छात्रों के लिए राष्ट्रीय फेलोशिप (NFSC)',
+    mr: 'अनुसूचित जातीच्या विद्यार्थ्यांसाठी राष्ट्रीय फेलोशिप (NFSC)',
+    bn: 'তপশিলি জাতি শিক্ষার্থীদের জন্য জাতীয় ফেলোশিপ (NFSC)',
+    gu: 'અનુસૂચિત જાતિના વિદ્યાર્થીઓ માટે રાષ્ટ્રીય ફેલોશિપ (NFSC)',
+    kn: 'ಪರಿಶಿಷ್ಟ ಜಾತಿ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ರಾಷ್ಟ್ರೀಯ ಫೆಲೋಶಿಪ್ (NFSC)',
+    ml: 'പട്ടികജാതി വിദ്യാർത്ഥികൾക്കുള്ള ദേശീയ ഫെലോഷിപ്പ് (NFSC)',
+    od: 'ଅନୁସୂଚିତ ଜାତି ଛାତ୍ରଛାତ୍ରୀଙ୍କ ପାଇଁ ଜାତୀୟ ଫେଲୋସିପ୍ (NFSC)',
+    pa: 'ਅਨੁਸੂਚਿਤ ਜਾਤੀ ਦੇ ਵਿਦਿਆਰਥੀਆਂ ਲਈ ਰਾਸ਼ਟਰੀ ਫੈਲੋਸ਼ਿਪ (NFSC)',
+    ta: 'பட்டியலின மாணவர்களுக்கான தேசிய உதவித்தொகை (NFSC)',
+    te: 'షెడ్యూల్డ్ కులాల విద్యార్థుల కోసం జాతీయ ఫెలోషిప్ (NFSC)',
+  },
+  'Rajiv Gandhi National Fellowship for SC Students (RGNF)': {
+    hi: 'राजीव गांधी राष्ट्रीय फेलोशिप (RGNF)',
+    mr: 'राजीव गांधी राष्ट्रीय फेलोशिप (RGNF)',
+    bn: 'রাজীব গান্ধী জাতীয় ফেলোশিপ (RGNF)',
+    gu: 'રાજીવ ગાંધી રાષ્ટ્રીય ફેલોશિપ (RGNF)',
+    kn: 'ರಾಜೀವ್ ಗಾಂಧಿ ರಾಷ್ಟ್ರೀಯ ಫೆಲೋಶಿಪ್ (RGNF)',
+    ml: 'രാജീവ് ഗാന്ധി ദേശീയ ഫെലോഷിപ്പ് (RGNF)',
+    od: 'ରାଜୀବ ଗାନ୍ଧୀ ଜାତୀୟ ଫେଲୋସିପ୍ (RGNF)',
+    pa: 'ਰਾਜੀਵ ਗਾਂਧੀ ਰਾਸ਼ਟਰੀ ਫੈਲੋਸ਼ਿਪ (RGNF)',
+    ta: 'ராஜீவ் காந்தி தேசிய உதவித்தொகை (RGNF)',
+    te: 'రాజీవ్ గాంధీ జాతీయ ఫెలోషిప్ (RGNF)',
+  },
 };
 
 export function getLocalizedSchemeName(name: string | undefined | null, lang: string = 'en'): string {
@@ -6063,6 +6087,30 @@ const SCHEME_DESCRIPTIONS_LOCALIZED: Record<string, Record<string, string>> = {
     ta: 'புதிய தொழில் தொடங்குவதற்காக பட்டியலினத்தவர் மற்றும் பெண் கடன் வாங்குபவர்களுக்கு ₹10 லட்சம் முதல் ₹1 கோடி வரை வங்கிக் கடன்களை வழங்குவதற்கான நிதி அமைச்சகம் / SIDBI-யின் தேசிய முயற்சி.',
     te: 'గ్రీన్‌ఫీల్డ్ సంస్థల కోసం ఎస్సీ/ఎస్టీ మరియు మహిళా రుణగ్రహీతలకు ₹10 లక్షల నుండి ₹1 కోటి వరకు బ్యాంక్ రుణాలను అందించడానికి ఆర్థిక మంత్రిత్వ శాఖ / SIDBI ప్రారంభించిన జాతీయ చొరవ. వాణిజ్య బ్యాంకులు నేరుగా పంపిణీ చేస్తాయి.',
   },
+  'National Fellowship for Scheduled Caste Students': {
+    hi: 'यूजीसी द्वारा मान्यता प्राप्त विश्वविद्यालयों और संस्थानों में एम.फिल और पीएचडी करने वाले अनुसूचित जाति के छात्रों के लिए वित्तीय फेलोशिप सहायता।',
+    mr: 'यूजीसी मान्यताप्राप्त विद्यापीठे आणि संस्थांमध्ये एम.फिल व पीएचडी करणाऱ्या अनुसूचित जातीच्या विद्यार्थ्यांसाठी आर्थिक फेलोशिप सहाय्य.',
+    bn: 'ইউজিসি স্বীকৃত বিশ্ববিদ্যালয় এবং প্রতিষ্ঠানে এম.ফিল এবং পিএইচডি করা তপশিলি জাতি শিক্ষার্থীদের জন্য আর্থিক ফেলোশিপ সহায়তা।',
+    gu: 'યુજીસી માન્ય યુનિવર્સિટીઓ અને સંસ્થાઓમાં એમ.ફિલ અને પીએચડી કરતા એસસી વિદ્યાર્થીઓ માટે નાણાકીય ફેલોશિપ સહાય.',
+    kn: 'ಯುಜಿಸಿ ಮಾನ್ಯತೆ ಪಡೆದ ವಿಶ್ವವಿದ್ಯಾಲಯಗಳಲ್ಲಿ ಎಂ.ಫಿಲ್ ಮತ್ತು ಪಿಎಚ್‌ಡಿ ಮಾಡುವ ಎಸ್‌ಸಿ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಆರ್ಥಿಕ ಫೆಲೋಶಿಪ್ ಬೆಂಬಲ.',
+    ml: 'യുജിസി അംഗീകൃത സർവകലാശാലകളിൽ എം.ഫിൽ, പിഎച്ച്.ഡി ചെയ്യുന്ന എസ്‌സി വിദ്യാർത്ഥികൾക്കുള്ള സാമ്പത്തിക ഫെലോഷിപ്പ് സഹായം.',
+    od: 'ୟୁଜିସି ସ୍ୱୀକୃତିପ୍ରାପ୍ତ ବିଶ୍ୱବିଦ୍ୟାଳୟରେ ଏମ୍.ଫିଲ୍ ଏବଂ ପିଏଚ୍.ଡି କରୁଥିବା SC ଛାତ୍ରଛାତ୍ରୀଙ୍କ ପାଇଁ ଆର୍ଥିକ ଫେଲୋସିପ୍ ସହାୟତା।',
+    pa: 'ਯੂਜੀਸੀ ਦੁਆਰਾ ਮਾਨਤਾ ਪ੍ਰਾਪਤ ਯੂਨੀਵਰਸਿਟੀਆਂ ਵਿੱਚ ਐਮ.ਫਿਲ ਅਤੇ ਪੀਐਚਡੀ ਕਰਨ ਵਾਲੇ ਐਸਸੀ ਵਿਦਿਆਰਥੀਆਂ ਲਈ ਵਿੱਤੀ ਫੈਲੋਸ਼ਿਪ ਸਹਾਇਤਾ।',
+    ta: 'யுஜிசி அங்கீகரிக்கப்பட்ட பல்கலைக்கழகங்களில் எம்.பில் மற்றும் பி.எச்.டி படிக்கும் எஸ்சி மாணவர்களுக்கான நிதி உதவித்தொகை.',
+    te: 'యూజీసీ గుర్తింపు పొందిన విశ్వవిద్యాలయాలలో ఎం.ఫిల్ మరియు పీహెచ్‌డీ చదివే ఎస్సీ విద్యార్థులకు ఆర్థిక ఫెలోషిప్ సహాయం.',
+  },
+  'Rajiv Gandhi National Fellowship for SC Students (RGNF)': {
+    hi: 'भारतीय विश्वविद्यालयों में पूर्णकालिक एम.फिल/पीएचडी करने वाले अनुसूचित जाति के छात्रों के लिए वित्तीय फेलोशिप (जेआरएफ और एसआरएफ घटक सहित)।',
+    mr: 'भारतीय विद्यापीठांमध्ये पूर्णवेळ एम.फिल/पीएचडी करणाऱ्या अनुसूचित जातीच्या विद्यार्थ्यांसाठी आर्थिक फेलोशिप (JRF आणि SRF घटकांसह).',
+    bn: 'ভারতীয় বিশ্ববিদ্যালয়গুলিতে পূর্ণকালীন এম.ফিল/পিএইচডি করা তপশিলি জাতি শিক্ষার্থীদের জন্য আর্থিক ফেলোশিপ (জেআরএফ এবং এসআরএফ উপাদান সহ)।',
+    gu: 'ભારતીય યુનિવર્સિટીઓમાં પૂર્ણ-સમય એમ.ફિલ/પીએચડી કરતા એસસી વિદ્યાર્થીઓ માટે નાણાકીય ફેલોશિપ (JRF અને SRF સહિત).',
+    kn: 'ಭಾರತೀಯ ವಿಶ್ವವಿದ್ಯಾಲಯಗಳಲ್ಲಿ ಪೂರ್ಣಕಾಲಿಕ ಎಂ.ಫಿಲ್/ಪಿಎಚ್‌ಡಿ ಮಾಡುವ ಎಸ್‌ಸಿ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಆರ್ಥಿಕ ಫೆಲೋಶಿಪ್ (ಜೆಆರ್‌ಎಫ್ ಮತ್ತು ಎಸ್‌ಆರ್‌ಎಫ್ ಸೇರಿದಂತೆ).',
+    ml: 'ഇന്ത്യൻ സർവകലാശാലകളിൽ മുഴുവൻ സമയ എം.ഫിൽ/പിഎച്ച്.ഡി ചെയ്യുന്ന എസ്‌സി വിദ്യാർത്ഥികൾക്കുള്ള സാമ്പത്തിക ഫെലോഷിപ്പ്.',
+    od: 'ଭାରତୀୟ ବିଶ୍ୱବିଦ୍ୟାଳୟରେ ପୂର୍ଣ୍ଣକାଳୀନ ଏମ୍.ଫିଲ୍/ପିଏଚ୍.ଡି କରୁଥିବା SC ଛାତ୍ରଛାତ୍ରୀଙ୍କ ପାଇଁ ଆର୍ଥିକ ଫେଲୋସିପ୍।',
+    pa: 'ਭਾਰਤੀ ਯੂਨੀਵਰਸਿਟੀਆਂ ਵਿੱਚ ਫੁੱਲ-ਟਾਈਮ ਐਮ.ਫਿਲ/ਪੀਐਚਡੀ ਕਰਨ ਵਾਲੇ ਐਸਸੀ ਵਿਦਿਆਰਥੀਆਂ ਲਈ ਵਿੱਤੀ ਫੈਲੋਸ਼ਿਪ।',
+    ta: 'இந்தியப் பல்கலைக்கழகங்களில் முழுநேர எம்.பில்/பிஎச்.டி படிக்கும் எஸ்சி மாணவர்களுக்கான நிதி உதவித்தொகை.',
+    te: 'భారతీయ విశ్వవిద్యాలయాలలో పూర్తి సమయం ఎం.ఫిల్/పీహెచ్‌డీ చదివే ఎస్సీ విద్యార్థులకు ఆర్థిక ఫెలోషిప్.',
+  },
 };
 
 export function getLocalizedSchemeDesc(name: string | undefined | null, defaultDesc: string = '', lang: string = 'en'): string {
@@ -6191,10 +6239,90 @@ export function getLocalizedMatchReason(reason: string, lang: string = 'en'): st
   if (!reason || lang === 'en') return reason;
   const lower = reason.toLowerCase();
 
-  if (lower.includes('purpose') || lower.includes('business')) return REASONS_LOCALIZED['purpose'][lang] || reason;
-  if (lower.includes('income') || lower.includes('earning')) return REASONS_LOCALIZED['income'][lang] || reason;
-  if (lower.includes('women') || lower.includes('female')) return REASONS_LOCALIZED['women'][lang] || reason;
-  if (lower.includes('requested') || lower.includes('detail') || lower.includes('information')) return REASONS_LOCALIZED['requested'][lang] || reason;
+  if (lower.includes('doctoral') || lower.includes('phd') || lower.includes('fellowship')) {
+    if (lang === 'hi') return 'डॉक्टरेट शोध अनुसंधान के लिए विशेष रूप से निर्मित फेलोशिप';
+    if (lang === 'mr') return 'डॉक्टरेट संशोधन फेलोशिपसाठी विशेष योजना';
+    if (lang === 'bn') return 'ডক্টরাল গবেষণা ফেলোশিপের জন্য বিশেষভাবে নির্মিত প্রকল্প';
+  }
+  if (lower.includes('comprehensive health') || lower.includes('medical insurance')) {
+    if (lang === 'hi') return 'व्यापक स्वास्थ्य और चिकित्सा बीमा कवरेज';
+    if (lang === 'mr') return 'सर्वसमावेशक आरोग्य आणि वैद्यकीय विमा संरक्षण';
+    if (lang === 'bn') return 'ব্যাপক স্বাস্থ্য ও চিকিৎসা বীমা কভারেজ';
+  }
+  if (lower.includes('health and medical') || lower.includes('medical assistance')) {
+    if (lang === 'hi') return 'स्वास्थ्य एवं चिकित्सा सहायता योजना';
+    if (lang === 'mr') return 'आरोग्य आणि वैद्यकीय सहाय्य योजना';
+    if (lang === 'bn') return 'স্বাস্থ্য ও চিকিৎসা সহায়তা প্রকল্প';
+  }
+  if (lower.includes('social security') || lower.includes('pension')) {
+    if (lang === 'hi') return 'वरिष्ठ नागरिकों/पात्र लाभार्थियों के लिए सामाजिक सुरक्षा पेंशन';
+    if (lang === 'mr') return 'ज्येष्ठ नागरिक/पात्र लाभार्थ्यांसाठी सामाजिक सुरक्षा पेन्शन';
+    if (lang === 'bn') return 'বয়োজ্যেষ্ঠ/যোগ্য সুবিধাভোগীদের জন্য সামাজিক সুরক্ষা পেনশন';
+  }
+  if (lower.includes('scholarship support') || lower.includes('scholarship')) {
+    if (lang === 'hi') return 'शैक्षणिक छात्रवृत्ति सहायता';
+    if (lang === 'mr') return 'शैक्षणिक शिष्यवृत्ती सहाय्य';
+    if (lang === 'bn') return 'শিক্ষাগত বৃত্তি সহায়তা';
+  }
+  if (lower.includes('purpose matches') || lower.includes('eligible activities') || lower.includes('purpose') || lower.includes('business')) {
+    if (lang === 'hi') return 'उद्देश्य इस योजना की पात्र व्यावसायिक गतिविधियों से मेल खाता है';
+    if (lang === 'mr') return 'उद्देश्य या योजनेच्या पात्र व्यावसायिक उपक्रमांशी जुळतो';
+    if (lang === 'bn') return 'উদ্দেশ্য এই প্রকল্পের যোগ্য ব্যবসায়িক কার্যক্রমের সাথে মেলে';
+  }
+  if (lower.includes('income falls') || lower.includes('income threshold') || lower.includes('income')) {
+    if (lang === 'hi') return 'पारिवारिक वार्षिक आय योजना की पात्र सीमा के अंतर्गत है';
+    if (lang === 'mr') return 'कौटुंबिक वार्षिक उत्पन्न योजनेच्या पात्र मर्यादेत येते';
+    if (lang === 'bn') return 'পারিবারিক বার্ষিক আয় প্রকল্পের যোগ্য সীমার মধ্যে রয়েছে';
+  }
+  if (lower.includes('loan requirement fits') || lower.includes('scheme limits')) {
+    if (lang === 'hi') return 'ऋण आवश्यकता योजना की निर्धारित सीमा के पूर्णतः अनुकूल है';
+    if (lang === 'mr') return 'कर्ज आवश्यकता योजनेच्या मर्यादेमध्ये बसते';
+    if (lang === 'bn') return 'ঋণের প্রয়োজনীয়তা প্রকল্পের সীমার মধ্যে উপযুক্ত';
+  }
+  if (lower.includes('vocational financing') || lower.includes('designed for education')) {
+    if (lang === 'hi') return 'शिक्षा और व्यावसायिक प्रशिक्षण वित्तपोषण के लिए विशेष रूप से तैयार';
+    if (lang === 'mr') return 'शिक्षण आणि व्यावसायिक वित्तपुरवठ्यासाठी विशेष योजना';
+    if (lang === 'bn') return 'শিক্ষা এবং বৃত্তিমূলক অর্থায়নের জন্য বিশেষভাবে পরিকল্পিত';
+  }
+  if (lower.includes('specifically matches your requested') || lower.includes('education level')) {
+    if (lang === 'hi') return 'आपके द्वारा अनुरोधित शिक्षा स्तर के पूर्णतः अनुकूल';
+    if (lang === 'mr') return 'तुमच्या विनंती केलेल्या शिक्षण पातळीशी सुसंगत';
+    if (lang === 'bn') return 'আপনার অনুরোধকৃত শিক্ষার স্তরের সাথে সম্পূর্ণ সামঞ্জস্যপূর্ণ';
+  }
+  if (lower.includes('women entrepreneurs') || lower.includes('women') || lower.includes('female')) {
+    if (lang === 'hi') return 'महिला उद्यमियों के लिए विशेष रियायती योजना';
+    if (lang === 'mr') return 'महिला उद्योजकांसाठी विशेष सवलतीची योजना';
+    if (lang === 'bn') return 'মহিলা উদ্যোক্তাদের জন্য বিশেষ সুবিধাযুক্ত প্রকল্প';
+  }
+  const stateTailoredMatch = reason.match(/Specifically tailored for residents of (.+)/i);
+  if (stateTailoredMatch) {
+    const st = stateTailoredMatch[1].trim();
+    if (lang === 'hi') return `${st} के निवासियों के लिए विशेष रूप से तैयार`;
+    if (lang === 'mr') return `${st} च्या रहिवाशांसाठी विशेष राज्य योजना`;
+    if (lang === 'bn') return `${st} এর বাসিন্দাদের জন্য বিশেষভাবে পরিকল্পিত`;
+  }
+  const stateLevelMatch = reason.match(/State-level scheme for residents of (.+)/i);
+  if (stateLevelMatch) {
+    const st = stateLevelMatch[1].trim();
+    if (lang === 'hi') return `${st} के निवासियों के लिए राज्य-स्तरीय योजना`;
+    if (lang === 'mr') return `${st} च्या रहिवाशांसाठी राज्य-स्तरीय योजना`;
+    if (lang === 'bn') return `${st} এর বাসিন্দাদের জন্য রাজ্য স্তরের প্রকল্প`;
+  }
+  if (lower.includes('scheduled caste') || lower.includes('(sc) beneficiaries')) {
+    if (lang === 'hi') return 'अनुसूचित जाति (SC) के लाभार्थियों के लिए विशेष रूप से आरक्षित';
+    if (lang === 'mr') return 'अनुसूचित जाती (SC) लाभार्थ्यांसाठी विशेष आरक्षित';
+    if (lang === 'bn') return 'তপশিলি জাতি (SC) সুবিধাভোগীদের জন্য বিশেষভাবে নির্ধারিত';
+  }
+  if (lower.includes('requested detailed') || lower.includes('scheme information') || lower.includes('requested') || lower.includes('detail')) {
+    if (lang === 'hi') return 'लाभार्थी ने योजना की विस्तृत जानकारी का अनुरोध किया';
+    if (lang === 'mr') return 'लाभार्थ्याने योजनेच्या सविस्तर माहितीची विनंती केली';
+    if (lang === 'bn') return 'সুবিধাভোগী প্রকল্পের বিস্তারিত তথ্যের জন্য অনুরোধ করেছেন';
+  }
+  if (lower.includes('nsfdc') || lower.includes('guidelines')) {
+    if (lang === 'hi') return 'आधिकारिक एनएसएफडीसी रियायती योजना दिशानिर्देश';
+    if (lang === 'mr') return 'अधिकृत एनएसएफडीसी सवलत योजना मार्गदर्शक तत्त्वे';
+    if (lang === 'bn') return 'সরকারি এনএসএফডিসি প্রকল্প নির্দেশিকা';
+  }
 
   return reason;
 }

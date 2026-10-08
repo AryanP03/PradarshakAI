@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { sendChat, fetchTTS, transcribeAudio } from '@/lib/api';
 import type { ChatResponse, ChatMessage, Scheme } from '@/lib/api';
+import { detectLanguageFromText } from '@/lib/languages';
 import TypingIndicator from './TypingIndicator';
 import TypewriterText from './TypewriterText';
 import SchemeResultCard from './SchemeResultCard';
@@ -53,6 +54,7 @@ interface Message {
   disclaimer?: string;
   speechText?: string;
   toolData?: Record<string, unknown>;
+  detectedLanguage?: string;
   /** True only for freshly-received assistant replies — drives the typing
    *  animation. Messages loaded from chat history render instantly. */
   animate?: boolean;
@@ -269,7 +271,7 @@ function MessageBubble({
   loadingVoiceId?: string | null;
   onPlayTTS?: (msg: Message) => void;
   onStopTTS?: () => void;
-  onPlayVoice?: (voiceId: string, text: string) => void;
+  onPlayVoice?: (voiceId: string, text: string, lang?: string) => void;
   onStopVoice?: () => void;
   t: (key: string, fallback?: string) => string;
   onSchemeAction?: (action: 'KNOW_MORE' | 'DOCUMENTS' | 'EMI', scheme: any) => void;
@@ -279,6 +281,7 @@ function MessageBubble({
 }) {
   const isUser = msg.role === 'user';
   const { language } = useLanguage();
+  const effectiveMsgLang = msg.detectedLanguage || language;
   const [textDone, setTextDone] = useState(!msg.animate);
   const showExtras = !msg.animate || textDone;
 
@@ -347,7 +350,7 @@ function MessageBubble({
             boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
           }}
         >
-          <div style={{ whiteSpace: 'pre-wrap' }}>
+          <div id={`msg-text-${msg.id}`} style={{ whiteSpace: 'pre-wrap' }}>
             {isUser ? (
               msg.text.split('\n').map((line, i) => (
                 <p key={i} style={{ margin: i > 0 ? '6px 0 0' : 0, color: '#ffffff' }}>
@@ -374,7 +377,7 @@ function MessageBubble({
                 isAnyLoading={Boolean(activeLoadingId) && !isThisLoading}
                 onPlay={() => {
                   const textToPlay = msg.speechText || msg.text;
-                  if (onPlayVoice) onPlayVoice(msg.id, textToPlay);
+                  if (onPlayVoice) onPlayVoice(msg.id, textToPlay, effectiveMsgLang);
                   else if (onPlayTTS) onPlayTTS(msg);
                 }}
                 onStop={() => {
@@ -393,29 +396,31 @@ function MessageBubble({
           <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 14 }}>
             {schemes.map((s: any, i: number) => {
               const schemeVoiceId = `scheme_${msg.id}_${s.id || i}`;
-              const schemeSpeech = buildSchemeSpeech(s, language);
+              const schemeSpeech = buildSchemeSpeech(s, effectiveMsgLang);
               return (
-                <SchemeResultCard
-                  key={s.id || i}
-                  scheme={s as Parameters<typeof SchemeResultCard>[0]['scheme']}
-                  rank={i + 1}
-                  onKnowMore={() => {
-                    onSchemeAction?.('KNOW_MORE', s);
-                  }}
-                  onGetDocuments={() => {
-                    onSchemeAction?.('DOCUMENTS', s);
-                  }}
-                  onCalculateEMI={() => {
-                    onStepComplete?.('scheme');
-                    onStepComplete?.('emi');
-                    onSchemeAction?.('EMI', s);
-                  }}
-                  speechText={schemeSpeech}
-                  isVoicePlaying={activePlayingId === schemeVoiceId}
-                  isVoiceLoading={activeLoadingId === schemeVoiceId}
-                  onPlayVoice={() => onPlayVoice?.(schemeVoiceId, schemeSpeech)}
-                  onStopVoice={onStopVoice}
-                />
+                <div key={s.id || i} id={`scheme-card-${schemeVoiceId}`}>
+                  <SchemeResultCard
+                    scheme={s as Parameters<typeof SchemeResultCard>[0]['scheme']}
+                    language={effectiveMsgLang}
+                    rank={i + 1}
+                    onKnowMore={() => {
+                      onSchemeAction?.('KNOW_MORE', s);
+                    }}
+                    onGetDocuments={() => {
+                      onSchemeAction?.('DOCUMENTS', s);
+                    }}
+                    onCalculateEMI={() => {
+                      onStepComplete?.('scheme');
+                      onStepComplete?.('emi');
+                      onSchemeAction?.('EMI', s);
+                    }}
+                    speechText={schemeSpeech}
+                    isVoicePlaying={activePlayingId === schemeVoiceId}
+                    isVoiceLoading={activeLoadingId === schemeVoiceId}
+                    onPlayVoice={() => onPlayVoice?.(schemeVoiceId, schemeSpeech, effectiveMsgLang)}
+                    onStopVoice={onStopVoice}
+                  />
+                </div>
               );
             })}
 
@@ -507,15 +512,15 @@ function MessageBubble({
 
         {showExtras && emiData && (() => {
           const emiVoiceId = `emi_${msg.id}`;
-          const emiSpeech = buildEmiSpeech(emiData, language);
+          const emiSpeech = buildEmiSpeech(emiData, effectiveMsgLang);
           return (
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div id={`emi-card-${emiVoiceId}`} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
               <EMIResultCard
                 data={emiData as unknown as Parameters<typeof EMIResultCard>[0]['data']}
                 speechText={emiSpeech}
                 isVoicePlaying={activePlayingId === emiVoiceId}
                 isVoiceLoading={activeLoadingId === emiVoiceId}
-                onPlayVoice={() => onPlayVoice?.(emiVoiceId, emiSpeech)}
+                onPlayVoice={() => onPlayVoice?.(emiVoiceId, emiSpeech, effectiveMsgLang)}
                 onStopVoice={onStopVoice}
               />
               {onOpenEMI && (
@@ -575,7 +580,7 @@ function MessageBubble({
           const schemesList = (comparison.schemes as any[]) || [comparison.schemeA, comparison.schemeB].filter(Boolean);
           const compSpeech = msg.speechText || (comparison.speechText as string) || buildComparisonSpeech(schemesList, language);
           return (
-            <div style={{ width: '100%' }}>
+            <div id={`comp-card-${compVoiceId}`} style={{ width: '100%' }}>
               <ComparisonCard
                 schemes={schemesList}
                 schemeA={comparison.schemeA as any}
@@ -585,7 +590,7 @@ function MessageBubble({
                 speechText={compSpeech}
                 isPlaying={activePlayingId === compVoiceId}
                 isLoadingTTS={activeLoadingId === compVoiceId}
-                onPlayTTS={() => onPlayVoice?.(compVoiceId, compSpeech)}
+                onPlayTTS={() => onPlayVoice?.(compVoiceId, compSpeech, effectiveMsgLang)}
                 onStopTTS={onStopVoice}
               />
             </div>
@@ -597,7 +602,7 @@ function MessageBubble({
           const schemeName = (msg.data?.schemeName || msg.data?.scheme_name || (msg.data?.scheme as any)?.name) as string | undefined;
           const docSpeech = buildDocumentsSpeech(documents, schemeName, msg.data?.note as string | undefined, language);
           return (
-            <div style={{ width: '100%' }}>
+            <div id={`doc-card-${docVoiceId}`} style={{ width: '100%' }}>
               <DocumentCard
                 documents={documents}
                 schemeName={schemeName}
@@ -605,7 +610,7 @@ function MessageBubble({
                 speechText={docSpeech}
                 isVoicePlaying={activePlayingId === docVoiceId}
                 isVoiceLoading={activeLoadingId === docVoiceId}
-                onPlayVoice={() => onPlayVoice?.(docVoiceId, docSpeech)}
+                onPlayVoice={() => onPlayVoice?.(docVoiceId, docSpeech, effectiveMsgLang)}
                 onStopVoice={onStopVoice}
               />
             </div>
@@ -1170,19 +1175,29 @@ export default function ChatInterface({
   }, []);
 
   const handlePlayVoice = useCallback(
-    async (voiceId: string, speechText: string) => {
+    async (voiceId: string, speechText: string, speechLang?: string, elementIdToRead?: string) => {
       stopAudio();
       setLoadingVoiceId(voiceId);
       setSpeechError(null);
 
-      const cleanText = speechText.replace(/[#*`_\[\]]/g, '').trim();
+      let textToRead = speechText;
+      if (elementIdToRead) {
+        const el = document.getElementById(elementIdToRead);
+        if (el && el.innerText) {
+          textToRead = el.innerText;
+        }
+      }
+
+      const cleanText = textToRead.replace(/[#*`_\[\]]/g, '').trim();
       if (!cleanText) {
         setLoadingVoiceId(null);
         return;
       }
 
+      const effectiveVoiceLang = detectLanguageFromText(cleanText, speechLang || language);
+
       try {
-        const blob = await fetchTTS(cleanText, language);
+        const blob = await fetchTTS(cleanText, effectiveVoiceLang);
         const url = URL.createObjectURL(blob);
         audioUrlRef.current = url;
         const audio = new Audio(url);
@@ -1194,7 +1209,7 @@ export default function ChatInterface({
         audio.onerror = () => {
           stopAudio();
           setPlayingVoiceId(voiceId);
-          fallbackBrowserSpeech(cleanText, language, voiceId);
+          fallbackBrowserSpeech(cleanText, effectiveVoiceLang, voiceId);
         };
 
         setLoadingVoiceId(null);
@@ -1204,7 +1219,7 @@ export default function ChatInterface({
         console.warn('[tts-fetch-fallback]', err);
         setLoadingVoiceId(null);
         setPlayingVoiceId(voiceId);
-        fallbackBrowserSpeech(cleanText, language, voiceId);
+        fallbackBrowserSpeech(cleanText, effectiveVoiceLang, voiceId);
       }
     },
     [language, stopAudio, fallbackBrowserSpeech]
@@ -1213,7 +1228,7 @@ export default function ChatInterface({
   const handlePlayTTS = useCallback(
     (msg: Message) => {
       const rawSpeech = msg.speechText || msg.text || '';
-      handlePlayVoice(msg.id, rawSpeech);
+      handlePlayVoice(msg.id, rawSpeech, undefined, `msg-text-${msg.id}`);
     },
     [handlePlayVoice]
   );
@@ -1578,7 +1593,8 @@ export default function ChatInterface({
               updateDetectedLang(sttRes.detectedLanguageCode, sttRes.languageProbability);
             }
 
-            const reqLang = isAuto ? 'auto' : language;
+            // In voice mode, we ALWAYS want 'auto' so the backend can detect the language of this specific utterance.
+            const reqLang = 'auto';
             const chatRes = await sendChat(
               transcript,
               sessionId || undefined,
@@ -1627,6 +1643,7 @@ export default function ChatInterface({
                 quickActions: chatRes.quickActions,
                 disclaimer: chatRes.disclaimer,
                 speechText: chatRes.speechText,
+                detectedLanguage: chatRes.detectedLanguage,
                 animate: true,
               },
             ]);
@@ -1636,8 +1653,10 @@ export default function ChatInterface({
 
             setVoiceAgentState('SPEAKING');
 
+            const effectiveVoiceLang = chatRes.detectedLanguage || sttRes.detectedLanguageCode || language;
+
             try {
-              const ttsBlob = await fetchTTS(cleanSpeech, language);
+              const ttsBlob = await fetchTTS(cleanSpeech, effectiveVoiceLang);
               if (!isVoiceSessionActiveRef.current) {
                 setVoiceAgentState('IDLE');
                 return;
@@ -1660,7 +1679,7 @@ export default function ChatInterface({
               audio.onerror = () => {
                 stopAudio();
                 if (isVoiceSessionActiveRef.current) {
-                  fallbackBrowserSpeech(cleanSpeech, language, assistantMsgId);
+                  fallbackBrowserSpeech(cleanSpeech, effectiveVoiceLang, assistantMsgId);
                   setTimeout(() => {
                     if (isVoiceSessionActiveRef.current) startVoiceAgentTurn();
                   }, 3000);
@@ -1671,7 +1690,7 @@ export default function ChatInterface({
             } catch (ttsErr) {
               console.warn('TTS error, falling back to browser synthesis:', ttsErr);
               if (isVoiceSessionActiveRef.current) {
-                fallbackBrowserSpeech(cleanSpeech, language, assistantMsgId);
+                fallbackBrowserSpeech(cleanSpeech, effectiveVoiceLang, assistantMsgId);
                 setTimeout(() => {
                   if (isVoiceSessionActiveRef.current) startVoiceAgentTurn();
                 }, 3500);
@@ -1951,6 +1970,7 @@ export default function ChatInterface({
           quickActions: res.quickActions,
           disclaimer: res.disclaimer,
           speechText: res.speechText,
+          detectedLanguage: res.detectedLanguage,
           animate: true,
         });
       } catch (err) {
@@ -2034,6 +2054,7 @@ export default function ChatInterface({
           quickActions: res.quickActions,
           disclaimer: res.disclaimer,
           speechText: res.speechText,
+          detectedLanguage: res.detectedLanguage,
           animate: true,
         });
       } catch (err) {
@@ -2105,6 +2126,7 @@ export default function ChatInterface({
           quickActions: res.quickActions,
           disclaimer: res.disclaimer,
           speechText: res.speechText,
+          detectedLanguage: res.detectedLanguage,
           animate: true,
         });
       } catch (err) {

@@ -1,4 +1,5 @@
 import type { Language } from './IntentClassifier';
+import { INDIAN_STATES, resolveUserState } from './SchemeEngine';
 
 /**
  * UserEntities is kept as a shared shape for tool arguments (see Tools.ts) —
@@ -14,6 +15,8 @@ export interface UserEntities {
   course?: string;
   location?: string;              // city / district / PIN
   state?: string;                 // state of residence (e.g. 'Maharashtra', 'Gujarat')
+  level?: string;                 // 'State' or 'Central'
+  state_only?: boolean;           // true if user specifically requested state-level schemes only
   gender?: string;
   age?: number;
   scheme_names?: string[];        // schemes mentioned by user
@@ -40,14 +43,18 @@ export interface UserProfileContext {
 }
 
 export interface ConversationFacts {
-  business_type?: string;        // e.g. 'tailoring', 'dairy', 'kirana', 'salon'
+  business_type?: string;        // e.g. 'tailoring', 'dairy', 'kirana', 'salon', 'stationery and bookstore'
   purpose?: string;              // e.g. 'tailoring machine and small shop'
   loan_amount_rs?: number;       // e.g. 100000
   loan_amount_type?: 'exact' | 'approximate' | 'unknown';
   loan_amount_text?: string;     // e.g. '₹1 Lakh'
   family_income_rs?: number;     // annual in rupees
   location?: string;             // city/district
-  state?: string;                // state of residence (e.g. 'Rajasthan', 'Goa')
+  state?: string;                // state of residence (e.g. 'Rajasthan', 'Goa', 'Kerala')
+  level?: string;                // 'State' or 'Central'
+  state_only?: boolean;          // true if user specifically requested state-level schemes only
+  age?: number;
+  caste?: string;
   gender?: string;
   category_hint?: string;        // 'business_loan' | 'education_loan' | 'general'
   education_level?: string;
@@ -165,6 +172,9 @@ export function extractAndUpdateFacts(
   } else if (/dairy|cattle|cow|buffalo|milk|farming|agriculture|खेती|डेयरी|पशुपालन/i.test(lowerMsg)) {
     facts.business_type = 'dairy & animal husbandry';
     facts.category_hint = 'business_loan';
+  } else if (/stationery|bookstore|book\s*shop|books\b|किताब|पुस्तक/i.test(lowerMsg)) {
+    facts.business_type = 'stationery and bookstore';
+    facts.category_hint = 'business_loan';
   } else if (/grocery|kirana|general store|shop|dukaan|retail|व्यापार|दुकान/i.test(lowerMsg)) {
     if (!facts.business_type) {
       facts.business_type = 'retail shop / kirana';
@@ -231,12 +241,71 @@ export function extractAndUpdateFacts(
     }
   }
 
+  // 5b. Age Extraction in conversation
+  const ageMatch = lowerMsg.match(/(?:i\s*am\s*|age\s*(?:is|of)?\s*)?(\d{1,2})\s*(?:years?[- ]?old|yr[- ]?old|sal|saal|वर्ष|साल)\b/i) ||
+                   lowerMsg.match(/\bage\s*(?:is|:)?\s*(\d{1,2})\b/i);
+  if (ageMatch && ageMatch[1]) {
+    const val = parseInt(ageMatch[1], 10);
+    if (!isNaN(val) && val >= 10 && val <= 100) {
+      facts.age = val;
+    }
+  }
+
+  // 5c. Gender Extraction in conversation
+  if (!facts.gender) {
+    if (/\b(woman|female|girl|mahila|महिला|स्त्री|নারী|મહિલા)\b/i.test(lowerMsg)) {
+      facts.gender = 'female';
+    } else if (/\b(man|male|boy|purush|पुरुष|পুরুষ|પુરુષ)\b/i.test(lowerMsg)) {
+      facts.gender = 'male';
+    }
+  }
+
+  // 5d. Caste / Social Category Extraction in conversation
+  if (!facts.caste) {
+    if (/\b(sc|scheduled caste|dalit|अनुसूचित जाति)\b/i.test(lowerMsg)) {
+      facts.caste = 'SC';
+    } else if (/\b(st|scheduled tribe|adivasi|अनुसूचित जनजाति)\b/i.test(lowerMsg)) {
+      facts.caste = 'ST';
+    } else if (/\b(obc|other backward class|अन्य पिछड़ा वर्ग)\b/i.test(lowerMsg)) {
+      facts.caste = 'OBC';
+    }
+  }
+
+  // 5e. Location / City Extraction in conversation
+  if (!facts.location) {
+    const locMatch = lowerMsg.match(/(?:from|in|at|living in|resident of|रहने वाला|रहने वाली)\s+([A-Za-z\s]+?)(?:,|\.|\band\b|\bwith\b|\bincome\b|\bwant|\bneed|$)/i);
+    if (locMatch && locMatch[1]) {
+      const candidate = locMatch[1].trim();
+      if (candidate.length > 2 && candidate.length < 30 && !/^(the|a|an|my|our)$/i.test(candidate)) {
+        facts.location = candidate;
+      }
+    }
+  }
+
   // 6. Reset selected_scheme if user asks for broad recommendation or alternatives
   if (
     /which scheme is (?:better|best)|show (?:me )?(?:other|more) schemes|alternatives?|compare|any other schemes?|all schemes|what (?:loan )?schemes are available|suggest schemes/i.test(lowerMsg) ||
     /अन्य योजना|इतर योजना|विकल्प|तुलना|સરખામણી/i.test(lowerMsg)
   ) {
     facts.selected_scheme = undefined;
+  }
+
+  // 7. State & State-Level/State-Specific Scheme Extraction
+  const resolvedState = resolveUserState({ purpose: message, location: facts.location });
+  if (resolvedState && !facts.state) {
+    facts.state = resolvedState;
+  }
+
+  const isStateOnlyRequest =
+    /\b(state\s*specific|state\s*level|state\s*government|state\s*only|only\s*state|state\s*scheme|state\s*schemes)\b/i.test(lowerMsg) ||
+    /राज्य\s*स्तरीय|राज्य\s*सरकार|केवळ\s*राज्य|फक्त\s*राज्य|રાજ્ય\s*સ્તરીય/i.test(lowerMsg);
+
+  if (isStateOnlyRequest) {
+    facts.level = 'State';
+    facts.state_only = true;
+    if (resolvedState) {
+      facts.state = resolvedState;
+    }
   }
 
   return facts;

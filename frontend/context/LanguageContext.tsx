@@ -48,7 +48,7 @@ function setLanguageCookie(name: string, value: string): void {
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Language>('en');
-  const [selectedMode, setSelectedMode] = useState<LanguageMode>('en');
+  const [selectedMode, setSelectedMode] = useState<LanguageMode>('auto');
 
   useEffect(() => {
     // 1. Check cookies first (SSR / pre-hydration source of truth)
@@ -77,9 +77,9 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       setLanguageCookie('app_lang_mode', savedLang);
       setLanguageCookie('app_lang', resolved);
     } else {
-      setSelectedMode('en');
+      setSelectedMode('auto');
       setLangState('en');
-      setLanguageCookie('app_lang_mode', 'en');
+      setLanguageCookie('app_lang_mode', 'auto');
       setLanguageCookie('app_lang', 'en');
     }
   }, []);

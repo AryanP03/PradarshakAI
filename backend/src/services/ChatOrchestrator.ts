@@ -190,6 +190,9 @@ ${userContext?.trade_category ? `- Target Trade / Business is "${userContext.tra
 
   const factLines: string[] = [];
   if (knownFacts) {
+    if (knownFacts.age != null) factLines.push(`- Stated Age: ${knownFacts.age} years`);
+    if (knownFacts.caste) factLines.push(`- Stated Social / Caste Category: ${knownFacts.caste}`);
+    if (knownFacts.gender) factLines.push(`- Stated Gender: ${knownFacts.gender}`);
     if (knownFacts.business_type) factLines.push(`- Stated Business / Trade: ${knownFacts.business_type}`);
     if (knownFacts.purpose) factLines.push(`- Stated Purpose / Equipment: ${knownFacts.purpose}`);
     if (knownFacts.loan_amount_rs != null) {
@@ -212,6 +215,7 @@ ${factLines.join('\n')}
 CONVERSATIONAL INTEGRITY & ZERO-REDUNDANCY MANDATE:
 - DO NOT re-ask the user for any information that is already present in the KNOWN FACTS or pre-verified profile above!
 - Specifically:
+  * If age, city, location, caste, purpose, or income has already been stated, NEVER ask for it again!
   * If the loan amount is already known (e.g. ₹1 Lakh), NEVER ask "What loan amount do you need?" or "Could you share your required loan amount?".
   * If the business type is already known (e.g. tailoring), NEVER ask "What business are you planning?".
   * NEVER ask about an "intended course" or "degree" unless the user's inquiry is explicitly an education loan. For a tailoring business, discuss machines, shop setup, and working capital, NEVER courses.
@@ -606,6 +610,144 @@ export function cleanAndFormatPostRecommendation(
   return cleaned;
 }
 
+export function isReferenceToPriorSchemes(message: string, hasPriorSchemes: boolean): boolean {
+  if (!hasPriorSchemes) return false;
+  const msg = (message || '').trim().toLowerCase();
+
+  // If user says "in hindi", "in english", "tell me in hindi", "explain in hindi", "हिंदी में", "বাংলায়" etc.
+  if (/^(?:in\s+[a-z]+|tell me in\s+[a-z]+|explain in\s+[a-z]+|explain\s+(?:those|these|them)?\s*in\s+[a-z]+|हिंदी में|मराठीत|বাংলায়|ગુજરાતીમાં|తెలుగులో|தமிழில்)$/i.test(msg)) {
+    return true;
+  }
+
+  const englishRefPatterns = [
+    /(?:tell|explain|describe|know more|details?|speak)\s+(?:me\s+)?(?:about\s+)?(?:the\s+)?(?:two|three|both|above|mentioned|recommended|given|these|those|earlier|previous)\s+(?:schemes?|options?|ones?)/i,
+    /(?:tell|explain|describe)\s+(?:those|these|them|the ones?)\s*(?:above|in\s+[a-z]+|more)?/i,
+    /schemes?\s+(?:you\s+)?(?:just\s+)?(?:recommended|mentioned|suggested|showed|listed|shared)/i,
+    /the\s+(?:two|three|both)\s+schemes/i,
+    /(?:what about|how about)\s+(?:the\s+)?(?:schemes?|ones?|above)/i,
+    /explain\s+(?:those|these)\s+in\s+[a-z]+/i,
+    /tell\s+me\s+about\s+(?:them|those|these)/i,
+  ];
+
+  if (englishRefPatterns.some((pat) => pat.test(msg))) {
+    return true;
+  }
+
+  const indicRefPatterns = [
+    /(?:ऊपर|उपरोक्त|पहले|अभी)\s*(?:बताई|दी गई|उल्लेखित|सुझाई)?\s*(?:दोनों|तीनों|इन|उन)?\s*योजना/i,
+    /(?:उन|इन)\s*योजनाओं\s*(?:के बारे में|को)?/i,
+    /योजनाएं\s*(?:जो आपने बताई|के बारे में)/i,
+    /(?:इसके|इनके|उनके)\s*बारे में\s*(?:और\s*)?(?:बताएं|बताओ|जानकारी|समझाइए)/i,
+    /(?:हिंदी|मराठी|বাংলা)\s*में\s*(?:समझाएं|बताएं|बताओ)/i,
+  ];
+
+  if (indicRefPatterns.some((pat) => pat.test(msg))) {
+    return true;
+  }
+
+  return false;
+}
+
+export function localizeMatchReason(reason: string, lang: string): string {
+  if (!reason || lang === 'en') return reason;
+  const lower = reason.toLowerCase();
+
+  if (lower.includes('doctoral') || lower.includes('phd') || lower.includes('fellowship')) {
+    if (lang === 'hi') return 'डॉक्टरेट शोध अनुसंधान के लिए विशेष रूप से निर्मित फेलोशिप';
+    if (lang === 'mr') return 'डॉक्टरेट संशोधन फेलोशिपसाठी विशेष योजना';
+    if (lang === 'bn') return 'ডক্টরাল গবেষণা ফেলোশিপের জন্য বিশেষভাবে নির্মিত প্রকল্প';
+  }
+  if (lower.includes('comprehensive health') || lower.includes('medical insurance')) {
+    if (lang === 'hi') return 'व्यापक स्वास्थ्य और चिकित्सा बीमा कवरेज';
+    if (lang === 'mr') return 'सर्वसमावेशक आरोग्य आणि वैद्यकीय विमा संरक्षण';
+    if (lang === 'bn') return 'ব্যাপক স্বাস্থ্য ও চিকিৎসা বীমা কভারেজ';
+  }
+  if (lower.includes('health and medical') || lower.includes('medical assistance')) {
+    if (lang === 'hi') return 'स्वास्थ्य एवं चिकित्सा सहायता योजना';
+    if (lang === 'mr') return 'आरोग्य आणि वैद्यकीय सहाय्य योजना';
+    if (lang === 'bn') return 'স্বাস্থ্য ও চিকিৎসা সহায়তা প্রকল্প';
+  }
+  if (lower.includes('social security') || lower.includes('pension')) {
+    if (lang === 'hi') return 'वरिष्ठ नागरिकों/पात्र लाभार्थियों के लिए सामाजिक सुरक्षा पेंशन';
+    if (lang === 'mr') return 'ज्येष्ठ नागरिक/पात्र लाभार्थ्यांसाठी सामाजिक सुरक्षा पेन्शन';
+    if (lang === 'bn') return 'বয়োজ্যেষ্ঠ/যোগ্য সুবিধাভোগীদের জন্য সামাজিক সুরক্ষা পেনশন';
+  }
+  if (lower.includes('scholarship support') || lower.includes('scholarship')) {
+    if (lang === 'hi') return 'शैक्षणिक छात्रवृत्ति सहायता';
+    if (lang === 'mr') return 'शैक्षणिक शिष्यवृत्ती सहाय्य';
+    if (lang === 'bn') return 'শিক্ষাগত বৃত্তি সহায়তা';
+  }
+  if (lower.includes('purpose matches') || lower.includes('eligible activities')) {
+    if (lang === 'hi') return 'उद्देश्य इस योजना की पात्र व्यावसायिक गतिविधियों से मेल खाता है';
+    if (lang === 'mr') return 'उद्देश्य या योजनेच्या पात्र व्यावसायिक उपक्रमांशी जुळतो';
+    if (lang === 'bn') return 'উদ্দেশ্য এই প্রকল্পের যোগ্য ব্যবসায়িক কার্যক্রমের সাথে মেলে';
+  }
+  if (lower.includes('income falls') || lower.includes('income threshold')) {
+    if (lang === 'hi') return 'पारिवारिक वार्षिक आय योजना की पात्र सीमा के अंतर्गत है';
+    if (lang === 'mr') return 'कौटुंबिक वार्षिक उत्पन्न योजनेच्या पात्र मर्यादेत येते';
+    if (lang === 'bn') return 'পারিবারিক বার্ষিক আয় প্রকল্পের যোগ্য সীমার মধ্যে রয়েছে';
+  }
+  if (lower.includes('loan requirement fits') || lower.includes('scheme limits')) {
+    if (lang === 'hi') return 'ऋण आवश्यकता योजना की निर्धारित सीमा के पूर्णतः अनुकूल है';
+    if (lang === 'mr') return 'कर्ज आवश्यकता योजनेच्या मर्यादेमध्ये बसते';
+    if (lang === 'bn') return 'ঋণের প্রয়োজনীয়তা প্রকল্পের সীমার মধ্যে উপযুক্ত';
+  }
+  if (lower.includes('vocational financing') || lower.includes('designed for education')) {
+    if (lang === 'hi') return 'शिक्षा और व्यावसायिक प्रशिक्षण वित्तपोषण के लिए विशेष रूप से तैयार';
+    if (lang === 'mr') return 'शिक्षण आणि व्यावसायिक वित्तपुरवठ्यासाठी विशेष योजना';
+    if (lang === 'bn') return 'শিক্ষা এবং বৃত্তিমূলক অর্থায়নের জন্য বিশেষভাবে পরিকল্পিত';
+  }
+  if (lower.includes('specifically matches your requested') || lower.includes('education level')) {
+    if (lang === 'hi') return 'आपके द्वारा अनुरोधित शिक्षा स्तर के पूर्णतः अनुकूल';
+    if (lang === 'mr') return 'तुमच्या विनंती केलेल्या शिक्षण पातळीशी सुसंगत';
+    if (lang === 'bn') return 'আপনার অনুরোধকৃত শিক্ষার স্তরের সাথে সম্পূর্ণ সামঞ্জস্যপূর্ণ';
+  }
+  if (lower.includes('women entrepreneurs') || lower.includes('exclusive concessional scheme for women')) {
+    if (lang === 'hi') return 'महिला उद्यमियों के लिए विशेष रियायती योजना';
+    if (lang === 'mr') return 'महिला उद्योजकांसाठी विशेष सवलतीची योजना';
+    if (lang === 'bn') return 'মহিলা উদ্যোক্তাদের জন্য বিশেষ সুবিধাযুক্ত প্রকল্প';
+  }
+  const stateTailoredMatch = reason.match(/Specifically tailored for residents of (.+)/i);
+  if (stateTailoredMatch) {
+    const st = stateTailoredMatch[1].trim();
+    if (lang === 'hi') return `${st} के निवासियों के लिए विशेष रूप से तैयार`;
+    if (lang === 'mr') return `${st} च्या रहिवाशांसाठी विशेष राज्य योजना`;
+    if (lang === 'bn') return `${st} এর বাসিন্দাদের জন্য বিশেষভাবে পরিকল্পিত`;
+  }
+  const stateLevelMatch = reason.match(/State-level scheme for residents of (.+)/i);
+  if (stateLevelMatch) {
+    const st = stateLevelMatch[1].trim();
+    if (lang === 'hi') return `${st} के निवासियों के लिए राज्य-स्तरीय योजना`;
+    if (lang === 'mr') return `${st} च्या रहिवाशांसाठी राज्य-स्तरीय योजना`;
+    if (lang === 'bn') return `${st} এর বাসিন্দাদের জন্য রাজ্য স্তরের প্রকল্প`;
+  }
+  if (lower.includes('scheduled caste') || lower.includes('(sc) beneficiaries')) {
+    if (lang === 'hi') return 'अनुसूचित जाति (SC) के लाभार्थियों के लिए विशेष रूप से आरक्षित';
+    if (lang === 'mr') return 'अनुसूचित जाती (SC) लाभार्थ्यांसाठी विशेष आरक्षित';
+    if (lang === 'bn') return 'তপশিলি জাতি (SC) সুবিধাভোগীদের জন্য বিশেষভাবে নির্ধারিত';
+  }
+  if (lower.includes('requested detailed') || lower.includes('scheme information')) {
+    if (lang === 'hi') return 'लाभार्थी ने योजना की विस्तृत जानकारी का अनुरोध किया';
+    if (lang === 'mr') return 'लाभार्थ्याने योजनेच्या सविस्तर माहितीची विनंती केली';
+    if (lang === 'bn') return 'সুবিধাভোগী প্রকল্পের বিস্তারিত তথ্যের জন্য অনুরোধ করেছেন';
+  }
+  if (lower.includes('nsfdc') || lower.includes('guidelines')) {
+    if (lang === 'hi') return 'आधिकारिक एनएसएफडीसी रियायती योजना दिशानिर्देश';
+    if (lang === 'mr') return 'अधिकृत एनएसएफडीसी सवलत योजना मार्गदर्शक तत्त्वे';
+    if (lang === 'bn') return 'সরকারি এনএসएफডিসি প্রকল্প নির্দেশিকা';
+  }
+
+  return reason;
+}
+
+export function localizeSchemesForResponse(schemes: any[], lang: string): any[] {
+  if (!schemes || schemes.length === 0 || lang === 'en') return schemes;
+  return schemes.map((s) => ({
+    ...s,
+    matchReasons: ((s.matchReasons || []) as string[]).map((r: string) => localizeMatchReason(r, lang)),
+  }));
+}
+
 const MAX_TOOL_ROUNDS = 3;
 
 export async function process(
@@ -630,6 +772,7 @@ export async function process(
     detectedSpeechLanguage,
     speechProbability,
     message,
+    sessionLanguage: session.language,
   });
 
   session.language = resolution.effectiveLanguage as Language;
@@ -908,40 +1051,82 @@ Explain clearly and warmly that during the ${morat}-month moratorium no principa
       }
     }
   } else {
-    // 1. Check if user is asking directly to compare schemes in their query
-    const directCompareSchemes = await resolveComparisonFromQuery(message, session.lastContext);
-    if (directCompareSchemes && directCompareSchemes.length >= 2) {
-      lastToolName = 'compare_schemes';
-      lastToolData = {
-        schemes: directCompareSchemes,
-        schemeA: directCompareSchemes[0] || null,
-        schemeB: directCompareSchemes[1] || null,
-      };
-      speechText = generateComparisonSpeechText(directCompareSchemes, session.language);
-      finalText = getComparisonSummaryText(directCompareSchemes, session.language);
-      lastToolData.speechText = speechText;
-    } else {
-      // 2. High-priority specific scheme query detection
-      const allActiveSchemes = await fetchActiveSchemes();
-      const specificSchemeRes = identifySpecificScheme(
-        message,
-        allActiveSchemes,
-        session.knownFacts?.selected_scheme
-      );
+    const hasPriorSchemes = Boolean(
+      (session.knownFacts?.last_recommended_schemes && session.knownFacts.last_recommended_schemes.length > 0) ||
+      ((session.lastContext?.recommend_schemes as any)?.schemes?.length > 0)
+    );
 
-      if (specificSchemeRes.isSpecificSchemeQuery && specificSchemeRes.scheme) {
-        console.log(`[ROUTER] Specific scheme identified with high priority: "${specificSchemeRes.scheme.name}" (id: ${specificSchemeRes.scheme.id}, focus: ${specificSchemeRes.queryFocus})`);
-        session.knownFacts.selected_scheme = {
-          id: specificSchemeRes.scheme.id,
-          name: specificSchemeRes.scheme.name,
-        };
+    const isRefToPrior = isReferenceToPriorSchemes(message, hasPriorSchemes);
+    if (isRefToPrior && hasPriorSchemes) {
+      console.log(`[ROUTER] Reference to prior schemes detected for message="${message}". Reusing previous schemes.`);
+      let existingSchemes: Scheme[] = [];
+      if (Array.isArray((session.lastContext?.recommend_schemes as any)?.schemes)) {
+        existingSchemes = (session.lastContext!.recommend_schemes as any).schemes;
+      } else if (session.knownFacts?.last_recommended_schemes?.length) {
+        const ids = session.knownFacts.last_recommended_schemes.map((s) => s.id).filter(Boolean) as number[];
+        if (ids.length > 0) {
+          const fetched = await Promise.all(ids.map((id) => fetchSchemeById(id)));
+          existingSchemes = fetched.filter(Boolean) as Scheme[];
+        }
       }
 
-      try {
-        const calledTools = new Set<string>();
-        for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
-          const availableTools = TOOL_DEFS.filter(t => !calledTools.has(t.function.name));
-          const assistantMsg = await llmChat({ messages, tools: availableTools.length > 0 ? availableTools : undefined, maxTokens: 700 });
+      if (existingSchemes.length > 0) {
+        lastToolName = 'recommend_schemes';
+        lastToolData = { schemes: existingSchemes };
+
+        const schemeNamesList = existingSchemes.map((s) => s.name).join(', ');
+        messages.push({
+          role: 'system',
+          content: `The user is referencing the schemes already presented earlier in this conversation: ${schemeNamesList}.
+Explain these exact schemes in ${currentLangName} (${session.language}).
+DO NOT call recommend_schemes or any other tool. DO NOT ask the user for their age, city, location, caste, business, or income again, as this information was already provided earlier in this conversation.
+Explain why these specific schemes fit the user's previously stated profile and requirements in warm, natural ${currentLangName}.`,
+        });
+
+        const assistantMsg = await llmChat({ messages, tools: undefined, maxTokens: 700 });
+        finalText = assistantMsg.content || '';
+        speechText = finalText;
+      }
+    }
+
+    if (!lastToolData) {
+      // 1. Check if user is asking directly to compare schemes in their query
+      const directCompareSchemes = await resolveComparisonFromQuery(message, session.lastContext);
+      if (directCompareSchemes && directCompareSchemes.length >= 2) {
+        lastToolName = 'compare_schemes';
+        lastToolData = {
+          schemes: directCompareSchemes,
+          schemeA: directCompareSchemes[0] || null,
+          schemeB: directCompareSchemes[1] || null,
+        };
+        speechText = generateComparisonSpeechText(directCompareSchemes, session.language);
+        finalText = getComparisonSummaryText(directCompareSchemes, session.language);
+        lastToolData.speechText = speechText;
+      }
+    }
+
+    if (!lastToolData) {
+        // 2. High-priority specific scheme query detection
+        const allActiveSchemes = await fetchActiveSchemes();
+        const specificSchemeRes = identifySpecificScheme(
+          message,
+          allActiveSchemes,
+          session.knownFacts?.selected_scheme
+        );
+
+        if (specificSchemeRes.isSpecificSchemeQuery && specificSchemeRes.scheme) {
+          console.log(`[ROUTER] Specific scheme identified with high priority: "${specificSchemeRes.scheme.name}" (id: ${specificSchemeRes.scheme.id}, focus: ${specificSchemeRes.queryFocus})`);
+          session.knownFacts.selected_scheme = {
+            id: specificSchemeRes.scheme.id,
+            name: specificSchemeRes.scheme.name,
+          };
+        }
+
+        try {
+          const calledTools = new Set<string>();
+          for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
+            const availableTools = TOOL_DEFS.filter(t => !calledTools.has(t.function.name));
+            const assistantMsg = await llmChat({ messages, tools: availableTools.length > 0 ? availableTools : undefined, maxTokens: 700 });
 
           if (assistantMsg.tool_calls && assistantMsg.tool_calls.length > 0) {
             console.log(`[ROUTER] LLM round ${round}: tool_calls=[${assistantMsg.tool_calls.map(tc => tc.function.name).join(', ')}]`);
@@ -1016,6 +1201,16 @@ Explain clearly and warmly that during the ${morat}-month moratorium no principa
 
                   if (!args.state) {
                     args.state = resolveUserState({ purpose: message }) || session.knownFacts?.state || effectiveUserContext?.state;
+                  }
+
+                  const isStateOnly = Boolean(
+                    session.knownFacts?.state_only ||
+                    /\b(state\s*specific|state\s*level|state\s*government|state\s*only|only\s*state|state\s*scheme|state\s*schemes)\b/i.test(message) ||
+                    /राज्य\s*स्तरीय|राज्य\s*सरकार|केवळ\s*राज्य|फक्त\s*राज्य|રાજ્ય\s*સ્તરીય/i.test(message)
+                  );
+                  if (isStateOnly) {
+                    args.level = 'State';
+                    args.state_only = true;
                   }
 
                   if (!args.category_hint) {
@@ -1257,6 +1452,11 @@ Explain clearly and warmly that during the ${morat}-month moratorium no principa
         if (isSchemeRelated) {
           console.log('[ROUTER] Smart fallback: LLM returned empty, but message is scheme-related. Calling recommend_schemes directly.');
           try {
+            const isStateOnlyFb = Boolean(
+              session.knownFacts?.state_only ||
+              /\b(state\s*specific|state\s*level|state\s*government|state\s*only|only\s*state|state\s*scheme|state\s*schemes)\b/i.test(message) ||
+              /राज्य\s*स्तरीय|राज्य\s*सरकार|केवळ\s*राज्य|फक्त\s*राज्य|રાજ્ય\s*સ્તરીય/i.test(message)
+            );
             const smartFallbackResult = await executeTool('recommend_schemes', {
               query: message,
               purpose: session.knownFacts?.purpose || session.knownFacts?.business_type || message,
@@ -1264,6 +1464,9 @@ Explain clearly and warmly that during the ${morat}-month moratorium no principa
               family_income_rs: session.knownFacts?.family_income_rs || (effectiveUserContext?.salary ? Number(effectiveUserContext.salary) : undefined),
               location: session.knownFacts?.location || effectiveUserContext?.district || effectiveUserContext?.city,
               gender: session.knownFacts?.gender || effectiveUserContext?.gender?.toLowerCase(),
+              state: session.knownFacts?.state || resolveUserState({ purpose: message }) || effectiveUserContext?.state,
+              level: isStateOnlyFb ? 'State' : session.knownFacts?.level,
+              state_only: isStateOnlyFb,
               category_hint: session.knownFacts?.category_hint,
             });
             lastToolName = smartFallbackResult.toolName;
@@ -1305,6 +1508,45 @@ Explain clearly and warmly that during the ${morat}-month moratorium no principa
           finalText = LOCALIZED_ERROR_MESSAGES[session.language] || LOCALIZED_ERROR_MESSAGES.en;
           speechText = finalText;
         }
+      }
+    }
+  }
+
+  if (lastToolData && Array.isArray(lastToolData.schemes)) {
+    lastToolData.schemes = localizeSchemesForResponse(lastToolData.schemes as Scheme[], session.language);
+  }
+
+  const isStateSpecificRequest = Boolean(
+    session.knownFacts?.state_only ||
+    /\b(state\s*specific|state\s*level|state\s*government|state\s*only|only\s*state|state\s*scheme|state\s*schemes)\b/i.test(message) ||
+    /राज्य\s*स्तरीय|राज्य\s*सरकार|केवळ\s*राज्य|फक्त\s*राज्य|રાજ્ય\s*સ્તરીય/i.test(message)
+  );
+
+  if (isStateSpecificRequest) {
+    const targetState = session.knownFacts?.state || resolveUserState({ purpose: message }) || 'State';
+    const recSchemes = Array.isArray(lastToolData?.schemes) ? (lastToolData.schemes as Scheme[]) : [];
+
+    // 1. Ensure no Central schemes exist in recommended list
+    const hasCentralInToolData = recSchemes.some((s) => s.level === 'Central' || s.state === 'Central');
+    if (hasCentralInToolData && lastToolData) {
+      console.warn('[INTEGRITY] Found Central scheme in state-specific tool result! Filtering to State schemes only.');
+      lastToolData.schemes = recSchemes.filter((s) => s.level !== 'Central' && s.state !== 'Central');
+    }
+
+    // 2. Text integrity check: ensure response text never claims a scheme is "central" or contradicts state-only intent
+    const mentionsCentralContradiction = /\b(central\s*scheme|central\s*government\s*scheme|centrally\s*sponsored)\b/i.test(finalText);
+    const validStateSchemes = Array.isArray(lastToolData?.schemes) ? (lastToolData.schemes as Scheme[]) : [];
+
+    if (mentionsCentralContradiction || (validStateSchemes.length > 0 && !validStateSchemes.some((s) => finalText.includes(s.name)))) {
+      console.warn('[INTEGRITY] Contradiction detected in LLM text: response described Central scheme or missed state schemes for state-specific request. Correcting text.');
+      if (validStateSchemes.length > 0) {
+        const schemeListText = validStateSchemes.slice(0, 3).map((s, idx) => `${idx + 1}. ${s.name}: Up to ₹${s.max_loan_lakh || 10} Lakhs at ${s.interest_rate_min || 4}% interest`).join('\n');
+        finalText = session.language === 'hi'
+          ? `आपके लिए ${targetState} सरकार की विशिष्ट राज्य-स्तरीय योजनाएं उपलब्ध हैं:\n${schemeListText}`
+          : session.language === 'mr'
+          ? `तुमच्यासाठी ${targetState} शासनाच्या विशिष्ट राज्य-स्तरीय योजना उपलब्ध आहेत:\n${schemeListText}`
+          : `Here are the state-specific schemes from the ${targetState} Government that can assist you:\n${schemeListText}`;
+        speechText = finalText;
       }
     }
   }

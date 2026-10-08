@@ -72,6 +72,7 @@ function fmt(rs: number | null | undefined) {
 
 interface Props {
   scheme: Scheme;
+  language?: string;
   onKnowMore?: (scheme: Scheme) => void;
   onGetDocuments?: (scheme: Scheme) => void;
   onCalculateEMI?: (scheme: Scheme) => void;
@@ -86,6 +87,7 @@ interface Props {
 
 export default function SchemeResultCard({
   scheme,
+  language: propLang,
   onKnowMore,
   onGetDocuments,
   onCalculateEMI,
@@ -96,14 +98,15 @@ export default function SchemeResultCard({
   isVoicePlaying,
   isVoiceLoading,
 }: Props) {
-  const { language, t } = useLanguage();
+  const { language: ctxLang, t } = useLanguage();
+  const effectiveLang = propLang || ctxLang;
   const meta = CATEGORY_COLORS[scheme.category] || CATEGORY_COLORS.default;
   const categoryKey = `category.${scheme.category}`;
   const translatedCategory = t(categoryKey);
   const label = translatedCategory !== categoryKey ? translatedCategory : (CATEGORY_LABELS[scheme.category] || scheme.category);
 
-  const schemeName = getLocalizedSchemeName(scheme.name, language);
-  const schemeDesc = getLocalizedSchemeDesc(scheme.name, scheme.description, language);
+  const schemeName = getLocalizedSchemeName(scheme.name, effectiveLang);
+  const schemeDesc = getLocalizedSchemeDesc(scheme.name, scheme.description, effectiveLang);
 
   return (
     <Interactive3DCard
@@ -277,7 +280,7 @@ export default function SchemeResultCard({
               }}
             >
               <CheckCircle2 size={14} color="#059669" style={{ flexShrink: 0 }} />
-              <span>{getLocalizedMatchReason(r, language)}</span>
+              <span>{getLocalizedMatchReason(r, effectiveLang)}</span>
             </div>
           ))}
         </div>
@@ -303,7 +306,7 @@ export default function SchemeResultCard({
               }}
             >
               <AlertTriangle size={14} color="#ea580c" style={{ flexShrink: 0 }} />
-              <span>{getLocalizedWarning(w, language)}</span>
+              <span>{getLocalizedWarning(w, effectiveLang)}</span>
             </div>
           ))}
         </div>

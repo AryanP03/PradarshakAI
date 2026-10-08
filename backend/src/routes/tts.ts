@@ -13,7 +13,30 @@ router.post('/', async (req: Request, res: Response) => {
     return;
   }
 
-  const lang = (language && typeof language === 'string' ? language : 'en').toLowerCase();
+  let lang = (language && typeof language === 'string' ? language : 'en').toLowerCase().trim();
+
+  // Script-based language guard: if text contains native Indian script characters, ensure TTS uses the matching language model
+  if (/[\u0900-\u097F]/.test(text)) {
+    // Devanagari script: Default to Marathi if explicitly requested as 'mr', otherwise Hindi 'hi'
+    if (lang !== 'mr') lang = 'hi';
+  } else if (/[\u0980-\u09FF]/.test(text)) {
+    lang = 'bn';
+  } else if (/[\u0A80-\u0AFF]/.test(text)) {
+    lang = 'gu';
+  } else if (/[\u0A00-\u0A7F]/.test(text)) {
+    lang = 'pa';
+  } else if (/[\u0B80-\u0BFF]/.test(text)) {
+    lang = 'ta';
+  } else if (/[\u0C00-\u0C7F]/.test(text)) {
+    lang = 'te';
+  } else if (/[\u0C80-\u0CFF]/.test(text)) {
+    lang = 'kn';
+  } else if (/[\u0D00-\u0D7F]/.test(text)) {
+    lang = 'ml';
+  } else if (/[\u0B00-\u0B7F]/.test(text)) {
+    lang = 'od';
+  }
+
   const langConfig = getLanguageConfig(lang);
   if (!langConfig) {
     res.status(400).json({ error: `Unsupported language: "${language}"` });

@@ -56,6 +56,9 @@ export const TOOL_DEFS: ToolDef[] = [
           gender: { type: ['string', 'null'], enum: ['male', 'female', null] },
           age: { type: ['number', 'null'], description: 'Age of the applicant in years' },
           location: { type: ['string', 'null'], description: 'City or district' },
+          state: { type: ['string', 'null'], description: 'State of residence (e.g. Kerala, Tamil Nadu, Maharashtra)' },
+          level: { type: ['string', 'null'], enum: ['State', 'Central', null], description: 'Set to "State" when the user specifically asks for state government / state-level schemes only' },
+          state_only: { type: ['boolean', 'null'], description: 'Set to true when the user explicitly requests state-specific or state government schemes only (excluding central schemes)' },
           category_hint: { type: ['string', 'null'], enum: ['education', 'education_loan', 'business', 'business_loan', 'housing', 'welfare', null], description: 'Set to education_loan (or education) for education/study/scholarship/laptop, business_loan (or business) for business/trade, housing for home purchase/construction, welfare for insurance/health/pension/general welfare' },
         },
       },
@@ -188,6 +191,11 @@ export async function executeTool(name: string, args: Record<string, unknown>): 
         lowerPurpose.includes('mba') ||
         lowerPurpose.includes('mbbs') ||
         lowerPurpose.includes('laptop') ||
+        lowerPurpose.includes('iit') ||
+        lowerPurpose.includes('nit') ||
+        lowerPurpose.includes('iim') ||
+        lowerPurpose.includes('iiit') ||
+        lowerPurpose.includes('aiims') ||
         lowerPurpose.includes('विद्या') ||
         lowerPurpose.includes('शिक्षा') ||
         lowerPurpose.includes('शिक्षण') ||
@@ -208,6 +216,13 @@ export async function executeTool(name: string, args: Record<string, unknown>): 
       const detectedEdu = (args.education_level as string | undefined) || detectEducationLevel(rawPurpose);
       const detectedState = (args.state as string | undefined) || resolveUserState({ purpose: rawPurpose, location: args.location as string | undefined });
 
+      const isStateOnly = Boolean(
+        args.state_only ||
+        args.level === 'State' ||
+        /\b(state\s*specific|state\s*level|state\s*government|state\s*only|only\s*state|state\s*scheme|state\s*schemes)\b/i.test(rawPurpose) ||
+        /राज्य\s*स्तरीय|राज्य\s*सरकार|केवळ\s*राज्य|फक्त\s*राज्य|રાજ્ય\s*સ્તરીય/i.test(rawPurpose)
+      );
+
       const entities: UserEntities = {
         purpose: rawPurpose || undefined,
         loan_amount_rs: args.loan_amount_rs as number | undefined,
@@ -218,8 +233,10 @@ export async function executeTool(name: string, args: Record<string, unknown>): 
         age: args.age as number | undefined,
         location: args.location as string | undefined,
         state: detectedState || undefined,
+        level: isStateOnly ? 'State' : (args.level as string | undefined),
+        state_only: isStateOnly,
       };
-      const schemes: ScoredScheme[] = await recommendSchemes(entities, categoryHint);
+      const schemes: ScoredScheme[] = await recommendSchemes(entities, categoryHint, 3, isStateOnly);
 
       let nearestPartner: unknown = null;
       if (entities.location) {

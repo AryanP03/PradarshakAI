@@ -65,6 +65,7 @@ function PartnersContent() {
     label: '',
     coords: null,
   });
+  const [gpsLocation, setGpsLocation] = useState<{lat: number, lng: number} | null>(null);
   const [inputCity, setInputCity] = useState('');
   const [isLocatingGPS, setIsLocatingGPS] = useState(false);
   const [partners, setPartners] = useState<PartnerCardData[]>([]);
@@ -109,9 +110,12 @@ function PartnersContent() {
       const params = new URLSearchParams();
       if (loc.mode === 'city' && loc.label && loc.label.trim().toLowerCase() !== 'current location') {
         params.set('city', loc.label.trim());
-      } else if (loc.coords) {
-        params.set('lat', String(loc.coords.lat));
-        params.set('lng', String(loc.coords.lng));
+      }
+      
+      const trueOrigin = gpsLocation || loc.coords;
+      if (trueOrigin) {
+        params.set('lat', String(trueOrigin.lat));
+        params.set('lng', String(trueOrigin.lng));
       }
       if (categoryId && categoryId !== 'All') {
         params.set('category', categoryId);
@@ -140,11 +144,13 @@ function PartnersContent() {
 
       if (data.location && data.location.lat && data.location.lng) {
         const pt = { lat: data.location.lat, lng: data.location.lng };
-        setUserLocation(pt);
+        if (!gpsLocation) {
+          setUserLocation(pt);
+        }
         if (loc.mode === 'city') {
           setActiveLocation((prev) => (prev.mode === 'city' && prev.label === loc.label ? { ...prev, coords: pt } : prev));
         }
-      } else if (loc.coords) {
+      } else if (loc.coords && !gpsLocation) {
         setUserLocation(loc.coords);
       }
 
@@ -197,6 +203,7 @@ function PartnersContent() {
       (pos) => {
         const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         const finalGpsLoc: ActiveLocation = { mode: 'gps', label: 'Current Location', coords };
+        setGpsLocation(coords);
         setActiveLocation(finalGpsLoc);
         setUserLocation(coords);
         setIsLocatingGPS(false);
@@ -675,7 +682,9 @@ function PartnersContent() {
                     isSelected={selectedPartner?.id === partner.id}
                     onSelect={() => setSelectedPartner(partner as any)}
                     searchedLocation={
-                      activeLocation.coords
+                      gpsLocation
+                        ? `${gpsLocation.lat},${gpsLocation.lng}`
+                        : activeLocation.coords
                         ? `${activeLocation.coords.lat},${activeLocation.coords.lng}`
                         : activeLocation.label
                     }

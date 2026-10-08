@@ -202,6 +202,9 @@ export function detectEducationLevel(text?: string | null): EducationLevelStage 
 }
 
 export function schemeSupportsLevel(scheme: Scheme, targetLevel: EducationLevelStage): boolean {
+  if (!scheme.education_level && (!scheme.education_levels || scheme.education_levels.length === 0)) {
+    return true;
+  }
   if (scheme.education_level === targetLevel) return true;
   if (scheme.education_levels && scheme.education_levels.includes(targetLevel)) return true;
   if (targetLevel === 'undergraduate' && scheme.education_levels?.includes('higher_education')) return true;
@@ -247,14 +250,17 @@ export function resolveUserState(entities: UserEntities): string | null {
   return null;
 }
 
-export async function fetchActiveSchemes(categoryHint?: string, userState?: string | null): Promise<Scheme[]> {
+export async function fetchActiveSchemes(categoryHint?: string, userState?: string | null, stateOnly?: boolean): Promise<Scheme[]> {
   let query = 'SELECT * FROM schemes WHERE active = TRUE';
   const params: (string | number)[] = [];
 
   // We fetch all active schemes to avoid hiding candidates due to incorrect category hints from the LLM.
   // The advanced semantic scoring in scoreSchemes() will naturally sort and filter based on purpose and limits.
 
-  if (userState) {
+  if (stateOnly && userState) {
+    params.push(userState);
+    query += ` AND (state ILIKE $${params.length} AND (level = 'State' OR state != 'Central'))`;
+  } else if (userState) {
     params.push(userState);
     query += ` AND (state = 'Central' OR state ILIKE $${params.length})`;
   }
@@ -349,13 +355,13 @@ export function identifySpecificScheme(
   const normMulti = normalizeMultilingualText(message);
 
   const isAlternativeOrCompare =
-    /\b(alternative|alternatives|other schemes?|similar|options|compare|comparison|versus|vs|better|all schemes?|more schemes?|which scheme is better|diff|difference)\b/i.test(message) ||
+    /\b(alternative|alternatives|other schemes?|similar|options|compare|comparison|versus|vs|better|all schemes?|more schemes?|which scheme is better|diff|difference|is there any|are there any|any\s*(?:other\s*)?schemes?|any\s*scheme|suggest\s*schemes?)\b/i.test(message) ||
     /विकल्प|अन्य योजना|इतर योजना|तुलना|फरक|સરખામણી|તુલના|વિકલ્પ|অন্যান্য/i.test(message);
 
   let queryFocus: SpecificSchemeResolution['queryFocus'] = 'overview';
   if (/interest rate|interest|rate of interest|vyaaj|vyaj|ब्याज|व्याज|વ્યાજ|સુદ|வட்டி|వడ్డీ/i.test(message)) {
     queryFocus = 'interest_rate';
-  } else if (/eligib|who can apply|criteria|qualified|qualification|पात्रता|पात्र|योग्य|લાયકાત|যোগ্যতা/i.test(message)) {
+  } else if (/eligib|who can apply|criteria|qualified|qualification|पात्रता|पात्र|योग्य|લાયકાत|যোগ্যতা/i.test(message)) {
     queryFocus = 'eligibility';
   } else if (/document|checklist|papers|proof|certificate|दस्तावेज|कागदपत्र|દસ્તાવેજ|নথি|ஆவணங்கள்|పత్రాలు/i.test(message)) {
     queryFocus = 'documents';
@@ -383,12 +389,23 @@ export function identifySpecificScheme(
     const multiAliases = (MULTILINGUAL_SCHEME_ALIASES[s.id] || []).map((a) => normalizeMultilingualText(a));
     const dbMultiAliases = (s.aliases || []).map((a) => normalizeMultilingualText(a));
 
-    const isAcronymMatch = acronym.length >= 2 && words.includes(acronym);
-    const isShortMatch = shortName.length >= 2 && words.includes(shortName);
+    const isAcronymMatch = acronym.length >= 2 && (
+      acronym === 'may'
+        ? (normAscii === 'may' || /\bmay\s+(?:scheme|yojana|loan)\b/i.test(normAscii) || /\b(?:about|details\s*of)\s+may\b/i.test(normAscii))
+        : words.includes(acronym)
+    );
+    const isShortMatch = shortName.length >= 2 && (
+      shortName === 'may'
+        ? (normAscii === 'may' || /\bmay\s+(?:scheme|yojana|loan)\b/i.test(normAscii) || /\b(?:about|details\s*of)\s+may\b/i.test(normAscii))
+        : words.includes(shortName)
+    );
     const isFullNameMatch = fullName.length >= 5 && normAscii.includes(fullName);
     const isBaseNameMatch = baseName.length >= 5 && normAscii.includes(baseName);
 
     const isAliasMatch = normAliases.some((alias) => {
+      if (alias === 'may') {
+        return normAscii === 'may' || /\bmay\s+(?:scheme|yojana|loan)\b/i.test(normAscii) || /\b(?:about|details\s*of)\s+may\b/i.test(normAscii);
+      }
       if (alias.length <= 4) return words.includes(alias);
       return normAscii.includes(alias);
     });
@@ -443,11 +460,14 @@ export async function fetchSchemeByName(name: string): Promise<Scheme | null> {
     const multiAliases = (MULTILINGUAL_SCHEME_ALIASES[s.id] || []).map((a) => normalizeMultilingualText(a));
 
     if (
-      (acronym && (normInput === acronym || normInput.split(' ').includes(acronym))) ||
-      (shortName && (normInput === shortName || normInput.split(' ').includes(shortName))) ||
+      (acronym && (acronym === 'may' ? (normInput === 'may' || /\bmay\s+(?:scheme|yojana|loan)\b/i.test(normInput)) : (normInput === acronym || normInput.split(' ').includes(acronym)))) ||
+      (shortName && (shortName === 'may' ? (normInput === 'may' || /\bmay\s+(?:scheme|yojana|loan)\b/i.test(normInput)) : (normInput === shortName || normInput.split(' ').includes(shortName)))) ||
       (baseName && (normInput === baseName || normInput.includes(baseName) || baseName.includes(normInput))) ||
       (fullName && (normInput === fullName || normInput.includes(fullName) || fullName.includes(normInput))) ||
-      normAliases.some((alias) => alias.length >= 2 && (normInput === alias || normInput.includes(alias) || alias.includes(normInput))) ||
+      normAliases.some((alias) => {
+        if (alias === 'may') return normInput === 'may' || /\bmay\s+(?:scheme|yojana|loan)\b/i.test(normInput);
+        return alias.length >= 2 && (normInput === alias || normInput.includes(alias) || alias.includes(normInput));
+      }) ||
       multiAliases.some((alias) => alias.length >= 2 && (normMultiInput === alias || normMultiInput.includes(alias) || alias.includes(normMultiInput)))
     ) {
       return s;
@@ -461,12 +481,119 @@ export async function fetchSchemeByName(name: string): Promise<Scheme | null> {
   return rows[0] || null;
 }
 
+export function checkNarrowTradeMismatch(scheme: Scheme, normP: string): { isNarrow: boolean; mismatched: boolean; reason?: string } {
+  // 1. Medical graduate doctors / private clinic setup
+  const isDoctorClinicScheme =
+    scheme.id === 76 ||
+    /\b(clinic_setup|medical\s*graduate|private\s*clinic|mbbs|bds)\b/i.test(
+      scheme.name + ' ' + (scheme.eligible_project_types || []).join(' ') + ' ' + (scheme.target_beneficiary || '') + ' ' + (scheme.description || '')
+    );
+  if (isDoctorClinicScheme) {
+    const isDoctorClinicQuery = /\b(doctor|doctors|physician|dentist|mbbs|bds|md|clinic|private\s*clinic|medical\s*graduate|medical\s*equipment)\b/i.test(normP);
+    if (!isDoctorClinicQuery) {
+      return {
+        isNarrow: true,
+        mismatched: true,
+        reason: `${scheme.name} is strictly for SC medical graduate doctors (MBBS/BDS/MD) setting up private clinics or purchasing medical equipment.`
+      };
+    }
+    return { isNarrow: true, mismatched: false };
+  }
+
+  // 2. Leather craft / Charmakar community
+  const isLeatherScheme =
+    scheme.id === 72 ||
+    /\b(leather_craft|charmakar|leather\s*worker|tanner|चर्मकार)\b/i.test(
+      scheme.name + ' ' + (scheme.eligible_project_types || []).join(' ') + ' ' + (scheme.target_beneficiary || '') + ' ' + (scheme.description || '')
+    );
+  if (isLeatherScheme) {
+    const isLeatherQuery = /\b(leather|charmakar|footwear|shoe|shoes|cobbler|tanner|tannery|चर्मकार|चमड़ा)\b/i.test(normP);
+    if (!isLeatherQuery) {
+      return {
+        isNarrow: true,
+        mismatched: true,
+        reason: `${scheme.name} is strictly for the Charmakar (leather-working) community and leather craft/footwear enterprises.`
+      };
+    }
+    return { isNarrow: true, mismatched: false };
+  }
+
+  // 3. Passenger Auto-rickshaw
+  const isAutoRickshawScheme =
+    scheme.id === 75 ||
+    ((scheme.eligible_project_types || []).includes('auto_rickshaw') && !(scheme.eligible_project_types || []).includes('small_trade'));
+  if (isAutoRickshawScheme) {
+    const isAutoQuery = /\b(auto|rickshaw|auto-rickshaw|autorickshaw|three\s*wheeler|taxi|commercial\s*driver)\b/i.test(normP);
+    if (!isAutoQuery) {
+      return {
+        isNarrow: true,
+        mismatched: true,
+        reason: `${scheme.name} is strictly for the purchase and operation of passenger auto-rickshaws.`
+      };
+    }
+    return { isNarrow: true, mismatched: false };
+  }
+
+  // 4. Sanitation / Safai Karamchari / Scavenger
+  const isSanitationWorkerScheme =
+    /\b(safai\s*karamchari|manual\s*scavenger|sanitation\s*worker)\b/i.test(
+      scheme.name + ' ' + (scheme.target_beneficiary || '') + ' ' + (scheme.description || '')
+    );
+  if (isSanitationWorkerScheme) {
+    const isSanitationQuery = /\b(safai|sanitation|scavenger|cleaning\s*worker|waste\s*picker)\b/i.test(normP);
+    if (!isSanitationQuery) {
+      return {
+        isNarrow: true,
+        mismatched: true,
+        reason: `${scheme.name} is strictly for sanitation workers, manual scavengers, and their dependents.`
+      };
+    }
+    return { isNarrow: true, mismatched: false };
+  }
+
+  // 5. Foundation Seed Production & Dedicated Agriculture Subsidy
+  const isSeedScheme = scheme.id === 113 || /foundation seeds|seed production/i.test(scheme.name);
+  if (isSeedScheme) {
+    const isSeedQuery = /\b(seed|seeds|farming|crop|farmer)\b/i.test(normP) && !/\b(grocery|kirana|shop|store|retail|dukaan|stationery|bookstore)\b/i.test(normP);
+    if (!isSeedQuery) {
+      return {
+        isNarrow: true,
+        mismatched: true,
+        reason: `${scheme.name} is strictly for foundation seed production for SC/ST farmers, not commercial retail shop or trade enterprises.`
+      };
+    }
+    return { isNarrow: true, mismatched: false };
+  }
+
+  // 6. Dedicated agricultural cultivation / farming subsidy schemes vs non-farm retail/commercial shop queries
+  const isRetailTradeQuery = /\b(grocery|kirana|shop|store|retail|dukaan|stationery|bookstore|books|tailor|tailoring|salon|parlour)\b/i.test(normP);
+  const isDedicatedAgri =
+    (scheme.eligible_project_types || []).length > 0 &&
+    (scheme.eligible_project_types || []).every(t => /agriculture|seed_production|farming|crop|livestock|cattle|poultry|fisheries/i.test(t)) &&
+    !(scheme.eligible_project_types || []).some(t => /small_trade|petty_shop|retail|shop|self_employment|services/.test(t));
+  if (isDedicatedAgri && isRetailTradeQuery) {
+    return {
+      isNarrow: true,
+      mismatched: true,
+      reason: `${scheme.name} is strictly for agricultural farming / crop production activities, not commercial retail shop or trade enterprises.`
+    };
+  }
+
+  return { isNarrow: false, mismatched: false };
+}
+
 function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number {
   const p = (purpose || '').trim();
   if (!p) return 15;
 
   const normP = normalizeSchemeText(p);
   const pTokens = normP.split(/\s+/).filter(Boolean);
+
+  // Narrow trade mismatch penalty
+  const narrow = checkNarrowTradeMismatch(scheme, normP);
+  if (narrow.mismatched) {
+    return -100;
+  }
 
   const parensMatch = scheme.name.match(/\(([^)]+)\)/);
   let acronym = parensMatch ? normalizeSchemeText(parensMatch[1]) : '';
@@ -481,11 +608,24 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
   const normAliases = (scheme.aliases || []).map((a) => normalizeSchemeText(a));
 
   // Check direct scheme match against acronym, short_name, base_name, full_name, or aliases
-  const isAcronymMatch = normAcronym.length > 0 && (normP === normAcronym || pTokens.includes(normAcronym));
-  const isShortMatch = normShortName.length > 0 && (normP === normShortName || pTokens.includes(normShortName));
+  const isAcronymMatch = normAcronym.length > 0 && (
+    normAcronym === 'may'
+      ? (normP === 'may' || /\bmay\s+(?:scheme|yojana|loan)\b/i.test(normP) || /\b(?:about|details\s*of)\s+may\b/i.test(normP))
+      : (normP === normAcronym || pTokens.includes(normAcronym))
+  );
+  const isShortMatch = normShortName.length > 0 && (
+    normShortName === 'may'
+      ? (normP === 'may' || /\bmay\s+(?:scheme|yojana|loan)\b/i.test(normP) || /\b(?:about|details\s*of)\s+may\b/i.test(normP))
+      : (normP === normShortName || pTokens.includes(normShortName))
+  );
   const isFullNameMatch = normFullName.length >= 3 && (normP === normFullName || normP.includes(normFullName) || normFullName.includes(normP));
   const isBaseNameMatch = normBaseName.length >= 3 && (normP === normBaseName || normP.includes(normBaseName) || normBaseName.includes(normP));
-  const isAliasMatch = normAliases.some((alias) => alias.length >= 2 && (normP === alias || normP.includes(alias) || alias.includes(normP)));
+  const isAliasMatch = normAliases.some((alias) => {
+    if (alias === 'may') {
+      return normP === 'may' || /\bmay\s+(?:scheme|yojana|loan)\b/i.test(normP) || /\b(?:about|details\s*of)\s+may\b/i.test(normP);
+    }
+    return alias.length >= 2 && (normP === alias || normP.includes(alias) || alias.includes(normP));
+  });
 
   const rawTypes = scheme.eligible_project_types || [];
   const normalizedTypes = rawTypes.map((t) => t.toLowerCase().replace(/[-_]/g, ' '));
@@ -741,10 +881,14 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
     'શિક્ષણ', 'கல்வி', 'విద్య', 'വിദ്യാഭ്യാസം', 'ଶିକ୍ଷା', 'ਸਿੱਖਿਆ'
   ];
 
+  const hasBroadEntrepreneurshipTags =
+    normalizedTypes.some((t) => /self_employment|small_trade|services|manufacturing/.test(t)) &&
+    !normalizedTypes.some((t) => /seed_production|leather_craft|clinic_setup|auto_rickshaw/.test(t));
+
   const isMultiPurposeConcessional =
-    scheme.category === 'micro_finance' ||
-    scheme.category === 'entrepreneurship' ||
-    /mcf|micro credit|term loan|udyam nidhi|swarojgar|finance and development|rscfdc/i.test(scheme.name);
+    (scheme.category === 'micro_finance' && !/svanidhi/.test(scheme.name.toLowerCase())) ||
+    /mcf|micro credit|term loan|udyam nidhi|swarojgar|stand-up india|stand up india|finance and development|rscfdc|kscdc|ksfdc|tadco/i.test(scheme.name) ||
+    (scheme.category === 'entrepreneurship' && hasBroadEntrepreneurshipTags);
 
   const isSanitationScheme = normalizedTypes.some((t) => /sanitation|waste|sewage|toilet|clean|scavenger/.test(t));
   const isGreenScheme = normalizedTypes.some((t) => /green|solar|renewable|electric|rickshaw|biogas|eco/.test(t));
@@ -797,14 +941,40 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
     return 20;
   }
   if (matchWords(businessWords)) {
-    if (normP.includes('सिलाई') || normP.includes('tailoring') || normP.includes('शिलाई')) {
-      if (normalizedTypes.some((t) => t.includes('tailoring'))) return 50;
+    if (normP.includes('सिलाई') || normP.includes('tailoring') || normP.includes('शिलाई') || normP.includes('sewing')) {
+      if (normalizedTypes.some((t) => t.includes('tailoring') || t.includes('sewing'))) return 85;
     }
+
+    // Retail shop matching (grocery, kirana, stationery, bookstore, store, general store)
+    const isRetailShopQuery = /\b(grocery|kirana|shop|store|retail|dukaan|stationery|bookstore|books|दुकान|व्यापार)\b/i.test(normP);
+    if (isRetailShopQuery) {
+      const isFixedShop = !/\b(street|vendor|hawker|cart|thela|rehri|footpath|mobile)\b/i.test(normP);
+      // PM SVANidhi (street vendor) fixed shop penalty: cap at 20 so it cannot outrank or tie with MCF / MSY / Term Loan
+      if ((scheme.id === 45 || /svanidhi/i.test(scheme.name)) && isFixedShop) {
+        return 20;
+      }
+      if (normalizedTypes.some((t) => /petty_shop|small_trade|retail|shop|store/.test(t))) {
+        return 85;
+      }
+      if (normalizedTypes.includes('self_employment') || isMultiPurposeConcessional) {
+        return 65;
+      }
+      const isDedicatedAgri =
+        /kisan|krishi|fasal|seed/i.test(scheme.name) ||
+        ((normalizedTypes.filter(t => /agri|farm|dairy|poultry|crop|livestock|fisher|cattle|animal/.test(t)).length / Math.max(1, normalizedTypes.length)) > 0.4 &&
+         !normalizedTypes.some(t => /self_employment|small_trade|services/.test(t)));
+      if (isDedicatedAgri) return -50;
+    }
+
     if (matchingTagCount > 0) return Math.min(95, 35 + tagMatchScore);
-    if (!isMultiPurposeConcessional && isAgriScheme) return -30;
-    if (!isMultiPurposeConcessional && (isSanitationScheme || isArtisanScheme)) return -15;
+    const isDedicatedAgri =
+      /kisan|krishi|fasal|seed/i.test(scheme.name) ||
+      ((normalizedTypes.filter(t => /agri|farm|dairy|poultry|crop|livestock|fisher|cattle|animal/.test(t)).length / Math.max(1, normalizedTypes.length)) > 0.4 &&
+       !normalizedTypes.some(t => /self_employment|small_trade|services/.test(t)));
+    if (isDedicatedAgri) return -50;
+    if (isSanitationScheme || isArtisanScheme) return -30;
     if (isEducationScheme || scheme.category === 'skill_development' || scheme.category === 'welfare') return -50;
-    if (scheme.category === 'entrepreneurship' || scheme.category === 'micro_finance') return 40;
+    if (isMultiPurposeConcessional) return 40;
     return 15;
   }
 
@@ -1045,9 +1215,15 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
       else if (entities.gender === 'female' && gScore > 0) matchReasons.push('Exclusive concessional scheme for women entrepreneurs');
 
       // State relevance bonus
+      const isStateExplicit = Boolean(entities.state_only || entities.level === 'State' || /\b(state\s*specific|state\s*level|state\s*government|state\s*only|only\s*state|state\s*scheme|state\s*schemes)\b/i.test(pNorm));
       if (userState && scheme.state && scheme.state.toLowerCase() === userState.toLowerCase()) {
-        score += 35;
-        matchReasons.push(`Specifically tailored for residents of ${scheme.state}`);
+        if (pScore >= 60 || isDirectMatch || isStateExplicit) {
+          score += 35;
+          matchReasons.push(`Specifically tailored for residents of ${scheme.state}`);
+        } else if (pScore >= 35) {
+          score += 10;
+          matchReasons.push(`State-level scheme for residents of ${scheme.state}`);
+        }
       }
 
       // SC / Social Category preference bonus
@@ -1093,10 +1269,24 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
       const isBusinessQuery = categoryHint === 'business_loan' ||
         ['tailor', 'tailoring', 'sewing', 'business', 'shop', 'kirana', 'dairy', 'machine', 'transport', 'auto', 'सिलाई', 'शिलाई', 'दुकान', 'व्यापार'].some(w => pNorm.includes(w));
 
+      // Boundary check -1: Narrow trade mismatch (Hard filter)
+      const narrow = checkNarrowTradeMismatch(scheme, pNorm);
+      if (narrow.mismatched) {
+        tier = 'HARD_DISQUALIFIED';
+        disqualificationReason = narrow.reason;
+      }
       // Boundary check 0: State eligibility (Hard filter)
-      if (scheme.state && scheme.state !== 'Central' && (!userState || scheme.state.toLowerCase() !== userState.toLowerCase())) {
+      else if (scheme.state && scheme.state !== 'Central' && (!userState || scheme.state.toLowerCase() !== userState.toLowerCase())) {
         tier = 'HARD_DISQUALIFIED';
         disqualificationReason = `This scheme is exclusively for residents of ${scheme.state}.`;
+      }
+      // Boundary check 0b: State-only explicit request (Hard filter)
+      else if (
+        (entities.state_only || entities.level === 'State' || /\b(state\s*specific|state\s*level|state\s*government|state\s*only|only\s*state|state\s*scheme|state\s*schemes)\b/i.test(pNorm)) &&
+        (scheme.level === 'Central' || scheme.state === 'Central')
+      ) {
+        tier = 'HARD_DISQUALIFIED';
+        disqualificationReason = 'User explicitly requested state-specific schemes; Central schemes are excluded.';
       }
       // Boundary check 1: Loan ceiling exceeded (e.g. ₹55L > ₹50L Term Loan cap) or non-loan scheme when loan requested
       else if (loanLakh && (schemeMaxLoan === 0 || loanLakh > schemeMaxLoan)) {
@@ -1198,6 +1388,12 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
         }
       }
 
+      const isFixedShop = /\b(grocery|kirana|shop|store|retail|dukaan|stationery|bookstore|books)\b/i.test(pNorm) &&
+        !/\b(street|vendor|hawker|cart|thela|rehri|footpath|mobile)\b/i.test(pNorm);
+      if (isFixedShop && (scheme.id === 45 || /svanidhi/i.test(scheme.name))) {
+        warnings.push('PM SVANidhi is primarily designed for informal street vendors / mobile carts (₹50K limit) rather than fixed commercial retail shops.');
+      }
+
       if (tier === 'HARD_DISQUALIFIED') {
         if (disqualificationReason && !warnings.includes(disqualificationReason)) {
           warnings.unshift(disqualificationReason);
@@ -1243,19 +1439,27 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
   return scored;
 }
 
-export async function recommendSchemes(entities: UserEntities, categoryHint?: string, limit: number = 3): Promise<ScoredScheme[]> {
+export async function recommendSchemes(entities: UserEntities, categoryHint?: string, limit: number = 3, stateOnly?: boolean): Promise<ScoredScheme[]> {
+  const pNorm = normalizeSchemeText(entities.purpose || '');
+  const isStateOnly = Boolean(
+    stateOnly ||
+    entities.state_only ||
+    entities.level === 'State' ||
+    /\b(state\s*specific|state\s*level|state\s*government|state\s*only|only\s*state|state\s*scheme|state\s*schemes)\b/i.test(pNorm) ||
+    /राज्य\s*स्तरीय|राज्य\s*सरकार|केवळ\s*राज्य|फक्त\s*राज्य|રાજ્ય\s*સ્તરીય/i.test(pNorm)
+  );
   const userState = resolveUserState(entities);
-  console.log('[SCHEME_SERVICE] recommendSchemes called:', JSON.stringify({ categoryHint, userState, purpose: entities.purpose, loan_amount_rs: entities.loan_amount_rs, gender: entities.gender, family_income_rs: entities.family_income_rs }));
+  console.log('[SCHEME_SERVICE] recommendSchemes called:', JSON.stringify({ categoryHint, userState, isStateOnly, purpose: entities.purpose, loan_amount_rs: entities.loan_amount_rs, gender: entities.gender, family_income_rs: entities.family_income_rs }));
 
-  let all = await fetchActiveSchemes(categoryHint, userState);
-  console.log(`[DATABASE] fetchActiveSchemes(${categoryHint || 'all'}, ${userState || 'any'}) returned ${all.length} schemes`);
+  let all = await fetchActiveSchemes(categoryHint, userState, isStateOnly);
+  console.log(`[DATABASE] fetchActiveSchemes(${categoryHint || 'all'}, ${userState || 'any'}, stateOnly=${isStateOnly}) returned ${all.length} schemes`);
 
   if (all.length === 0 && categoryHint) {
     console.log('[DATABASE] Category filter returned 0 results, falling back to all active schemes for state');
-    all = await fetchActiveSchemes(undefined, userState);
+    all = await fetchActiveSchemes(undefined, userState, isStateOnly);
   }
 
-  const scored = scoreSchemes(all, entities, categoryHint);
+  const scored = scoreSchemes(all, { ...entities, state_only: isStateOnly, level: isStateOnly ? 'State' : entities.level }, categoryHint);
   console.log(`[SCHEME_SERVICE] scoreSchemes returned ${scored.length} scored schemes:`, scored.slice(0, 5).map(s => `${s.name}(score=${s.score},tier=${s.tier},state=${s.state})`).join(', '));
 
   if (scored.length === 0) {
@@ -1289,6 +1493,8 @@ export async function recommendSchemes(entities: UserEntities, categoryHint?: st
       r.includes('pension') ||
       r.includes('scholarship') ||
       r.includes('tailored for residents') ||
+      r.includes('State-level scheme') ||
+      r.includes('Specifically tailored') ||
       r.includes('Scheduled Caste')
     );
     return hasPurposeMatch;
