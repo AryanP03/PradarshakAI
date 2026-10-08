@@ -263,12 +263,14 @@ function NavBarContent() {
           style={{
             maxWidth: 1360,
             margin: '0 auto',
-            padding: '0 16px',
+            padding: '0 clamp(8px, 2vw, 16px)',
             height: 64,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: 12,
+            gap: 'clamp(4px, 1.5vw, 12px)',
+            minWidth: 0,
+            boxSizing: 'border-box',
           }}
         >
           {/* ── Brand Emblem & Title ───────────────────────────────────────── */}
@@ -390,7 +392,7 @@ function NavBarContent() {
           </nav>
 
           {/* ── Right Controls: Language Selector & User Auth ───────────────── */}
-          <div ref={controlsRef} style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          <div ref={controlsRef} style={{ display: 'flex', alignItems: 'center', gap: 'clamp(4px, 1.5vw, 8px)', flexShrink: 0, minWidth: 0 }}>
             {/* Single Global Language Selector Dropdown */}
             <div style={{ position: 'relative' }}>
               <button
@@ -403,8 +405,8 @@ function NavBarContent() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 5,
-                  padding: '6px 10px',
+                  gap: 4,
+                  padding: '6px clamp(6px, 1.5vw, 10px)',
                   borderRadius: 6,
                   fontSize: 12.5,
                   fontWeight: 600,
@@ -417,7 +419,7 @@ function NavBarContent() {
                 aria-label="Select language"
               >
                 <Globe size={13} color="#ffdcc2" />
-                <span className="max-w-[75px] md:max-w-[110px] truncate">{currentLangObj.nativeName}</span>
+                <span className="max-w-[48px] sm:max-w-[75px] md:max-w-[110px] truncate">{currentLangObj.nativeName}</span>
                 <ChevronDown size={12} style={{ transform: langOpen ? 'rotate(180deg)' : 'none', transition: 'transform 150ms' }} />
               </button>
 

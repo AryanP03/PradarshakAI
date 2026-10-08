@@ -1,0 +1,1524 @@
+{
+  "viewports": [
+    {
+      "viewport": "390x844",
+      "winWidth": 390,
+      "docScrollWidth": 390,
+      "docClientWidth": 390,
+      "isScrollWidthEqualClientWidth": true,
+      "overflowCount": 0,
+      "overflowingElements": [],
+      "userBubbleMetrics": {
+        "left": 65,
+        "right": 380,
+        "width": 315,
+        "distFromRightEdge": 10,
+        "distFromLeftEdge": 65,
+        "isRightAligned": true
+      },
+      "botBubbleMetrics": {
+        "left": 60,
+        "right": 375,
+        "width": 315,
+        "distFromLeftEdge": 60,
+        "distFromRightEdge": 15,
+        "isLeftAligned": false
+      },
+      "titles": [
+        {
+          "text": "National Livestock Mission (NLM)",
+          "wordCount": 4,
+          "height": 24,
+          "linesApprox": 1,
+          "wordsPerLine": 4,
+          "isSingleWordPerLine": false
+        },
+        {
+          "text": "Pradhan Mantri Kisan Credit Card (PM-KCC)",
+          "wordCount": 6,
+          "height": 48,
+          "linesApprox": 2,
+          "wordsPerLine": 3,
+          "isSingleWordPerLine": false
+        },
+        {
+          "text": "Agriculture Infrastructure Fund (AIF)",
+          "wordCount": 4,
+          "height": 24,
+          "linesApprox": 1,
+          "wordsPerLine": 4,
+          "isSingleWordPerLine": false
+        }
+      ],
+      "cards": [
+        {
+          "width": 371,
+          "left": 10,
+          "right": 380,
+          "pctOfViewport": 95
+        },
+        {
+          "width": 371,
+          "left": 10,
+          "right": 380,
+          "pctOfViewport": 95
+        },
+        {
+          "width": 371,
+          "left": 10,
+          "right": 380,
+          "pctOfViewport": 95
+        }
+      ],
+      "hasMatchPercentageInText": false,
+      "hasBestMatchBadge": true,
+      "chip25Info": {
+        "found": true,
+        "title": "Advisory Checklist: 25% complete",
+        "ariaLabel": "Advisory Checklist: 25% complete"
+      },
+      "buttons": [
+        {
+          "text": "Partner Locator",
+          "width": 0,
+          "height": 0,
+          "meets44px": false
+        },
+        {
+          "text": "New Chat",
+          "width": 106,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Visit Portal",
+          "width": 109,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Know More",
+          "width": 166,
+          "height": 53,
+          "meets44px": true
+        },
+        {
+          "text": "Required Documents",
+          "width": 166,
+          "height": 53,
+          "meets44px": true
+        },
+        {
+          "text": "Calculate EMI",
+          "width": 166,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Visit Portal",
+          "width": 109,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Know More",
+          "width": 166,
+          "height": 53,
+          "meets44px": true
+        },
+        {
+          "text": "Required Documents",
+          "width": 166,
+          "height": 53,
+          "meets44px": true
+        },
+        {
+          "text": "Calculate EMI",
+          "width": 166,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Visit Portal",
+          "width": 109,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Know More",
+          "width": 166,
+          "height": 53,
+          "meets44px": true
+        },
+        {
+          "text": "Required Documents",
+          "width": 166,
+          "height": 53,
+          "meets44px": true
+        },
+        {
+          "text": "Calculate EMI",
+          "width": 166,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Compare Schemes (3)",
+          "width": 186,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Know Partner Locations",
+          "width": 201,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Calculate EMI",
+          "width": 136,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Required documents",
+          "width": 179,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Find nearest partner",
+          "width": 177,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Compare other schemes",
+          "width": 200,
+          "height": 44,
+          "meets44px": true
+        }
+      ]
+    },
+    {
+      "viewport": "360x800",
+      "winWidth": 360,
+      "docScrollWidth": 360,
+      "docClientWidth": 360,
+      "isScrollWidthEqualClientWidth": true,
+      "overflowCount": 0,
+      "overflowingElements": [],
+      "userBubbleMetrics": {
+        "left": 60,
+        "right": 351,
+        "width": 291,
+        "distFromRightEdge": 9,
+        "distFromLeftEdge": 60,
+        "isRightAligned": true
+      },
+      "botBubbleMetrics": {
+        "left": 59,
+        "right": 350,
+        "width": 291,
+        "distFromLeftEdge": 59,
+        "distFromRightEdge": 10,
+        "isLeftAligned": false
+      },
+      "titles": [
+        {
+          "text": "National Livestock Mission (NLM)",
+          "wordCount": 4,
+          "height": 24,
+          "linesApprox": 1,
+          "wordsPerLine": 4,
+          "isSingleWordPerLine": false
+        },
+        {
+          "text": "Pradhan Mantri Kisan Credit Card (PM-KCC)",
+          "wordCount": 6,
+          "height": 48,
+          "linesApprox": 2,
+          "wordsPerLine": 3,
+          "isSingleWordPerLine": false
+        },
+        {
+          "text": "Agriculture Infrastructure Fund (AIF)",
+          "wordCount": 4,
+          "height": 24,
+          "linesApprox": 1,
+          "wordsPerLine": 4,
+          "isSingleWordPerLine": false
+        }
+      ],
+      "cards": [
+        {
+          "width": 342,
+          "left": 9,
+          "right": 351,
+          "pctOfViewport": 95
+        },
+        {
+          "width": 342,
+          "left": 9,
+          "right": 351,
+          "pctOfViewport": 95
+        },
+        {
+          "width": 342,
+          "left": 9,
+          "right": 351,
+          "pctOfViewport": 95
+        }
+      ],
+      "hasMatchPercentageInText": false,
+      "hasBestMatchBadge": true,
+      "chip25Info": {
+        "found": true,
+        "title": "Advisory Checklist: 25% complete",
+        "ariaLabel": "Advisory Checklist: 25% complete"
+      },
+      "buttons": [
+        {
+          "text": "Partner Locator",
+          "width": 0,
+          "height": 0,
+          "meets44px": false
+        },
+        {
+          "text": "New Chat",
+          "width": 106,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Visit Portal",
+          "width": 109,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Know More",
+          "width": 152,
+          "height": 53,
+          "meets44px": true
+        },
+        {
+          "text": "Required Documents",
+          "width": 152,
+          "height": 53,
+          "meets44px": true
+        },
+        {
+          "text": "Calculate EMI",
+          "width": 152,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Visit Portal",
+          "width": 109,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Know More",
+          "width": 152,
+          "height": 53,
+          "meets44px": true
+        },
+        {
+          "text": "Required Documents",
+          "width": 152,
+          "height": 53,
+          "meets44px": true
+        },
+        {
+          "text": "Calculate EMI",
+          "width": 152,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Visit Portal",
+          "width": 109,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Know More",
+          "width": 152,
+          "height": 53,
+          "meets44px": true
+        },
+        {
+          "text": "Required Documents",
+          "width": 152,
+          "height": 53,
+          "meets44px": true
+        },
+        {
+          "text": "Calculate EMI",
+          "width": 152,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Compare Schemes (3)",
+          "width": 186,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Know Partner Locations",
+          "width": 201,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Calculate EMI",
+          "width": 136,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Required documents",
+          "width": 179,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Find nearest partner",
+          "width": 177,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Compare other schemes",
+          "width": 200,
+          "height": 44,
+          "meets44px": true
+        }
+      ]
+    },
+    {
+      "viewport": "412x915",
+      "winWidth": 412,
+      "docScrollWidth": 412,
+      "docClientWidth": 412,
+      "isScrollWidthEqualClientWidth": true,
+      "overflowCount": 0,
+      "overflowingElements": [],
+      "userBubbleMetrics": {
+        "left": 69,
+        "right": 402,
+        "width": 333,
+        "distFromRightEdge": 10,
+        "distFromLeftEdge": 69,
+        "isRightAligned": true
+      },
+      "botBubbleMetrics": {
+        "left": 60,
+        "right": 393,
+        "width": 333,
+        "distFromLeftEdge": 60,
+        "distFromRightEdge": 19,
+        "isLeftAligned": false
+      },
+      "titles": [
+        {
+          "text": "National Livestock Mission (NLM)",
+          "wordCount": 4,
+          "height": 24,
+          "linesApprox": 1,
+          "wordsPerLine": 4,
+          "isSingleWordPerLine": false
+        },
+        {
+          "text": "Pradhan Mantri Kisan Credit Card (PM-KCC)",
+          "wordCount": 6,
+          "height": 24,
+          "linesApprox": 1,
+          "wordsPerLine": 6,
+          "isSingleWordPerLine": false
+        },
+        {
+          "text": "Agriculture Infrastructure Fund (AIF)",
+          "wordCount": 4,
+          "height": 24,
+          "linesApprox": 1,
+          "wordsPerLine": 4,
+          "isSingleWordPerLine": false
+        }
+      ],
+      "cards": [
+        {
+          "width": 391,
+          "left": 10,
+          "right": 402,
+          "pctOfViewport": 95
+        },
+        {
+          "width": 391,
+          "left": 10,
+          "right": 402,
+          "pctOfViewport": 95
+        },
+        {
+          "width": 391,
+          "left": 10,
+          "right": 402,
+          "pctOfViewport": 95
+        }
+      ],
+      "hasMatchPercentageInText": false,
+      "hasBestMatchBadge": true,
+      "chip25Info": {
+        "found": true,
+        "title": "Advisory Checklist: 25% complete",
+        "ariaLabel": "Advisory Checklist: 25% complete"
+      },
+      "buttons": [
+        {
+          "text": "Partner Locator",
+          "width": 0,
+          "height": 0,
+          "meets44px": false
+        },
+        {
+          "text": "New Chat",
+          "width": 106,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Visit Portal",
+          "width": 109,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Know More",
+          "width": 176,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Required Documents",
+          "width": 176,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Calculate EMI",
+          "width": 176,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Visit Portal",
+          "width": 109,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Know More",
+          "width": 176,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Required Documents",
+          "width": 176,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Calculate EMI",
+          "width": 176,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Visit Portal",
+          "width": 109,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Know More",
+          "width": 176,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Required Documents",
+          "width": 176,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Calculate EMI",
+          "width": 176,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Compare Schemes (3)",
+          "width": 186,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Know Partner Locations",
+          "width": 201,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Calculate EMI",
+          "width": 136,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Required documents",
+          "width": 179,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Find nearest partner",
+          "width": 177,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Compare other schemes",
+          "width": 200,
+          "height": 44,
+          "meets44px": true
+        }
+      ]
+    },
+    {
+      "viewport": "320x568",
+      "winWidth": 320,
+      "docScrollWidth": 320,
+      "docClientWidth": 320,
+      "isScrollWidthEqualClientWidth": true,
+      "overflowCount": 0,
+      "overflowingElements": [],
+      "userBubbleMetrics": {
+        "left": 54,
+        "right": 312,
+        "width": 258,
+        "distFromRightEdge": 8,
+        "distFromLeftEdge": 54,
+        "isRightAligned": true
+      },
+      "botBubbleMetrics": {
+        "left": 58,
+        "right": 312,
+        "width": 254,
+        "distFromLeftEdge": 58,
+        "distFromRightEdge": 8,
+        "isLeftAligned": false
+      },
+      "titles": [
+        {
+          "text": "National Livestock Mission (NLM)",
+          "wordCount": 4,
+          "height": 24,
+          "linesApprox": 1,
+          "wordsPerLine": 4,
+          "isSingleWordPerLine": false
+        },
+        {
+          "text": "Pradhan Mantri Kisan Credit Card (PM-KCC)",
+          "wordCount": 6,
+          "height": 48,
+          "linesApprox": 2,
+          "wordsPerLine": 3,
+          "isSingleWordPerLine": false
+        },
+        {
+          "text": "Agriculture Infrastructure Fund (AIF)",
+          "wordCount": 4,
+          "height": 48,
+          "linesApprox": 2,
+          "wordsPerLine": 2,
+          "isSingleWordPerLine": false
+        }
+      ],
+      "cards": [
+        {
+          "width": 304,
+          "left": 8,
+          "right": 312,
+          "pctOfViewport": 95
+        },
+        {
+          "width": 304,
+          "left": 8,
+          "right": 312,
+          "pctOfViewport": 95
+        },
+        {
+          "width": 304,
+          "left": 8,
+          "right": 312,
+          "pctOfViewport": 95
+        }
+      ],
+      "hasMatchPercentageInText": false,
+      "hasBestMatchBadge": true,
+      "chip25Info": {
+        "found": true,
+        "title": "Advisory Checklist: 25% complete",
+        "ariaLabel": "Advisory Checklist: 25% complete"
+      },
+      "buttons": [
+        {
+          "text": "Partner Locator",
+          "width": 0,
+          "height": 0,
+          "meets44px": false
+        },
+        {
+          "text": "New Chat",
+          "width": 106,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Visit Portal",
+          "width": 109,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Know More",
+          "width": 274,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Required Documents",
+          "width": 274,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Calculate EMI",
+          "width": 274,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Visit Portal",
+          "width": 109,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Know More",
+          "width": 274,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Required Documents",
+          "width": 274,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Calculate EMI",
+          "width": 274,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Visit Portal",
+          "width": 109,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Know More",
+          "width": 274,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Required Documents",
+          "width": 274,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Calculate EMI",
+          "width": 274,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Compare Schemes (3)",
+          "width": 186,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Know Partner Locations",
+          "width": 201,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Calculate EMI",
+          "width": 136,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Required documents",
+          "width": 179,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Find nearest partner",
+          "width": 177,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Compare other schemes",
+          "width": 200,
+          "height": 44,
+          "meets44px": true
+        }
+      ]
+    },
+    {
+      "viewport": "1280x800",
+      "winWidth": 1280,
+      "docScrollWidth": 1280,
+      "docClientWidth": 1280,
+      "isScrollWidthEqualClientWidth": true,
+      "overflowCount": 0,
+      "overflowingElements": [],
+      "userBubbleMetrics": {
+        "left": 640,
+        "right": 1080,
+        "width": 441,
+        "distFromRightEdge": 200,
+        "distFromLeftEdge": 640,
+        "isRightAligned": true
+      },
+      "botBubbleMetrics": {
+        "left": 250,
+        "right": 930,
+        "width": 680,
+        "distFromLeftEdge": 250,
+        "distFromRightEdge": 350,
+        "isLeftAligned": true
+      },
+      "titles": [
+        {
+          "text": "National Livestock Mission (NLM)",
+          "wordCount": 4,
+          "height": 24,
+          "linesApprox": 1,
+          "wordsPerLine": 4,
+          "isSingleWordPerLine": false
+        },
+        {
+          "text": "Pradhan Mantri Kisan Credit Card (PM-KCC)",
+          "wordCount": 6,
+          "height": 24,
+          "linesApprox": 1,
+          "wordsPerLine": 6,
+          "isSingleWordPerLine": false
+        },
+        {
+          "text": "Agriculture Infrastructure Fund (AIF)",
+          "wordCount": 4,
+          "height": 24,
+          "linesApprox": 1,
+          "wordsPerLine": 4,
+          "isSingleWordPerLine": false
+        }
+      ],
+      "cards": [
+        {
+          "width": 880,
+          "left": 200,
+          "right": 1080,
+          "pctOfViewport": 69
+        },
+        {
+          "width": 880,
+          "left": 200,
+          "right": 1080,
+          "pctOfViewport": 69
+        },
+        {
+          "width": 880,
+          "left": 200,
+          "right": 1080,
+          "pctOfViewport": 69
+        }
+      ],
+      "hasMatchPercentageInText": false,
+      "hasBestMatchBadge": true,
+      "chip25Info": {
+        "found": true,
+        "title": "",
+        "ariaLabel": ""
+      },
+      "buttons": [
+        {
+          "text": "Partner Locator",
+          "width": 119,
+          "height": 30,
+          "meets44px": false
+        },
+        {
+          "text": "New Chat",
+          "width": 106,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Visit Portal",
+          "width": 109,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Know More",
+          "width": 273,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Required Documents",
+          "width": 273,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Calculate EMI",
+          "width": 273,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Visit Portal",
+          "width": 109,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Know More",
+          "width": 273,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Required Documents",
+          "width": 273,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Calculate EMI",
+          "width": 273,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Visit Portal",
+          "width": 109,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Know More",
+          "width": 273,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Required Documents",
+          "width": 273,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Calculate EMI",
+          "width": 273,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Compare Schemes (3)",
+          "width": 186,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Know Partner Locations",
+          "width": 201,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Calculate EMI",
+          "width": 136,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Required documents",
+          "width": 179,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Find nearest partner",
+          "width": 177,
+          "height": 44,
+          "meets44px": true
+        },
+        {
+          "text": "Compare other schemes",
+          "width": 200,
+          "height": 44,
+          "meets44px": true
+        }
+      ]
+    }
+  ],
+  "stress": {
+    "viewport": "390x844",
+    "winWidth": 390,
+    "docScrollWidth": 390,
+    "docClientWidth": 390,
+    "isScrollWidthEqualClientWidth": true,
+    "overflowCount": 0,
+    "overflowingElements": [],
+    "userBubbleMetrics": {
+      "left": 65,
+      "right": 380,
+      "width": 315,
+      "distFromRightEdge": 10,
+      "distFromLeftEdge": 65,
+      "isRightAligned": true
+    },
+    "botBubbleMetrics": {
+      "left": 60,
+      "right": 375,
+      "width": 315,
+      "distFromLeftEdge": 60,
+      "distFromRightEdge": 15,
+      "isLeftAligned": false
+    },
+    "titles": [
+      {
+        "text": "Dr. Ambedkar Central Sector Scheme of Interest Subsidy on Ed",
+        "wordCount": 11,
+        "height": 48,
+        "linesApprox": 2,
+        "wordsPerLine": 5.5,
+        "isSingleWordPerLine": false
+      },
+      {
+        "text": "Rajarshi Chhatrapati Shahu Maharaj Shikshan Shulkh Shishyavr",
+        "wordCount": 8,
+        "height": 48,
+        "linesApprox": 2,
+        "wordsPerLine": 4,
+        "isSingleWordPerLine": false
+      },
+      {
+        "text": "Agriculture Infrastructure Fund (AIF)",
+        "wordCount": 4,
+        "height": 24,
+        "linesApprox": 1,
+        "wordsPerLine": 4,
+        "isSingleWordPerLine": false
+      }
+    ],
+    "cards": [
+      {
+        "width": 371,
+        "left": 10,
+        "right": 380,
+        "pctOfViewport": 95
+      },
+      {
+        "width": 371,
+        "left": 10,
+        "right": 380,
+        "pctOfViewport": 95
+      },
+      {
+        "width": 371,
+        "left": 10,
+        "right": 380,
+        "pctOfViewport": 95
+      }
+    ],
+    "hasMatchPercentageInText": false,
+    "hasBestMatchBadge": true,
+    "chip25Info": {
+      "found": true,
+      "title": "Advisory Checklist: 25% complete",
+      "ariaLabel": "Advisory Checklist: 25% complete"
+    },
+    "buttons": [
+      {
+        "text": "Partner Locator",
+        "width": 0,
+        "height": 0,
+        "meets44px": false
+      },
+      {
+        "text": "New Chat",
+        "width": 106,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Visit Portal",
+        "width": 109,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Know More",
+        "width": 166,
+        "height": 53,
+        "meets44px": true
+      },
+      {
+        "text": "Required Documents",
+        "width": 166,
+        "height": 53,
+        "meets44px": true
+      },
+      {
+        "text": "Calculate EMI",
+        "width": 166,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Visit Portal",
+        "width": 109,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Know More",
+        "width": 166,
+        "height": 53,
+        "meets44px": true
+      },
+      {
+        "text": "Required Documents",
+        "width": 166,
+        "height": 53,
+        "meets44px": true
+      },
+      {
+        "text": "Calculate EMI",
+        "width": 166,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Visit Portal",
+        "width": 109,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Know More",
+        "width": 166,
+        "height": 53,
+        "meets44px": true
+      },
+      {
+        "text": "Required Documents",
+        "width": 166,
+        "height": 53,
+        "meets44px": true
+      },
+      {
+        "text": "Calculate EMI",
+        "width": 166,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Compare Schemes (3)",
+        "width": 186,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Know Partner Locations",
+        "width": 201,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Calculate EMI",
+        "width": 136,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Required documents",
+        "width": 179,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Find nearest partner",
+        "width": 177,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Compare other schemes",
+        "width": 200,
+        "height": 44,
+        "meets44px": true
+      }
+    ]
+  },
+  "comparison": {
+    "viewport": "390x844",
+    "winWidth": 390,
+    "docScrollWidth": 390,
+    "docClientWidth": 390,
+    "isScrollWidthEqualClientWidth": true,
+    "overflowCount": 0,
+    "overflowingElements": [],
+    "userBubbleMetrics": {
+      "left": 65,
+      "right": 380,
+      "width": 315,
+      "distFromRightEdge": 10,
+      "distFromLeftEdge": 65,
+      "isRightAligned": true
+    },
+    "botBubbleMetrics": {
+      "left": 60,
+      "right": 375,
+      "width": 315,
+      "distFromLeftEdge": 60,
+      "distFromRightEdge": 15,
+      "isLeftAligned": false
+    },
+    "titles": [
+      {
+        "text": "Dr. Ambedkar Central Sector Scheme of Interest Subsidy on Ed",
+        "wordCount": 11,
+        "height": 48,
+        "linesApprox": 2,
+        "wordsPerLine": 5.5,
+        "isSingleWordPerLine": false
+      },
+      {
+        "text": "Rajarshi Chhatrapati Shahu Maharaj Shikshan Shulkh Shishyavr",
+        "wordCount": 8,
+        "height": 48,
+        "linesApprox": 2,
+        "wordsPerLine": 4,
+        "isSingleWordPerLine": false
+      },
+      {
+        "text": "Agriculture Infrastructure Fund (AIF)",
+        "wordCount": 4,
+        "height": 24,
+        "linesApprox": 1,
+        "wordsPerLine": 4,
+        "isSingleWordPerLine": false
+      }
+    ],
+    "cards": [
+      {
+        "width": 371,
+        "left": 10,
+        "right": 380,
+        "pctOfViewport": 95
+      },
+      {
+        "width": 371,
+        "left": 10,
+        "right": 380,
+        "pctOfViewport": 95
+      },
+      {
+        "width": 371,
+        "left": 10,
+        "right": 380,
+        "pctOfViewport": 95
+      }
+    ],
+    "hasMatchPercentageInText": false,
+    "hasBestMatchBadge": true,
+    "chip25Info": {
+      "found": false
+    },
+    "buttons": [
+      {
+        "text": "Partner Locator",
+        "width": 0,
+        "height": 0,
+        "meets44px": false
+      },
+      {
+        "text": "New Chat",
+        "width": 106,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Visit Portal",
+        "width": 109,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Know More",
+        "width": 166,
+        "height": 53,
+        "meets44px": true
+      },
+      {
+        "text": "Required Documents",
+        "width": 166,
+        "height": 53,
+        "meets44px": true
+      },
+      {
+        "text": "Calculate EMI",
+        "width": 166,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Visit Portal",
+        "width": 109,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Know More",
+        "width": 166,
+        "height": 53,
+        "meets44px": true
+      },
+      {
+        "text": "Required Documents",
+        "width": 166,
+        "height": 53,
+        "meets44px": true
+      },
+      {
+        "text": "Calculate EMI",
+        "width": 166,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Visit Portal",
+        "width": 109,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Know More",
+        "width": 166,
+        "height": 53,
+        "meets44px": true
+      },
+      {
+        "text": "Required Documents",
+        "width": 166,
+        "height": 53,
+        "meets44px": true
+      },
+      {
+        "text": "Calculate EMI",
+        "width": 166,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Compare Schemes (3)",
+        "width": 186,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Know Partner Locations",
+        "width": 201,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Calculate EMI",
+        "width": 136,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Required documents",
+        "width": 179,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Find nearest partner",
+        "width": 177,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Compare other schemes",
+        "width": 200,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Know More",
+        "width": 0,
+        "height": 0,
+        "meets44px": false
+      },
+      {
+        "text": "Calculate EMI",
+        "width": 0,
+        "height": 0,
+        "meets44px": false
+      },
+      {
+        "text": "Know More",
+        "width": 0,
+        "height": 0,
+        "meets44px": false
+      },
+      {
+        "text": "Calculate EMI",
+        "width": 0,
+        "height": 0,
+        "meets44px": false
+      },
+      {
+        "text": "Know More",
+        "width": 0,
+        "height": 0,
+        "meets44px": false
+      },
+      {
+        "text": "Calculate EMI",
+        "width": 0,
+        "height": 0,
+        "meets44px": false
+      },
+      {
+        "text": "Know More",
+        "width": 166,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Calculate EMI",
+        "width": 166,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Know More",
+        "width": 166,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Calculate EMI",
+        "width": 166,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Know More",
+        "width": 166,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Calculate EMI",
+        "width": 166,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Calculate EMI",
+        "width": 136,
+        "height": 44,
+        "meets44px": true
+      },
+      {
+        "text": "Find nearest partner",
+        "width": 177,
+        "height": 44,
+        "meets44px": true
+      }
+    ]
+  },
+  "hindi": {
+    "viewport": "390x844",
+    "winWidth": 390,
+    "docScrollWidth": 390,
+    "docClientWidth": 390,
+    "isScrollWidthEqualClientWidth": true,
+    "overflowCount": 0,
+    "overflowingElements": [],
+    "userBubbleMetrics": null,
+    "botBubbleMetrics": null,
+    "titles": [],
+    "cards": [],
+    "hasMatchPercentageInText": false,
+    "hasBestMatchBadge": false,
+    "chip25Info": {
+      "found": false
+    },
+    "buttons": []
+  },
+  "marathi": {
+    "viewport": "390x844",
+    "winWidth": 390,
+    "docScrollWidth": 390,
+    "docClientWidth": 390,
+    "isScrollWidthEqualClientWidth": true,
+    "overflowCount": 0,
+    "overflowingElements": [],
+    "userBubbleMetrics": null,
+    "botBubbleMetrics": null,
+    "titles": [],
+    "cards": [],
+    "hasMatchPercentageInText": false,
+    "hasBestMatchBadge": false,
+    "chip25Info": {
+      "found": false
+    },
+    "buttons": []
+  }
+}

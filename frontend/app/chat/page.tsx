@@ -415,7 +415,7 @@ function ChatPage() {
   const progressPct = Math.round((completedCount / JOURNEY_STEPS.length) * 100);
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-slate-50 text-slate-900">
+    <div style={{ height: '100dvh', minHeight: '100vh' }} className="flex flex-col overflow-hidden bg-slate-50 text-slate-900">
       <NavBar />
 
       {/* Migration / Non-blocking Notice Toast */}
@@ -447,334 +447,6 @@ function ChatPage() {
 
       {/* ── Main Workspace Body ───────────────────────────────────────────── */}
       <div className="flex-1 flex overflow-hidden relative">
-        {/* Floating Controls Overlay */}
-        {tab === 'chat' && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 14,
-              left: 16,
-              right: 16,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              zIndex: 25,
-              pointerEvents: 'none',
-              gap: 8,
-            }}
-          >
-            {/* Top-Left: [ Past Chats ] [ Share Chat ] */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, pointerEvents: 'auto', position: 'relative' }}>
-              {/* [ Past Chats ] */}
-              <div style={{ position: 'relative' }}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!token) {
-                      setGuestSharePrompt(false);
-                      setGuestPastChatsPrompt((v) => !v);
-                    } else {
-                      setSidebarOpen((v) => !v);
-                    }
-                  }}
-                  className="interactive-control"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    padding: '7px 14px',
-                    borderRadius: 10,
-                    border: '1px solid',
-                    borderColor: sidebarOpen ? '#0b1f3a' : '#cbd5e1',
-                    background: sidebarOpen ? '#0b1f3a' : '#ffffff',
-                    color: sidebarOpen ? '#ffffff' : '#334155',
-                    fontSize: 12.5,
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    boxShadow: '0 2px 8px rgba(11,31,58,0.08)',
-                    transition: 'all 150ms ease',
-                  }}
-                  title={t('chat.past_chats', 'Past Chats')}
-                >
-                  <History size={14} color={sidebarOpen ? '#fbbf24' : '#e87722'} />
-                  <span className="hidden sm:inline">{t('chat.past_chats', 'Past Chats')}</span>
-                  <span className="sm:hidden">History</span>
-                </button>
-
-                {/* Guest Past Chats Auth Popover */}
-                {!token && guestPastChatsPrompt && (
-                  <div
-                    onClick={(e) => e.stopPropagation()}
-                    className="animate-slide-down"
-                    style={{
-                      position: 'absolute',
-                      top: 'calc(100% + 8px)',
-                      left: 0,
-                      zIndex: 40,
-                      background: '#ffffff',
-                      border: '1px solid #cbd5e1',
-                      borderRadius: 10,
-                      padding: '8px 14px',
-                      boxShadow: '0 8px 20px rgba(11,31,58,0.14)',
-                      fontSize: 12.5,
-                      color: '#334155',
-                      whiteSpace: 'nowrap',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                    }}
-                  >
-                    <span>
-                      <Link
-                        href="/auth?returnUrl=/chat"
-                        style={{
-                          color: '#1d4ed8',
-                          fontWeight: 700,
-                          textDecoration: 'underline',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        Sign in
-                      </Link>{' '}
-                      to store chats
-                    </span>
-                    <button
-                      onClick={() => setGuestPastChatsPrompt(false)}
-                      style={{
-                        background: 'transparent',
-                        border: 'none',
-                        color: '#94a3b8',
-                        cursor: 'pointer',
-                        padding: 2,
-                        display: 'flex',
-                        alignItems: 'center',
-                      }}
-                      aria-label="Dismiss"
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* [ Share Chat ] */}
-              <div style={{ position: 'relative' }}>
-                <button
-                  onClick={handleShareClick}
-                  disabled={sharingInProgress}
-                  className="interactive-control"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    padding: '7px 14px',
-                    borderRadius: 10,
-                    border: '1px solid #cbd5e1',
-                    background: '#ffffff',
-                    color: '#334155',
-                    fontSize: 12.5,
-                    fontWeight: 700,
-                    cursor: sharingInProgress ? 'wait' : 'pointer',
-                    boxShadow: '0 2px 8px rgba(11,31,58,0.08)',
-                    transition: 'all 150ms ease',
-                  }}
-                  title={t('chat.share_chat', 'Share Chat')}
-                >
-                  {sharingInProgress ? (
-                    <Loader2 size={14} color="#0284c7" className="animate-spin" />
-                  ) : (
-                    <Share2 size={14} color="#0284c7" />
-                  )}
-                  <span className="hidden sm:inline">{t('chat.share_chat', 'Share Chat')}</span>
-                  <span className="sm:hidden">Share</span>
-                </button>
-
-                {/* Guest Share Auth Popover */}
-                {!token && guestSharePrompt && (
-                  <div
-                    onClick={(e) => e.stopPropagation()}
-                    className="animate-slide-down"
-                    style={{
-                      position: 'absolute',
-                      top: 'calc(100% + 8px)',
-                      left: 0,
-                      zIndex: 40,
-                      background: '#ffffff',
-                      border: '1px solid #cbd5e1',
-                      borderRadius: 10,
-                      padding: '8px 14px',
-                      boxShadow: '0 8px 20px rgba(11,31,58,0.14)',
-                      fontSize: 12.5,
-                      color: '#334155',
-                      whiteSpace: 'nowrap',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                    }}
-                  >
-                    <span>
-                      <Link
-                        href="/auth?returnUrl=/chat"
-                        style={{
-                          color: '#0284c7',
-                          fontWeight: 700,
-                          textDecoration: 'underline',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        Sign in
-                      </Link>{' '}
-                      to share this chat
-                    </span>
-                    <button
-                      onClick={() => setGuestSharePrompt(false)}
-                      style={{
-                        background: 'transparent',
-                        border: 'none',
-                        color: '#94a3b8',
-                        cursor: 'pointer',
-                        padding: 2,
-                        display: 'flex',
-                        alignItems: 'center',
-                      }}
-                      aria-label="Dismiss"
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                )}
-
-                {/* Empty Chat Notice (Signed-in) */}
-                {token && emptyShareNotice && (
-                  <div
-                    onClick={(e) => e.stopPropagation()}
-                    className="animate-slide-down"
-                    style={{
-                      position: 'absolute',
-                      top: 'calc(100% + 8px)',
-                      left: 0,
-                      zIndex: 40,
-                      background: '#fff7ed',
-                      border: '1px solid #fed7aa',
-                      borderRadius: 10,
-                      padding: '8px 14px',
-                      boxShadow: '0 8px 20px rgba(11,31,58,0.14)',
-                      fontSize: 12.5,
-                      color: '#9a3412',
-                      fontWeight: 600,
-                      whiteSpace: 'nowrap',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                    }}
-                  >
-                    <span>Start a conversation before sharing this chat.</span>
-                    <button
-                      onClick={() => setEmptyShareNotice(false)}
-                      style={{
-                        background: 'transparent',
-                        border: 'none',
-                        color: '#ea580c',
-                        cursor: 'pointer',
-                        padding: 2,
-                        display: 'flex',
-                        alignItems: 'center',
-                      }}
-                      aria-label="Dismiss"
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                )}
-
-                {/* Copy Link Toast Fallback (For desktop browsers without Web Share API) */}
-                {copyToastNotice && (
-                  <div
-                    onClick={(e) => e.stopPropagation()}
-                    className="animate-slide-down"
-                    style={{
-                      position: 'absolute',
-                      top: 'calc(100% + 8px)',
-                      left: 0,
-                      zIndex: 40,
-                      background: '#f0fdf4',
-                      border: '1px solid #86efac',
-                      borderRadius: 10,
-                      padding: '8px 14px',
-                      boxShadow: '0 8px 20px rgba(11,31,58,0.14)',
-                      fontSize: 12.5,
-                      color: '#15803d',
-                      fontWeight: 600,
-                      whiteSpace: 'nowrap',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                    }}
-                  >
-                    <Check size={14} color="#16a34a" />
-                    <span>Link copied to clipboard</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Top-Right: [ Checklist: X% ] [ + New Chat ] */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, pointerEvents: 'auto' }}>
-              <button
-                onClick={() => setJourneyOpen((v) => !v)}
-                className="interactive-control"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '7px 14px',
-                  borderRadius: 10,
-                  border: '1px solid',
-                  borderColor: journeyOpen ? '#fed7aa' : '#cbd5e1',
-                  background: journeyOpen ? '#fff7ed' : '#ffffff',
-                  color: journeyOpen ? '#9a3412' : '#334155',
-                  fontSize: 12.5,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(11,31,58,0.08)',
-                  transition: 'all 150ms ease',
-                }}
-                title={t('chat.checklist', 'Checklist')}
-              >
-                <ClipboardList size={14} color="#ea580c" />
-                <span>
-                  <span className="hidden sm:inline">{t('chat.checklist', 'Checklist')}: </span>
-                  <strong style={{ color: '#c2410c' }}>{progressPct}%</strong>
-                </span>
-              </button>
-
-              <button
-                onClick={handleNewChat}
-                className="interactive-control"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '7px 14px',
-                  borderRadius: 10,
-                  border: 'none',
-                  background: '#0b1f3a',
-                  color: '#ffffff',
-                  fontSize: 12.5,
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(11,31,58,0.18)',
-                  transition: 'all 150ms ease',
-                }}
-                title={t('chat.new_chat', 'New Chat')}
-              >
-                <Plus size={14} color="#fbbf24" />
-                <span>{t('chat.new_chat', 'New Chat')}</span>
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Sliding Left History Drawer */}
         {tab === 'chat' && sidebarOpen && (
           <div className="absolute inset-y-0 left-0 z-30 w-72 sm:w-80 shadow-2xl animate-slide-left">
@@ -799,6 +471,357 @@ function ChatPage() {
 
         {/* Central Workspace Canvas */}
         <main className="flex-1 flex flex-col overflow-hidden bg-slate-50 w-full min-w-0">
+          {/* ── Dedicated Chat Top Toolbar (In-flow, never overlays messages) ── */}
+          {tab === 'chat' && (
+            <div
+              className="chat-top-toolbar"
+              style={{
+                width: '100%',
+                flexShrink: 0,
+                background: '#ffffff',
+                borderBottom: '1px solid #e2e8f0',
+                padding: '8px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                zIndex: 20,
+                gap: 8,
+                minWidth: 0,
+                boxSizing: 'border-box',
+              }}
+            >
+              {/* Top-Left: [ Past Chats ] [ Share Chat ] */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, position: 'relative', minWidth: 0 }}>
+                {/* [ Past Chats ] */}
+                <div style={{ position: 'relative' }}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!token) {
+                        setGuestSharePrompt(false);
+                        setGuestPastChatsPrompt((v) => !v);
+                      } else {
+                        setSidebarOpen((v) => !v);
+                      }
+                    }}
+                    className="interactive-control"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 6,
+                      padding: '8px 12px',
+                      minHeight: 44,
+                      borderRadius: 10,
+                      border: '1px solid',
+                      borderColor: sidebarOpen ? '#0b1f3a' : '#cbd5e1',
+                      background: sidebarOpen ? '#0b1f3a' : '#ffffff',
+                      color: sidebarOpen ? '#ffffff' : '#334155',
+                      fontSize: 12.5,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 8px rgba(11,31,58,0.06)',
+                      transition: 'all 150ms ease',
+                    }}
+                    title={t('chat.past_chats', 'Past Chats')}
+                    aria-label={t('chat.past_chats', 'Past Chats')}
+                  >
+                    <History size={15} color={sidebarOpen ? '#fbbf24' : '#e87722'} style={{ flexShrink: 0 }} />
+                    <span className="hidden sm:inline">{t('chat.past_chats', 'Past Chats')}</span>
+                    <span className="sm:hidden">History</span>
+                  </button>
+
+                  {/* Guest Past Chats Auth Popover */}
+                  {!token && guestPastChatsPrompt && (
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="animate-slide-down"
+                      style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 8px)',
+                        left: 0,
+                        zIndex: 40,
+                        background: '#ffffff',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: 10,
+                        padding: '10px 14px',
+                        boxShadow: '0 8px 20px rgba(11,31,58,0.14)',
+                        fontSize: 12.5,
+                        color: '#334155',
+                        whiteSpace: 'nowrap',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        maxWidth: 'calc(100vw - 32px)',
+                      }}
+                    >
+                      <span>
+                        <Link
+                          href="/auth?returnUrl=/chat"
+                          style={{
+                            color: '#1d4ed8',
+                            fontWeight: 700,
+                            textDecoration: 'underline',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Sign in
+                        </Link>{' '}
+                        to store chats
+                      </span>
+                      <button
+                        onClick={() => setGuestPastChatsPrompt(false)}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#94a3b8',
+                          cursor: 'pointer',
+                          padding: 4,
+                          display: 'flex',
+                          alignItems: 'center',
+                        }}
+                        aria-label="Dismiss"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* [ Share Chat ] */}
+                <div style={{ position: 'relative' }}>
+                  <button
+                    onClick={handleShareClick}
+                    disabled={sharingInProgress}
+                    className="interactive-control"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 6,
+                      padding: '8px 12px',
+                      minHeight: 44,
+                      borderRadius: 10,
+                      border: '1px solid #cbd5e1',
+                      background: '#ffffff',
+                      color: '#334155',
+                      fontSize: 12.5,
+                      fontWeight: 700,
+                      cursor: sharingInProgress ? 'wait' : 'pointer',
+                      boxShadow: '0 2px 8px rgba(11,31,58,0.06)',
+                      transition: 'all 150ms ease',
+                    }}
+                    title={t('chat.share_chat', 'Share Chat')}
+                    aria-label={t('chat.share_chat', 'Share Chat')}
+                  >
+                    {sharingInProgress ? (
+                      <Loader2 size={15} color="#0284c7" className="animate-spin" />
+                    ) : (
+                      <Share2 size={15} color="#0284c7" style={{ flexShrink: 0 }} />
+                    )}
+                    <span className="hidden sm:inline">{t('chat.share_chat', 'Share Chat')}</span>
+                    <span className="sm:hidden">Share</span>
+                  </button>
+
+                  {/* Guest Share Auth Popover */}
+                  {!token && guestSharePrompt && (
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="animate-slide-down"
+                      style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 8px)',
+                        left: 0,
+                        zIndex: 40,
+                        background: '#ffffff',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: 10,
+                        padding: '10px 14px',
+                        boxShadow: '0 8px 20px rgba(11,31,58,0.14)',
+                        fontSize: 12.5,
+                        color: '#334155',
+                        whiteSpace: 'nowrap',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        maxWidth: 'calc(100vw - 32px)',
+                      }}
+                    >
+                      <span>
+                        <Link
+                          href="/auth?returnUrl=/chat"
+                          style={{
+                            color: '#0284c7',
+                            fontWeight: 700,
+                            textDecoration: 'underline',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Sign in
+                        </Link>{' '}
+                        to share this chat
+                      </span>
+                      <button
+                        onClick={() => setGuestSharePrompt(false)}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#94a3b8',
+                          cursor: 'pointer',
+                          padding: 4,
+                          display: 'flex',
+                          alignItems: 'center',
+                        }}
+                        aria-label="Dismiss"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Empty Chat Notice (Signed-in) */}
+                  {token && emptyShareNotice && (
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="animate-slide-down"
+                      style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 8px)',
+                        left: 0,
+                        zIndex: 40,
+                        background: '#fff7ed',
+                        border: '1px solid #fed7aa',
+                        borderRadius: 10,
+                        padding: '10px 14px',
+                        boxShadow: '0 8px 20px rgba(11,31,58,0.14)',
+                        fontSize: 12.5,
+                        color: '#9a3412',
+                        fontWeight: 600,
+                        whiteSpace: 'nowrap',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        maxWidth: 'calc(100vw - 32px)',
+                      }}
+                    >
+                      <span>Start a conversation before sharing this chat.</span>
+                      <button
+                        onClick={() => setEmptyShareNotice(false)}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#ea580c',
+                          cursor: 'pointer',
+                          padding: 4,
+                          display: 'flex',
+                          alignItems: 'center',
+                        }}
+                        aria-label="Dismiss"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Copy Link Toast Fallback */}
+                  {copyToastNotice && (
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="animate-slide-down"
+                      style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 8px)',
+                        left: 0,
+                        zIndex: 40,
+                        background: '#f0fdf4',
+                        border: '1px solid #86efac',
+                        borderRadius: 10,
+                        padding: '10px 14px',
+                        boxShadow: '0 8px 20px rgba(11,31,58,0.14)',
+                        fontSize: 12.5,
+                        color: '#15803d',
+                        fontWeight: 600,
+                        whiteSpace: 'nowrap',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        maxWidth: 'calc(100vw - 32px)',
+                      }}
+                    >
+                      <Check size={14} color="#16a34a" />
+                      <span>Link copied to clipboard</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Top-Right: [ Checklist Progress: X% ] [ + New Chat ] */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flexShrink: 0 }}>
+                {/* 25% Chip: Advisory Checklist Progress */}
+                <button
+                  onClick={() => setJourneyOpen((v) => !v)}
+                  className="interactive-control"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    padding: '8px 12px',
+                    minHeight: 44,
+                    borderRadius: 10,
+                    border: '1px solid',
+                    borderColor: journeyOpen ? '#fed7aa' : '#cbd5e1',
+                    background: journeyOpen ? '#fff7ed' : '#ffffff',
+                    color: journeyOpen ? '#9a3412' : '#334155',
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px rgba(11,31,58,0.06)',
+                    transition: 'all 150ms ease',
+                    whiteSpace: 'nowrap',
+                  }}
+                  title={`Advisory Checklist: ${progressPct}% complete`}
+                  aria-label={`Advisory Checklist: ${progressPct}% complete`}
+                >
+                  <ClipboardList size={15} color="#ea580c" style={{ flexShrink: 0 }} />
+                  <span>
+                    <span className="hidden md:inline">{t('chat.checklist', 'Checklist')}: </span>
+                    <strong style={{ color: '#c2410c' }}>{progressPct}%</strong>
+                  </span>
+                </button>
+
+                {/* New Chat Button: white-space nowrap, never wraps to two lines */}
+                <button
+                  onClick={handleNewChat}
+                  className="interactive-control"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    padding: '8px 14px',
+                    minHeight: 44,
+                    borderRadius: 10,
+                    border: 'none',
+                    background: '#0b1f3a',
+                    color: '#ffffff',
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px rgba(11,31,58,0.18)',
+                    transition: 'all 150ms ease',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                  }}
+                  title={t('chat.new_chat', 'New Chat')}
+                  aria-label={t('chat.new_chat', 'New Chat')}
+                >
+                  <Plus size={15} color="#fbbf24" style={{ flexShrink: 0 }} />
+                  <span style={{ whiteSpace: 'nowrap' }}>{t('chat.new_chat', 'New Chat')}</span>
+                </button>
+              </div>
+            </div>
+          )}
           {tab === 'chat' && (
             <ChatInterface
               key={instanceKey}

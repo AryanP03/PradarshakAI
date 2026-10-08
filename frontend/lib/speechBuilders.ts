@@ -35,11 +35,9 @@ export function buildSchemeSpeech(s: any, lang: string = 'en'): string {
   const morMin = s.moratorium_months_min;
   const morMax = s.moratorium_months_max != null && Number(s.moratorium_months_max) > 0 ? Number(s.moratorium_months_max) : null;
   const desc = getLocalizedSchemeDesc(s.name, s.description || '', lang);
-  const matchPct = getSpeechMatchPct(s);
 
   if (lang === 'mr') {
     if (schemeName) parts.push(`${schemeName}.`);
-    if (matchPct != null) parts.push(`पात्रता जुळणी: ${matchPct} टक्के.`);
     if (maxLoan != null) {
       const loanStr = maxLoan >= 1 ? `${maxLoan} लाख रुपये` : `${Math.round(maxLoan * 100000)} रुपये`;
       parts.push(`कमाल कर्ज मर्यादा: ${loanStr}.`);
@@ -61,7 +59,6 @@ export function buildSchemeSpeech(s: any, lang: string = 'en'): string {
 
   if (lang === 'hi') {
     if (schemeName) parts.push(`${schemeName}.`);
-    if (matchPct != null) parts.push(`पात्रता मिलान: ${matchPct} प्रतिशत.`);
     if (maxLoan != null) {
       const loanStr = maxLoan >= 1 ? `${maxLoan} लाख रुपये` : `${Math.round(maxLoan * 100000)} रुपये`;
       parts.push(`अधिकतम ऋण सीमा: ${loanStr}.`);
@@ -83,7 +80,6 @@ export function buildSchemeSpeech(s: any, lang: string = 'en'): string {
 
   if (lang === 'bn') {
     if (schemeName) parts.push(`${schemeName}।`);
-    if (matchPct != null) parts.push(`যোগ্যতার মিল: ${matchPct} শতাংশ।`);
     if (maxLoan != null) {
       const loanStr = maxLoan >= 1 ? `${maxLoan} লাখ টাকা` : `${Math.round(maxLoan * 100000)} টাকা`;
       parts.push(`সর্বোচ্চ ঋণের পরিমাণ: ${loanStr}।`);
@@ -105,7 +101,6 @@ export function buildSchemeSpeech(s: any, lang: string = 'en'): string {
 
   if (lang === 'gu') {
     if (schemeName) parts.push(`${schemeName}.`);
-    if (matchPct != null) parts.push(`પાત્રતા મેળ: ${matchPct} ટકા.`);
     if (maxLoan != null) {
       const loanStr = maxLoan >= 1 ? `${maxLoan} લાખ રૂપિયા` : `${Math.round(maxLoan * 100000)} રૂપિયા`;
       parts.push(`મહત્તમ લોન મર્યાદા: ${loanStr}.`);
@@ -128,9 +123,6 @@ export function buildSchemeSpeech(s: any, lang: string = 'en'): string {
   // English fallback
   if (s.name) {
     parts.push(`${s.name}.`);
-  }
-  if (matchPct != null) {
-    parts.push(`Match score: ${matchPct} percent.`);
   }
   if (maxLoan != null) {
     const loanStr = maxLoan >= 1 ? `${maxLoan} lakh rupees` : `${Math.round(maxLoan * 100000)} rupees`;

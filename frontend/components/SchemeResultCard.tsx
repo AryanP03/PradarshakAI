@@ -115,18 +115,41 @@ export default function SchemeResultCard({
         background: 'var(--surface, #ffffff)',
         border: '1px solid var(--border, #e4e2e1)',
         borderRadius: 14,
-        padding: '22px 24px',
+        padding: 'clamp(14px, 3.5vw, 22px)',
         display: 'flex',
         flexDirection: 'column',
         gap: 16,
         width: '100%',
+        maxWidth: '100%',
+        minWidth: 0,
+        boxSizing: 'border-box',
         color: 'var(--text)',
       }}
     >
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      {/* Header Container */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', minWidth: 0 }}>
+        {/* Top Badges & Visit Portal row - wraps cleanly inside card */}
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 8,
+            width: '100%',
+            minWidth: 0,
+          }}
+        >
+          {/* Badges row: Best Match badge + Category chip */}
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              gap: 6,
+              minWidth: 0,
+            }}
+          >
             {rank === 1 && (
               <span
                 style={{
@@ -140,6 +163,8 @@ export default function SchemeResultCard({
                   background: '#e87722',
                   color: '#ffffff',
                   boxShadow: '0 2px 6px rgba(232,119,34,0.3)',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
                 }}
               >
                 <Sparkles size={13} />
@@ -155,42 +180,36 @@ export default function SchemeResultCard({
                 background: meta.bg,
                 color: meta.text,
                 border: `1px solid ${meta.border}`,
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
               }}
             >
               {label}
             </span>
           </div>
 
-          <h3 style={{ fontSize: 17, fontWeight: 700, color: '#001e40', margin: 0, lineHeight: 1.3 }}>
-            {schemeName}
-          </h3>
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            flexShrink: 0,
-          }}
-        >
+          {/* Visit Portal Button (if official link exists) */}
           {scheme.official_source_url && (
             <a
               href={scheme.official_source_url}
               target="_blank"
               rel="noopener noreferrer"
               style={{
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
                 gap: 6,
-                padding: '5px 10px',
-                borderRadius: 6,
+                padding: '8px 14px',
+                borderRadius: 8,
                 background: '#f1f5f9',
-                border: '1px solid #e2e8f0',
-                color: '#475569',
-                fontSize: 11.5,
+                border: '1px solid #cbd5e1',
+                color: '#334155',
+                fontSize: 12,
                 fontWeight: 600,
                 textDecoration: 'none',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                minHeight: 44,
+                boxSizing: 'border-box',
                 transition: 'all 0.2s',
                 cursor: 'pointer',
               }}
@@ -198,26 +217,28 @@ export default function SchemeResultCard({
               onMouseLeave={(e) => (e.currentTarget.style.background = '#f1f5f9')}
               onClick={(e) => e.stopPropagation()}
             >
-              <Globe size={13} />
+              <Globe size={14} />
               Visit Portal
             </a>
           )}
-          {scheme.score !== undefined && (
-            <span
-              style={{
-                fontSize: 13.5,
-                fontWeight: 800,
-                color: '#15803d',
-                background: '#f0fdf4',
-                border: '1px solid #bbf7d0',
-                padding: '3px 10px',
-                borderRadius: 6,
-              }}
-            >
-              {getDisplayMatchPercentage(scheme)}% {t('scheme.match')}
-            </span>
-          )}
         </div>
+
+        {/* Scheme Title on its own full-width row with natural wrapping */}
+        <h3
+          style={{
+            fontSize: 17,
+            fontWeight: 700,
+            color: '#001e40',
+            margin: 0,
+            lineHeight: 1.4,
+            width: '100%',
+            minWidth: 0,
+            wordBreak: 'normal',
+            overflowWrap: 'anywhere',
+          }}
+        >
+          {schemeName}
+        </h3>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5">
@@ -336,34 +357,39 @@ export default function SchemeResultCard({
       )}
 
       {/* Visually Attached Scheme Action Area */}
+      {/* Visually Attached Scheme Action Area */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 110px), 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))',
           gap: 8,
           paddingTop: 12,
           borderTop: '1.5px solid #e2e8f0',
           marginTop: 2,
+          width: '100%',
         }}
       >
         {onKnowMore && (
           <button
             type="button"
             onClick={() => onKnowMore(scheme)}
+            className="interactive-control"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 5,
-              padding: '8px 10px',
+              gap: 6,
+              padding: '10px 14px',
+              minHeight: 44,
               borderRadius: 8,
               border: '1.5px solid #0284c7',
               background: '#f0f9ff',
               color: '#0369a1',
-              fontSize: 'clamp(11.5px, 1.1vw, 12.5px)',
+              fontSize: 12.5,
               fontWeight: 700,
               cursor: 'pointer',
               minWidth: 0,
+              lineHeight: 1.25,
               transition: 'all 150ms ease',
             }}
             onMouseEnter={(e) => {
@@ -375,8 +401,8 @@ export default function SchemeResultCard({
               (e.currentTarget as HTMLElement).style.color = '#0369a1';
             }}
           >
-            <BookOpen size={14} style={{ flexShrink: 0 }} />
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t('scheme.action_know_more')}</span>
+            <BookOpen size={15} style={{ flexShrink: 0 }} />
+            <span style={{ textAlign: 'center' }}>{t('scheme.action_know_more')}</span>
           </button>
         )}
 
@@ -384,20 +410,23 @@ export default function SchemeResultCard({
           <button
             type="button"
             onClick={() => onGetDocuments(scheme)}
+            className="interactive-control"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 5,
-              padding: '8px 10px',
+              gap: 6,
+              padding: '10px 14px',
+              minHeight: 44,
               borderRadius: 8,
               border: '1.5px solid #059669',
               background: '#ecfdf5',
               color: '#065f46',
-              fontSize: 'clamp(11.5px, 1.1vw, 12.5px)',
+              fontSize: 12.5,
               fontWeight: 700,
               cursor: 'pointer',
               minWidth: 0,
+              lineHeight: 1.25,
               transition: 'all 150ms ease',
             }}
             onMouseEnter={(e) => {
@@ -409,8 +438,8 @@ export default function SchemeResultCard({
               (e.currentTarget as HTMLElement).style.color = '#065f46';
             }}
           >
-            <FileText size={14} style={{ flexShrink: 0 }} />
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t('scheme.action_documents')}</span>
+            <FileText size={15} style={{ flexShrink: 0 }} />
+            <span style={{ textAlign: 'center' }}>{t('scheme.action_documents')}</span>
           </button>
         )}
 
@@ -418,20 +447,23 @@ export default function SchemeResultCard({
           <button
             type="button"
             onClick={() => onCalculateEMI(scheme)}
+            className="interactive-control"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 5,
-              padding: '8px 10px',
+              gap: 6,
+              padding: '10px 14px',
+              minHeight: 44,
               borderRadius: 8,
               border: '1.5px solid #e87722',
               background: '#fff7ed',
               color: '#c2410c',
-              fontSize: 'clamp(11.5px, 1.1vw, 12.5px)',
+              fontSize: 12.5,
               fontWeight: 700,
               cursor: 'pointer',
               minWidth: 0,
+              lineHeight: 1.25,
               transition: 'all 150ms ease',
             }}
             onMouseEnter={(e) => {
@@ -443,8 +475,8 @@ export default function SchemeResultCard({
               (e.currentTarget as HTMLElement).style.color = '#9a3412';
             }}
           >
-            <Calculator size={14} />
-            <span>{t('scheme.action_emi')}</span>
+            <Calculator size={15} style={{ flexShrink: 0 }} />
+            <span style={{ textAlign: 'center' }}>{t('scheme.action_emi')}</span>
           </button>
         )}
       </div>

@@ -300,57 +300,77 @@ function MessageBubble({
     <div
       style={{
         display: 'flex',
-        alignItems: 'flex-start',
-        gap: 14,
-        marginBottom: 24,
+        flexDirection: 'column',
+        alignItems: 'stretch',
         width: '100%',
-        flexDirection: isUser ? 'row-reverse' : 'row',
+        maxWidth: '100%',
+        minWidth: 0,
+        marginBottom: 24,
+        gap: 14,
+        boxSizing: 'border-box',
       }}
     >
+      {/* ── Message Text Bubble Row ── */}
       <div
-        style={{
-          width: 38,
-          height: 38,
-          borderRadius: 8,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-          background: isUser ? '#001e40' : '#ffffff',
-          border: isUser ? '1px solid #001e40' : '1.5px solid #cbd5e1',
-          color: isUser ? '#ffffff' : '#001e40',
-          boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
-          padding: isUser ? 0 : 3,
-        }}
-      >
-        {isUser ? <User size={18} /> : <EmblemOfIndia size={28} />}
-      </div>
-
-      <div
+        className={`chat-message-row ${isUser ? 'chat-message-user' : 'chat-message-bot'}`}
+        data-role={msg.role}
         style={{
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: isUser ? 'flex-end' : 'flex-start',
-          maxWidth: '85%',
-          width: '100%',
+          alignItems: 'flex-start',
           gap: 12,
+          width: '100%',
+          maxWidth: '100%',
+          minWidth: 0,
+          flexDirection: 'row',
+          justifyContent: isUser ? 'flex-end' : 'flex-start',
+          boxSizing: 'border-box',
         }}
       >
+        {!isUser && (
+          <div
+            className="chat-avatar-bot"
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 8,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              background: '#ffffff',
+              border: '1.5px solid #cbd5e1',
+              color: '#001e40',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
+              padding: 3,
+            }}
+          >
+            <EmblemOfIndia size={28} />
+          </div>
+        )}
+
         <div
+          className={`chat-bubble ${isUser ? 'chat-bubble-user' : 'chat-bubble-bot'}`}
           style={{
-            padding: '16px 20px',
+            maxWidth: 'min(85%, 680px)',
+            minWidth: 0,
+            boxSizing: 'border-box',
+            padding: '14px 18px',
             borderRadius: 18,
-            borderTopRightRadius: isUser ? 4 : 18,
-            borderTopLeftRadius: isUser ? 18 : 4,
+            borderStartStartRadius: isUser ? 18 : 4,
+            borderStartEndRadius: isUser ? 4 : 18,
+            borderEndStartRadius: 18,
+            borderEndEndRadius: 18,
             fontSize: 14.5,
-            lineHeight: 1.65,
+            lineHeight: 1.6,
             background: isUser ? 'var(--navy, #001e40)' : 'var(--surface)',
             color: isUser ? '#ffffff' : 'var(--text)',
             border: isUser ? 'none' : '1px solid var(--border)',
             boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
+            wordBreak: 'normal',
+            overflowWrap: 'anywhere',
           }}
         >
-          <div id={`msg-text-${msg.id}`} style={{ whiteSpace: 'pre-wrap' }}>
+          <div id={`msg-text-${msg.id}`} style={{ whiteSpace: 'pre-wrap', wordBreak: 'normal', overflowWrap: 'anywhere' }}>
             {isUser ? (
               msg.text.split('\n').map((line, i) => (
                 <p key={i} style={{ margin: i > 0 ? '6px 0 0' : 0, color: '#ffffff' }}>
@@ -390,296 +410,326 @@ function MessageBubble({
             </div>
           )}
         </div>
+      </div>
 
-        {/* Structured Data Result Cards — held back until the reply finishes typing */}
-        {showExtras && schemes.length > 0 && (
-          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {schemes.map((s: any, i: number) => {
-              const schemeVoiceId = `scheme_${msg.id}_${s.id || i}`;
-              const schemeSpeech = buildSchemeSpeech(s, effectiveMsgLang);
-              return (
-                <div key={s.id || i} id={`scheme-card-${schemeVoiceId}`}>
-                  <SchemeResultCard
-                    scheme={s as Parameters<typeof SchemeResultCard>[0]['scheme']}
-                    language={effectiveMsgLang}
-                    rank={i + 1}
-                    onKnowMore={() => {
-                      onSchemeAction?.('KNOW_MORE', s);
-                    }}
-                    onGetDocuments={() => {
-                      onSchemeAction?.('DOCUMENTS', s);
-                    }}
-                    onCalculateEMI={() => {
-                      onStepComplete?.('scheme');
-                      onStepComplete?.('emi');
-                      onSchemeAction?.('EMI', s);
-                    }}
-                    speechText={schemeSpeech}
-                    isVoicePlaying={activePlayingId === schemeVoiceId}
-                    isVoiceLoading={activeLoadingId === schemeVoiceId}
-                    onPlayVoice={() => onPlayVoice?.(schemeVoiceId, schemeSpeech, effectiveMsgLang)}
-                    onStopVoice={onStopVoice}
-                  />
-                </div>
-              );
-            })}
+      {/* ── Structured Data Result Cards & Extras (Full Width — No Avatar Indent) ── */}
+      {showExtras && (
+        <div
+          style={{
+            width: '100%',
+            maxWidth: '100%',
+            minWidth: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 14,
+            boxSizing: 'border-box',
+          }}
+        >
+          {schemes.length > 0 && (
+            <div style={{ width: '100%', maxWidth: '100%', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 14, boxSizing: 'border-box' }}>
+              {schemes.map((s: any, i: number) => {
+                const schemeVoiceId = `scheme_${msg.id}_${s.id || i}`;
+                const schemeSpeech = buildSchemeSpeech(s, effectiveMsgLang);
+                return (
+                  <div key={s.id || i} id={`scheme-card-${schemeVoiceId}`} style={{ width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
+                    <SchemeResultCard
+                      scheme={s as Parameters<typeof SchemeResultCard>[0]['scheme']}
+                      language={effectiveMsgLang}
+                      rank={i + 1}
+                      onKnowMore={() => {
+                        onSchemeAction?.('KNOW_MORE', s);
+                      }}
+                      onGetDocuments={() => {
+                        onSchemeAction?.('DOCUMENTS', s);
+                      }}
+                      onCalculateEMI={() => {
+                        onStepComplete?.('scheme');
+                        onStepComplete?.('emi');
+                        onSchemeAction?.('EMI', s);
+                      }}
+                      speechText={schemeSpeech}
+                      isVoicePlaying={activePlayingId === schemeVoiceId}
+                      isVoiceLoading={activeLoadingId === schemeVoiceId}
+                      onPlayVoice={() => onPlayVoice?.(schemeVoiceId, schemeSpeech, effectiveMsgLang)}
+                      onStopVoice={onStopVoice}
+                    />
+                  </div>
+                );
+              })}
 
-            {/* Separate Global Actions Area (after ALL schemes) */}
-            <div
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                alignItems: 'center',
-                gap: 10,
-                paddingTop: 10,
-                borderTop: '1.5px dashed #cbd5e1',
-                marginTop: 4,
-              }}
-            >
-              {schemes.length > 1 && onCompareSchemes && (
-                <button
-                  type="button"
-                  onClick={() => onCompareSchemes(schemes)}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 7,
-                    padding: '9px 16px',
-                    borderRadius: 10,
-                    background: '#0b1f3a',
-                    color: '#ffffff',
-                    fontSize: 13,
-                    fontWeight: 700,
-                    border: 'none',
-                    cursor: 'pointer',
-                    boxShadow: '0 2px 8px rgba(11,31,58,0.15)',
-                    transition: 'background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = '#1e3a8a';
-                    (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = '#0b1f3a';
-                    (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-                  }}
-                >
-                  <Scale size={15} color="#fbbf24" />
-                  <span>{t('scheme.compare_btn')} ({schemes.length})</span>
-                </button>
-              )}
-
-              <button
-                type="button"
-                onClick={() => {
-                  onStepComplete?.('partner');
-                  if (onOpenPartners) {
-                    onOpenPartners();
-                  }
-                }}
+              {/* Separate Global Actions Area (after ALL schemes) */}
+              <div
                 style={{
-                  display: 'inline-flex',
+                  display: 'flex',
+                  flexWrap: 'wrap',
                   alignItems: 'center',
-                  gap: 7,
-                  padding: '9px 16px',
-                  borderRadius: 10,
-                  background: '#ffffff',
-                  color: '#0b1f3a',
-                  fontSize: 13,
-                  fontWeight: 700,
-                  border: '1.5px solid #0b1f3a',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 6px rgba(11,31,58,0.06)',
-                  transition: 'background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease',
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = '#f8fafc';
-                  (e.currentTarget as HTMLElement).style.borderColor = '#1e3a8a';
-                  (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = '#ffffff';
-                  (e.currentTarget as HTMLElement).style.borderColor = '#0b1f3a';
-                  (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                  gap: 10,
+                  paddingTop: 10,
+                  borderTop: '1.5px dashed #cbd5e1',
+                  marginTop: 4,
+                  width: '100%',
+                  minWidth: 0,
+                  boxSizing: 'border-box',
                 }}
               >
-                <MapPin size={15} color="#e87722" />
-                <span>{t('scheme.know_partners')}</span>
-              </button>
-            </div>
-          </div>
-        )}
+                {schemes.length > 1 && onCompareSchemes && (
+                  <button
+                    type="button"
+                    onClick={() => onCompareSchemes(schemes)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 7,
+                      padding: '10px 16px',
+                      minHeight: 44,
+                      borderRadius: 10,
+                      background: '#0b1f3a',
+                      color: '#ffffff',
+                      fontSize: 13,
+                      fontWeight: 700,
+                      border: 'none',
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 8px rgba(11,31,58,0.15)',
+                      whiteSpace: 'nowrap',
+                      transition: 'background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = '#1e3a8a';
+                      (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = '#0b1f3a';
+                      (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                    }}
+                  >
+                    <Scale size={15} color="#fbbf24" />
+                    <span>{t('scheme.compare_btn')} ({schemes.length})</span>
+                  </button>
+                )}
 
-        {showExtras && emiData && (() => {
-          const emiVoiceId = `emi_${msg.id}`;
-          const emiSpeech = buildEmiSpeech(emiData, effectiveMsgLang);
-          return (
-            <div id={`emi-card-${emiVoiceId}`} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <EMIResultCard
-                data={emiData as unknown as Parameters<typeof EMIResultCard>[0]['data']}
-                speechText={emiSpeech}
-                isVoicePlaying={activePlayingId === emiVoiceId}
-                isVoiceLoading={activeLoadingId === emiVoiceId}
-                onPlayVoice={() => onPlayVoice?.(emiVoiceId, emiSpeech, effectiveMsgLang)}
-                onStopVoice={onStopVoice}
-              />
-              {onOpenEMI && (
                 <button
                   type="button"
                   onClick={() => {
-                    const sid = (emiData as any).schemeId || (emiData as any).scheme?.id;
-                    onOpenEMI(sid);
+                    onStepComplete?.('partner');
+                    if (onOpenPartners) {
+                      onOpenPartners();
+                    }
                   }}
                   style={{
-                    alignSelf: 'flex-start',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 7,
+                    padding: '10px 16px',
+                    minHeight: 44,
+                    borderRadius: 10,
+                    background: '#ffffff',
+                    color: '#0b1f3a',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    border: '1.5px solid #0b1f3a',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 6px rgba(11,31,58,0.06)',
+                    whiteSpace: 'nowrap',
+                    transition: 'background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = '#f8fafc';
+                    (e.currentTarget as HTMLElement).style.borderColor = '#1e3a8a';
+                    (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = '#ffffff';
+                    (e.currentTarget as HTMLElement).style.borderColor = '#0b1f3a';
+                    (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                  }}
+                >
+                  <MapPin size={15} color="#e87722" />
+                  <span>{t('scheme.know_partners')}</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {emiData && (() => {
+            const emiVoiceId = `emi_${msg.id}`;
+            const emiSpeech = buildEmiSpeech(emiData, effectiveMsgLang);
+            return (
+              <div id={`emi-card-${emiVoiceId}`} style={{ width: '100%', maxWidth: '100%', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 10, boxSizing: 'border-box' }}>
+                <EMIResultCard
+                  data={emiData as unknown as Parameters<typeof EMIResultCard>[0]['data']}
+                  speechText={emiSpeech}
+                  isVoicePlaying={activePlayingId === emiVoiceId}
+                  isVoiceLoading={activeLoadingId === emiVoiceId}
+                  onPlayVoice={() => onPlayVoice?.(emiVoiceId, emiSpeech, effectiveMsgLang)}
+                  onStopVoice={onStopVoice}
+                />
+                {onOpenEMI && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const sid = (emiData as any).schemeId || (emiData as any).scheme?.id;
+                      onOpenEMI(sid);
+                    }}
+                    style={{
+                      alignSelf: 'flex-start',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      padding: '10px 16px',
+                      minHeight: 44,
+                      borderRadius: 8,
+                      background: '#fff7ed',
+                      border: '1.5px solid #ea580c',
+                      color: '#9a3412',
+                      fontSize: 13,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      transition: 'background-color 150ms ease, border-color 150ms ease, color 150ms ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = '#ea580c';
+                      (e.currentTarget as HTMLElement).style.color = '#ffffff';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = '#fff7ed';
+                      (e.currentTarget as HTMLElement).style.color = '#9a3412';
+                    }}
+                  >
+                    <Calculator size={14} />
+                    <span>{t('scheme.open_calculator')}</span>
+                  </button>
+                )}
+              </div>
+            );
+          })()}
+
+          {partners.length > 0 && (
+            <div style={{ width: '100%', maxWidth: '100%', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12, boxSizing: 'border-box' }}>
+              {partners.map((p, i) => (
+                <PartnerResultCard
+                  key={i}
+                  partner={p as Parameters<typeof PartnerResultCard>[0]['partner']}
+                  rank={i + 1}
+                  searchedLocation={((msg.data?.location || msg.toolData?.location) as string | undefined)}
+                />
+              ))}
+            </div>
+          )}
+
+          {comparison && (() => {
+            const compVoiceId = `comp_${msg.id}`;
+            const schemesList = (comparison.schemes as any[]) || [comparison.schemeA, comparison.schemeB].filter(Boolean);
+            const compSpeech = msg.speechText || (comparison.speechText as string) || buildComparisonSpeech(schemesList, language);
+            return (
+              <div id={`comp-card-${compVoiceId}`} style={{ width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
+                <ComparisonCard
+                  schemes={schemesList}
+                  schemeA={comparison.schemeA as any}
+                  schemeB={comparison.schemeB as any}
+                  onCalculateEMI={(s) => onSchemeAction?.('EMI', s)}
+                  onKnowMore={(s) => onSchemeAction?.('KNOW_MORE', s)}
+                  speechText={compSpeech}
+                  isPlaying={activePlayingId === compVoiceId}
+                  isLoadingTTS={activeLoadingId === compVoiceId}
+                  onPlayTTS={() => onPlayVoice?.(compVoiceId, compSpeech, effectiveMsgLang)}
+                  onStopTTS={onStopVoice}
+                />
+              </div>
+            );
+          })()}
+
+          {documents.length > 0 && (() => {
+            const docVoiceId = `doc_${msg.id}`;
+            const schemeName = (msg.data?.schemeName || msg.data?.scheme_name || (msg.data?.scheme as any)?.name) as string | undefined;
+            const docSpeech = buildDocumentsSpeech(documents, schemeName, msg.data?.note as string | undefined, language);
+            return (
+              <div id={`doc-card-${docVoiceId}`} style={{ width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
+                <DocumentCard
+                  documents={documents}
+                  schemeName={schemeName}
+                  note={msg.data?.note as string | undefined}
+                  speechText={docSpeech}
+                  isVoicePlaying={activePlayingId === docVoiceId}
+                  isVoiceLoading={activeLoadingId === docVoiceId}
+                  onPlayVoice={() => onPlayVoice?.(docVoiceId, docSpeech, effectiveMsgLang)}
+                  onStopVoice={onStopVoice}
+                />
+              </div>
+            );
+          })()}
+
+          {/* Grounding Disclaimer */}
+          {msg.disclaimer && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                fontSize: 12,
+                background: '#fff7ed',
+                border: '1px solid #fed7aa',
+                color: '#9a3412',
+                padding: '10px 14px',
+                borderRadius: 12,
+                width: '100%',
+                maxWidth: '100%',
+                minWidth: 0,
+                boxSizing: 'border-box',
+              }}
+            >
+              <Info size={16} color="#ea580c" style={{ flexShrink: 0 }} />
+              <span>{msg.disclaimer}</span>
+            </div>
+          )}
+
+          {/* Quick Action Chips */}
+          {msg.quickActions && msg.quickActions.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 4, width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
+              {msg.quickActions.map((qa, i) => (
+                <button
+                  key={i}
+                  onClick={() => onAction(qa.message)}
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 700,
+                    background: '#ffffff',
+                    border: '1.5px solid #0b1f3a',
+                    color: '#0b1f3a',
+                    padding: '10px 16px',
+                    minHeight: 44,
+                    borderRadius: 20,
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 6px rgba(11,31,58,0.06)',
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: 6,
-                    padding: '8px 14px',
-                    borderRadius: 8,
-                    background: '#fff7ed',
-                    border: '1.5px solid #ea580c',
-                    color: '#9a3412',
-                    fontSize: 12.5,
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    transition: 'background-color 150ms ease, border-color 150ms ease, color 150ms ease',
+                    whiteSpace: 'nowrap',
+                    transition: 'background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease',
                   }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = '#ea580c';
+                    (e.currentTarget as HTMLElement).style.background = '#0b1f3a';
                     (e.currentTarget as HTMLElement).style.color = '#ffffff';
+                    (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
+                    (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 12px rgba(11,31,58,0.15)';
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = '#fff7ed';
-                    (e.currentTarget as HTMLElement).style.color = '#9a3412';
+                    (e.currentTarget as HTMLElement).style.background = '#ffffff';
+                    (e.currentTarget as HTMLElement).style.color = '#0b1f3a';
+                    (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                    (e.currentTarget as HTMLElement).style.boxShadow = '0 2px 6px rgba(11,31,58,0.06)';
                   }}
                 >
-                  <Calculator size={14} />
-                  <span>{t('scheme.open_calculator')}</span>
+                  <span>{qa.label}</span>
+                  <ArrowRight size={13} />
                 </button>
-              )}
+              ))}
             </div>
-          );
-        })()}
-
-        {showExtras && partners.length > 0 && (
-          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {partners.map((p, i) => (
-              <PartnerResultCard
-                key={i}
-                partner={p as Parameters<typeof PartnerResultCard>[0]['partner']}
-                rank={i + 1}
-                searchedLocation={((msg.data?.location || msg.toolData?.location) as string | undefined)}
-              />
-            ))}
-          </div>
-        )}
-
-        {showExtras && comparison && (() => {
-          const compVoiceId = `comp_${msg.id}`;
-          const schemesList = (comparison.schemes as any[]) || [comparison.schemeA, comparison.schemeB].filter(Boolean);
-          const compSpeech = msg.speechText || (comparison.speechText as string) || buildComparisonSpeech(schemesList, language);
-          return (
-            <div id={`comp-card-${compVoiceId}`} style={{ width: '100%' }}>
-              <ComparisonCard
-                schemes={schemesList}
-                schemeA={comparison.schemeA as any}
-                schemeB={comparison.schemeB as any}
-                onCalculateEMI={(s) => onSchemeAction?.('EMI', s)}
-                onKnowMore={(s) => onSchemeAction?.('KNOW_MORE', s)}
-                speechText={compSpeech}
-                isPlaying={activePlayingId === compVoiceId}
-                isLoadingTTS={activeLoadingId === compVoiceId}
-                onPlayTTS={() => onPlayVoice?.(compVoiceId, compSpeech, effectiveMsgLang)}
-                onStopTTS={onStopVoice}
-              />
-            </div>
-          );
-        })()}
-
-        {showExtras && documents.length > 0 && (() => {
-          const docVoiceId = `doc_${msg.id}`;
-          const schemeName = (msg.data?.schemeName || msg.data?.scheme_name || (msg.data?.scheme as any)?.name) as string | undefined;
-          const docSpeech = buildDocumentsSpeech(documents, schemeName, msg.data?.note as string | undefined, language);
-          return (
-            <div id={`doc-card-${docVoiceId}`} style={{ width: '100%' }}>
-              <DocumentCard
-                documents={documents}
-                schemeName={schemeName}
-                note={msg.data?.note as string | undefined}
-                speechText={docSpeech}
-                isVoicePlaying={activePlayingId === docVoiceId}
-                isVoiceLoading={activeLoadingId === docVoiceId}
-                onPlayVoice={() => onPlayVoice?.(docVoiceId, docSpeech, effectiveMsgLang)}
-                onStopVoice={onStopVoice}
-              />
-            </div>
-          );
-        })()}
-
-        {/* Grounding Disclaimer */}
-        {showExtras && msg.disclaimer && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              fontSize: 12,
-              background: '#fff7ed',
-              border: '1px solid #fed7aa',
-              color: '#9a3412',
-              padding: '10px 14px',
-              borderRadius: 12,
-              width: '100%',
-            }}
-          >
-            <Info size={16} color="#ea580c" style={{ flexShrink: 0 }} />
-            <span>{msg.disclaimer}</span>
-          </div>
-        )}
-
-        {/* Quick Action Chips */}
-        {showExtras && msg.quickActions && msg.quickActions.length > 0 && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 6 }}>
-            {msg.quickActions.map((qa, i) => (
-              <button
-                key={i}
-                onClick={() => onAction(qa.message)}
-                style={{
-                  fontSize: 13,
-                  fontWeight: 700,
-                  background: '#ffffff',
-                  border: '1.5px solid #0b1f3a',
-                  color: '#0b1f3a',
-                  padding: '8px 16px',
-                  borderRadius: 20,
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 6px rgba(11,31,58,0.06)',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  transition: 'background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease',
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = '#0b1f3a';
-                  (e.currentTarget as HTMLElement).style.color = '#ffffff';
-                  (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
-                  (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 12px rgba(11,31,58,0.15)';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = '#ffffff';
-                  (e.currentTarget as HTMLElement).style.color = '#0b1f3a';
-                  (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-                  (e.currentTarget as HTMLElement).style.boxShadow = '0 2px 6px rgba(11,31,58,0.06)';
-                }}
-              >
-                <span>{qa.label}</span>
-                <ArrowRight size={13} />
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -2183,14 +2233,17 @@ export default function ChatInterface({
         style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '32px 24px',
+          overflowX: 'hidden',
+          padding: 'clamp(14px, 3vw, 28px) clamp(8px, 2.5vw, 20px)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           width: '100%',
+          minWidth: 0,
+          boxSizing: 'border-box',
         }}
       >
-        <div style={{ maxWidth: 880, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ maxWidth: 880, width: '100%', minWidth: 0, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
           {/* ── Category-Specific Page View Header ─────────────────────────────────── */}
           {showWelcome && messages.length === 0 && activeCategoryItem && (
@@ -2380,13 +2433,15 @@ export default function ChatInterface({
         style={{
           borderTop: isBottomDocked ? '1px solid #e2e8f0' : '1px solid transparent',
           background: isBottomDocked ? '#ffffff' : 'transparent',
-          padding: '14px 20px 20px',
+          padding: '10px clamp(8px, 2.5vw, 18px) max(12px, env(safe-area-inset-bottom, 12px))',
           flexShrink: 0,
           boxShadow: isBottomDocked ? '0 -4px 20px rgba(0,0,0,0.03)' : 'none',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           width: '100%',
+          minWidth: 0,
+          boxSizing: 'border-box',
           position: 'relative',
           zIndex: 10,
           transform: isBottomDocked
@@ -2400,7 +2455,7 @@ export default function ChatInterface({
               : 'transform 450ms cubic-bezier(0.16, 1, 0.3, 1), background-color 350ms ease, border-color 350ms ease, box-shadow 350ms ease',
         }}
       >
-        <div style={{ maxWidth: 880, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+        <div style={{ maxWidth: 880, width: '100%', minWidth: 0, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
 
           {/* ── Active Live Voice-to-Voice Agent Panel (Shown ABOVE Chatbox when clicked/active) ── */}
           {voiceAgentState !== 'IDLE' && (
@@ -2490,9 +2545,11 @@ export default function ChatInterface({
             onAnimationEnd={() => setPlayAttentionPop(false)}
             style={{
               width: '100%',
+              minWidth: 0,
+              boxSizing: 'border-box',
               display: 'flex',
               alignItems: 'center',
-              gap: 12,
+              gap: 8,
               transformOrigin: 'center center',
               position: 'relative',
             }}
@@ -2544,11 +2601,12 @@ export default function ChatInterface({
                 background: '#ffffff',
                 border: '1.5px solid #cbd5e1',
                 borderRadius: 18,
-                padding: '8px 12px 8px 18px',
+                padding: '6px 8px 6px 14px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 12,
+                gap: 8,
                 boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
+                boxSizing: 'border-box',
                 transition: 'background-color 180ms ease, border-color 180ms ease, box-shadow 180ms var(--ease-out)',
               }}
               onFocus={(e) => {
@@ -2580,23 +2638,26 @@ export default function ChatInterface({
                   isListening
                     ? t('chat.listening', 'Listening for text input...')
                     : activeCategoryItem
-                      ? `${t('chat.ask_about', 'Ask a question about')} ${activeCategoryItem.title}...`
-                      : t('chat.input_ph', 'Ask about loans, eligibility, interest rates, or channel partners...')
+                      ? `${t('chat.ask_about', 'Ask about')} ${activeCategoryItem.title}...`
+                      : t('chat.input_ph_short', 'Ask about schemes or eligibility...')
                 }
                 rows={1}
                 style={{
                   flex: 1,
+                  minWidth: 0,
                   background: 'transparent',
                   border: 'none',
                   outline: 'none',
                   resize: 'none',
-                  fontSize: 14.5,
+                  fontSize: 16,
                   color: '#0f172a',
                   padding: '6px 0',
                   minHeight: 28,
                   maxHeight: 120,
-                  lineHeight: 1.5,
+                  lineHeight: 1.4,
                   fontFamily: 'inherit',
+                  overflowY: input.split('\n').length > 3 ? 'auto' : 'hidden',
+                  boxSizing: 'border-box',
                 }}
                 disabled={loading || voiceAgentState === 'PROCESSING'}
                 onInput={(e) => {
@@ -2608,7 +2669,7 @@ export default function ChatInterface({
 
               {/* Preserved small composer mic for Speech-to-Text */}
               {speechSupported && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                   {isListening && <VoiceVisualizer stream={activeStream} isListening={isListening} />}
                   <button
                     type="button"
@@ -2622,8 +2683,10 @@ export default function ChatInterface({
                           : 'Speak into chat box (Speech-to-Text)'
                     }
                     style={{
-                      width: 40,
-                      height: 40,
+                      width: 44,
+                      height: 44,
+                      minWidth: 44,
+                      minHeight: 44,
                       borderRadius: 12,
                       background: isListening ? '#dc2626' : '#e2e8f0',
                       color: '#ffffff',
@@ -2632,6 +2695,7 @@ export default function ChatInterface({
                       alignItems: 'center',
                       justifyContent: 'center',
                       flexShrink: 0,
+                      boxSizing: 'border-box',
                       cursor: loading || isTranscribing ? 'default' : 'pointer',
                       opacity: loading || isTranscribing ? 0.6 : 1,
                       transition: 'background-color 180ms ease, opacity 150ms ease, transform 180ms var(--ease-out)',
@@ -2639,11 +2703,11 @@ export default function ChatInterface({
                     aria-label="Speech to text input"
                   >
                     {isTranscribing ? (
-                      <Loader2 size={17} style={{ animation: 'spin 1s linear infinite' }} color="#0b1f3a" />
+                      <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} color="#0b1f3a" />
                     ) : isListening ? (
-                      <MicOff size={17} color="#ffffff" />
+                      <MicOff size={18} color="#ffffff" />
                     ) : (
-                      <Mic size={17} color="#0b1f3a" />
+                      <Mic size={18} color="#0b1f3a" />
                     )}
                   </button>
                 </div>
@@ -2654,8 +2718,10 @@ export default function ChatInterface({
                 onClick={() => send(input)}
                 disabled={!input.trim() || loading}
                 style={{
-                  width: 40,
-                  height: 40,
+                  width: 44,
+                  height: 44,
+                  minWidth: 44,
+                  minHeight: 44,
                   borderRadius: 12,
                   background: input.trim() && !loading ? '#0b1f3a' : '#cbd5e1',
                   color: '#ffffff',
@@ -2664,13 +2730,14 @@ export default function ChatInterface({
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
+                  boxSizing: 'border-box',
                   cursor: input.trim() && !loading ? 'pointer' : 'default',
                   transition: 'background-color 180ms ease, opacity 150ms ease, transform 180ms var(--ease-out)',
                 }}
                 title="Send message (Enter)"
                 aria-label="Send message"
               >
-                <Send size={16} color={input.trim() && !loading ? '#fbbf24' : '#ffffff'} />
+                <Send size={18} color={input.trim() && !loading ? '#fbbf24' : '#ffffff'} />
               </button>
             </div>
 
@@ -2687,10 +2754,13 @@ export default function ChatInterface({
                   background: '#ffffff',
                   border: '1.5px solid #cbd5e1',
                   borderRadius: 18,
-                  padding: '8px 14px 8px 10px',
+                  padding: '6px 14px 6px 10px',
                   boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
                   cursor: 'pointer',
                   flexShrink: 0,
+                  minHeight: 44,
+                  minWidth: 44,
+                  boxSizing: 'border-box',
                   maxWidth: 'clamp(180px, 32vw, 240px)',
                   transition: 'all 200ms ease',
                 }}

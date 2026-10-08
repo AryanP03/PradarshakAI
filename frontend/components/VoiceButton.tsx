@@ -56,8 +56,11 @@ export default function VoiceButton({
       aria-label={isPlaying ? 'Stop voice playback' : title}
       className={`voice-btn voice-btn-${variant} ${isPlaying ? 'voice-btn-playing' : ''} ${className}`}
       style={{
-        padding: isSm ? '4px 10px' : '6px 14px',
-        fontSize: isSm ? 11.5 : 12.5,
+        padding: isSm ? '8px 12px' : '10px 16px',
+        minHeight: 44,
+        display: 'inline-flex',
+        alignItems: 'center',
+        fontSize: isSm ? 12 : 13,
         opacity: isAnyLoading ? 0.6 : 1,
         ...style,
       }}

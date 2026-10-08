@@ -568,6 +568,99 @@ p {
 .comparison-table-scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.comparison-desktop-canvas {
+  display: block;
+}
+
+.comparison-mobile-canvas {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .comparison-desktop-canvas {
+    display: none !important;
+  }
+
+  .comparison-mobile-canvas {
+    display: flex !important;
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+}
+
+.comparison-mobile-feature-section {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.comparison-mobile-feature-title {
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.comparison-mobile-scheme-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--surface-container);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.comparison-mobile-scheme-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.comparison-mobile-scheme-data {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--text);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.comparison-mobile-scheme-card {
+  padding: 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--surface-low);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .comparison-header-row {
@@ -1131,3 +1224,28 @@ html, body {
     max-width: 180px;
   }
 }
+
+/* ── Mobile Chat UI & Touch Target Responsive Rules ── */
+@media (max-width: 640px) {
+  .voice-idle-widget {
+    padding: 4px !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    max-width: 44px !important;
+    border-radius: 50% !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    box-sizing: border-box !important;
+  }
+  .voice-idle-widget .voice-idle-text {
+    display: none !important;
+  }
+  .chat-composer {
+    padding: 4px 6px 4px 12px !important;
+    border-radius: 16px !important;
+    gap: 6px !important;
+  }
+}
+

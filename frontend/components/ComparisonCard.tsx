@@ -99,35 +99,6 @@ export default function ComparisonCard({
     render: (s: Scheme) => React.ReactNode;
   }[] = [
     {
-      label: t('compare.match_score'),
-      render: (s) => {
-        const pct = s.match_percentage != null && s.match_percentage > 0
-          ? Math.round(Number(s.match_percentage))
-          : s.score != null
-            ? (s.score > 100
-                ? Math.min(98, Math.max(50, 55 + Math.round(((Math.min(320, Math.max(50, s.score)) - 50) / 270) * 43)))
-                : Math.round(Number(s.score)))
-            : null;
-        return pct != null ? (
-          <span
-            style={{
-              fontWeight: 800,
-              color: '#16a34a',
-              background: 'rgba(22, 163, 74, 0.12)',
-              border: '1px solid rgba(22, 163, 74, 0.25)',
-              padding: '2px 8px',
-              borderRadius: 6,
-              fontSize: 12,
-            }}
-          >
-            {pct}% {t('scheme.match')}
-          </span>
-        ) : (
-          <span style={{ color: 'var(--muted)' }}>—</span>
-        );
-      },
-    },
-    {
       label: t('compare.max_loan'),
       render: (s) => {
         const isBest = Number(s.max_loan_lakh) === maxLoan && maxLoan > 0;
@@ -269,8 +240,8 @@ export default function ComparisonCard({
         </div>
       </div>
 
-      {/* ── Horizontally Scrollable Table Canvas ──────────────────────────── */}
-      <div className="comparison-table-scroll">
+      {/* ── Desktop Horizontally Scrollable Table Canvas ────────────────── */}
+      <div className="comparison-desktop-canvas comparison-table-scroll">
         <div style={{ minWidth: 200 + schemes.length * 200 }}>
           {/* Column Header */}
           <div
@@ -335,6 +306,7 @@ export default function ComparisonCard({
                         type="button"
                         onClick={() => onKnowMore(s)}
                         className="btn-scheme-details"
+                        style={{ minHeight: 44 }}
                         title={`${t('scheme.action_know_more')}: ${localizedName}`}
                       >
                         <BookOpen size={12} />
@@ -346,6 +318,7 @@ export default function ComparisonCard({
                         type="button"
                         onClick={() => onCalculateEMI(s)}
                         className="btn-scheme-emi"
+                        style={{ minHeight: 44 }}
                         title={`${t('scheme.action_emi')}: ${localizedName}`}
                       >
                         <Calculator size={12} />
@@ -358,6 +331,70 @@ export default function ComparisonCard({
             </div>
           )}
         </div>
+      </div>
+
+      {/* ── Mobile Responsive Feature Cards (Zero horizontal scroll, fits mobile perfectly) ── */}
+      <div className="comparison-mobile-canvas">
+        {/* Features List */}
+        {ROWS.map((row, rIdx) => (
+          <div key={rIdx} className="comparison-mobile-feature-section">
+            <span className="comparison-mobile-feature-title">{row.label}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: '100%' }}>
+              {schemes.map((s, sIdx) => (
+                <div key={sIdx} className="comparison-mobile-scheme-row">
+                  <span className="comparison-mobile-scheme-label">
+                    {getLocalizedSchemeName(s.name, language)}
+                  </span>
+                  <div className="comparison-mobile-scheme-data">
+                    {row.render(s)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        {/* Scheme Actions in Mobile View */}
+        {(onCalculateEMI || onKnowMore) && (
+          <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+            {schemes.map((s, sIdx) => {
+              const localizedName = getLocalizedSchemeName(s.name, language);
+              return (
+                <div key={sIdx} className="comparison-mobile-scheme-card">
+                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', overflowWrap: 'anywhere' }}>
+                    {localizedName}
+                  </span>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', width: '100%' }}>
+                    {onKnowMore && (
+                      <button
+                        type="button"
+                        onClick={() => onKnowMore(s)}
+                        className="btn-scheme-details"
+                        style={{ minHeight: 44, flex: '1 1 140px', justifyContent: 'center' }}
+                        title={`${t('scheme.action_know_more')}: ${localizedName}`}
+                      >
+                        <BookOpen size={13} />
+                        <span>{t('scheme.action_know_more')}</span>
+                      </button>
+                    )}
+                    {onCalculateEMI && (
+                      <button
+                        type="button"
+                        onClick={() => onCalculateEMI(s)}
+                        className="btn-scheme-emi"
+                        style={{ minHeight: 44, flex: '1 1 140px', justifyContent: 'center' }}
+                        title={`${t('scheme.action_emi')}: ${localizedName}`}
+                      >
+                        <Calculator size={13} />
+                        <span>{t('scheme.action_emi')}</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

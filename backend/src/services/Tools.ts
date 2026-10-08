@@ -47,7 +47,7 @@ export const TOOL_DEFS: ToolDef[] = [
       parameters: {
         type: 'object',
         properties: {
-          query: { type: 'string', description: 'The user\'s search query or question about schemes' },
+          query: { type: ['string', 'null'], description: 'The user\'s search query or question about schemes' },
           purpose: { type: ['string', 'null'], description: 'Loan purpose, business type, or trade (e.g. tailoring, dairy, retail shop, education)' },
           loan_amount_rs: { type: ['number', 'null'], description: 'Requested loan amount in rupees' },
           family_income_rs: { type: ['number', 'null'], description: 'Annual family income in rupees' },
