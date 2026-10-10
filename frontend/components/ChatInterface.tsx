@@ -2227,11 +2227,15 @@ export default function ChatInterface({
         overflow: 'hidden',
         background: '#f8fafc',
         position: 'relative',
+        flex: 1,
+        minHeight: 0,
       }}
     >
       <div
+        className="chat-message-list-container"
         style={{
           flex: 1,
+          minHeight: 0,
           overflowY: 'auto',
           overflowX: 'hidden',
           padding: 'clamp(14px, 3vw, 28px) clamp(8px, 2.5vw, 20px)',
@@ -2639,7 +2643,7 @@ export default function ChatInterface({
                     ? t('chat.listening', 'Listening for text input...')
                     : activeCategoryItem
                       ? `${t('chat.ask_about', 'Ask about')} ${activeCategoryItem.title}...`
-                      : t('chat.input_ph_short', 'Ask about schemes or eligibility...')
+                      : t('chat.input_ph_short', 'Ask about schemes...')
                 }
                 rows={1}
                 style={{
@@ -2653,8 +2657,8 @@ export default function ChatInterface({
                   color: '#0f172a',
                   padding: '6px 0',
                   minHeight: 28,
-                  maxHeight: 120,
-                  lineHeight: 1.4,
+                  maxHeight: 96,
+                  lineHeight: 1.35,
                   fontFamily: 'inherit',
                   overflowY: input.split('\n').length > 3 ? 'auto' : 'hidden',
                   boxSizing: 'border-box',
@@ -2663,7 +2667,9 @@ export default function ChatInterface({
                 onInput={(e) => {
                   const el = e.currentTarget;
                   el.style.height = 'auto';
-                  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+                  const newHeight = Math.min(Math.max(el.scrollHeight, 28), 96);
+                  el.style.height = `${newHeight}px`;
+                  el.style.overflowY = el.scrollHeight > 96 ? 'auto' : 'hidden';
                 }}
               />
 
@@ -2713,6 +2719,37 @@ export default function ChatInterface({
                 </div>
               )}
 
+              {/* Compact voice-mode button inside composer on mobile (idle state, <= 640px) */}
+              {voiceAgentState === 'IDLE' && (
+                <button
+                  type="button"
+                  onClick={handleToggleVoiceAgent}
+                  className="interactive-control focus-ring voice-idle-btn-mobile sm:hidden"
+                  style={{
+                    width: 44,
+                    height: 44,
+                    minWidth: 44,
+                    minHeight: 44,
+                    borderRadius: 12,
+                    background: 'linear-gradient(135deg, #0056b3, #003366)',
+                    color: '#ffffff',
+                    border: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    boxSizing: 'border-box',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px rgba(0, 86, 179, 0.25)',
+                    transition: 'all 180ms ease',
+                  }}
+                  title={t('voice.tap_to_start', 'Tap to start voice conversation with PradarshakAI')}
+                  aria-label={t('voice.aria_label', 'Voice conversation with PradarshakAI')}
+                >
+                  <AudioWaveformIcon state="IDLE" />
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={() => send(input)}
@@ -2741,14 +2778,13 @@ export default function ChatInterface({
               </button>
             </div>
 
-            {/* ── Voice-to-Voice Button & Text on the Right Level of Chatbox (When IDLE) ── */}
+            {/* ── Voice-to-Voice Button & Text on the Right Level of Chatbox (When IDLE, Desktop >= 641px) ── */}
             {voiceAgentState === 'IDLE' && (
               <button
                 type="button"
                 onClick={handleToggleVoiceAgent}
-                className="interactive-control focus-ring voice-idle-widget"
+                className="interactive-control focus-ring voice-idle-widget voice-idle-widget-desktop hidden sm:flex"
                 style={{
-                  display: 'flex',
                   alignItems: 'center',
                   gap: 10,
                   background: '#ffffff',

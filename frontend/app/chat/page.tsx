@@ -415,7 +415,7 @@ function ChatPage() {
   const progressPct = Math.round((completedCount / JOURNEY_STEPS.length) * 100);
 
   return (
-    <div style={{ height: '100dvh', minHeight: '100vh' }} className="flex flex-col overflow-hidden bg-slate-50 text-slate-900">
+    <div className="chat-app-shell bg-slate-50 text-slate-900">
       <NavBar />
 
       {/* Migration / Non-blocking Notice Toast */}
@@ -512,6 +512,7 @@ function ChatPage() {
                       gap: 6,
                       padding: '8px 12px',
                       minHeight: 44,
+                      minWidth: 44,
                       borderRadius: 10,
                       border: '1px solid',
                       borderColor: sidebarOpen ? '#0b1f3a' : '#cbd5e1',
@@ -528,7 +529,6 @@ function ChatPage() {
                   >
                     <History size={15} color={sidebarOpen ? '#fbbf24' : '#e87722'} style={{ flexShrink: 0 }} />
                     <span className="hidden sm:inline">{t('chat.past_chats', 'Past Chats')}</span>
-                    <span className="sm:hidden">History</span>
                   </button>
 
                   {/* Guest Past Chats Auth Popover */}
@@ -601,6 +601,7 @@ function ChatPage() {
                       gap: 6,
                       padding: '8px 12px',
                       minHeight: 44,
+                      minWidth: 44,
                       borderRadius: 10,
                       border: '1px solid #cbd5e1',
                       background: '#ffffff',
@@ -620,7 +621,6 @@ function ChatPage() {
                       <Share2 size={15} color="#0284c7" style={{ flexShrink: 0 }} />
                     )}
                     <span className="hidden sm:inline">{t('chat.share_chat', 'Share Chat')}</span>
-                    <span className="sm:hidden">Share</span>
                   </button>
 
                   {/* Guest Share Auth Popover */}
@@ -768,6 +768,7 @@ function ChatPage() {
                     gap: 6,
                     padding: '8px 12px',
                     minHeight: 44,
+                    minWidth: 44,
                     borderRadius: 10,
                     border: '1px solid',
                     borderColor: journeyOpen ? '#fed7aa' : '#cbd5e1',
@@ -801,6 +802,7 @@ function ChatPage() {
                     gap: 6,
                     padding: '8px 14px',
                     minHeight: 44,
+                    minWidth: 44,
                     borderRadius: 10,
                     border: 'none',
                     background: '#0b1f3a',
@@ -817,7 +819,7 @@ function ChatPage() {
                   aria-label={t('chat.new_chat', 'New Chat')}
                 >
                   <Plus size={15} color="#fbbf24" style={{ flexShrink: 0 }} />
-                  <span style={{ whiteSpace: 'nowrap' }}>{t('chat.new_chat', 'New Chat')}</span>
+                  <span className="new-chat-btn-text" style={{ whiteSpace: 'nowrap' }}>{t('chat.new_chat', 'New Chat')}</span>
                 </button>
               </div>
             </div>

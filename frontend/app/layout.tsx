@@ -3,8 +3,11 @@ import './globals.css';
 import { LanguageProvider } from '@/context/LanguageContext';
 
 export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
   colorScheme: 'light',
   themeColor: '#00132b',
+  interactiveWidget: 'resizes-content',
 };
 
 export const metadata: Metadata = {

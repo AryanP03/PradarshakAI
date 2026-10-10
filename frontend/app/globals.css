@@ -1225,27 +1225,73 @@ html, body {
   }
 }
 
-/* ── Mobile Chat UI & Touch Target Responsive Rules ── */
-@media (max-width: 640px) {
-  .voice-idle-widget {
-    padding: 4px !important;
-    width: 44px !important;
-    height: 44px !important;
-    min-width: 44px !important;
-    min-height: 44px !important;
-    max-width: 44px !important;
-    border-radius: 50% !important;
-    justify-content: center !important;
-    gap: 0 !important;
-    box-sizing: border-box !important;
-  }
-  .voice-idle-widget .voice-idle-text {
+/* ── App Shell & Mobile Responsive Rules ── */
+.chat-app-shell {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 100%;
+}
+
+@media (max-width: 340px) {
+  .new-chat-btn-text {
     display: none !important;
   }
+}
+
+/* ── Mobile Chat UI & Touch Target Responsive Rules ── */
+@media (max-width: 640px) {
+  .chat-controls-container {
+    padding: 6px 8px max(8px, env(safe-area-inset-bottom, 8px)) !important;
+    transform: none !important;
+    flex-shrink: 0 !important;
+    background: #ffffff !important;
+    border-top: 1px solid #e2e8f0 !important;
+  }
+  .chatbox-row {
+    gap: 4px !important;
+    width: 100% !important;
+  }
   .chat-composer {
-    padding: 4px 6px 4px 12px !important;
-    border-radius: 16px !important;
-    gap: 6px !important;
+    padding: 3px 6px 3px 12px !important;
+    border-radius: 20px !important;
+    gap: 4px !important;
+    min-height: 44px !important;
+    align-items: center !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .chat-composer textarea {
+    font-size: 16px !important;
+    padding: 6px 0 !important;
+    min-height: 28px !important;
+    line-height: 1.35 !important;
+  }
+  .chat-composer textarea::placeholder {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .voice-idle-widget-desktop {
+    display: none !important;
   }
 }
+
+@media (min-width: 641px) {
+  .voice-idle-btn-mobile {
+    display: none !important;
+  }
+  .voice-idle-widget-desktop {
+    display: flex !important;
+  }
+}
+
+@media (max-height: 480px) {
+  .guidance-hint-line {
+    display: none !important;
+  }
+}
+
 
