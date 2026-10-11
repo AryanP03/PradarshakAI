@@ -1,0 +1,1559 @@
+[
+  {
+    "viewport": "320x568",
+    "width": 320,
+    "height": 568,
+    "inputStates": [
+      {
+        "state": "initial load",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "focused",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "one line typed",
+        "controlsH": 80,
+        "composerH": 65,
+        "textareaH": 59,
+        "textareaScrollH": 59
+      },
+      {
+        "state": "five lines typed",
+        "controlsH": 117,
+        "composerH": 102,
+        "textareaH": 96,
+        "textareaScrollH": 146
+      },
+      {
+        "state": "immediately after sending",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "while loading / typing indicator",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "after AI reply arrives",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "after switching UI to Hindi",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      }
+    ],
+    "inputHeightDiff": 0,
+    "scrollEmpty": {
+      "state": "empty",
+      "docScrollHeight": 568,
+      "winInnerHeight": 568,
+      "visualViewportHeight": 568,
+      "hasDocScroll": false,
+      "hasHorizontalScroll": false,
+      "scrollableElements": []
+    },
+    "scrollAfterReply": {
+      "state": "after reply",
+      "docScrollHeight": 568,
+      "winInnerHeight": 568,
+      "visualViewportHeight": 568,
+      "hasDocScroll": false,
+      "hasHorizontalScroll": false,
+      "scrollableElements": [
+        {
+          "tag": "div",
+          "className": "chat-message-list-container",
+          "clientHeight": 380,
+          "scrollHeight": 2037
+        }
+      ]
+    },
+    "alignment": {
+      "chatWidth": 320,
+      "userBubbles": [
+        {
+          "text": "Which schemes are available?  ...",
+          "width": 225,
+          "widthPct": "70.4%",
+          "leftGap": 83,
+          "leftGapPct": "25.9%",
+          "rightGap": 12
+        },
+        {
+          "text": "Hi",
+          "width": 50,
+          "widthPct": "15.6%",
+          "leftGap": 258,
+          "leftGapPct": "80.6%",
+          "rightGap": 12
+        },
+        {
+          "text": "👍🎯",
+          "width": 76,
+          "widthPct": "23.7%",
+          "leftGap": 232,
+          "leftGapPct": "72.5%",
+          "rightGap": 12
+        },
+        {
+          "text": "मुझे उच्च शिक्षा के लिए सबसे अ...",
+          "width": 243,
+          "widthPct": "75.8%",
+          "leftGap": 65,
+          "leftGapPct": "20.3%",
+          "rightGap": 12
+        }
+      ],
+      "avatarVisible": false,
+      "botBubble": {
+        "left": 12,
+        "right": 12,
+        "width": 296
+      },
+      "cards": [
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 296
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 296
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 296
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 296
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 296
+        }
+      ]
+    },
+    "keyboardCheck": {
+      "composerVisible": true,
+      "composerTop": 346,
+      "composerBottom": 392,
+      "containerScrollHeight": 3242,
+      "containerClientHeight": 212
+    },
+    "screenshot": "d:\\SIH_2026\\PradarsakAI\\screenshots\\after_320x568.png"
+  },
+  {
+    "viewport": "360x640",
+    "width": 360,
+    "height": 640,
+    "inputStates": [
+      {
+        "state": "initial load",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "focused",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "one line typed",
+        "controlsH": 80,
+        "composerH": 65,
+        "textareaH": 59,
+        "textareaScrollH": 59
+      },
+      {
+        "state": "five lines typed",
+        "controlsH": 117,
+        "composerH": 102,
+        "textareaH": 96,
+        "textareaScrollH": 146
+      },
+      {
+        "state": "immediately after sending",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "while loading / typing indicator",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "after AI reply arrives",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "after switching UI to Hindi",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      }
+    ],
+    "inputHeightDiff": 0,
+    "scrollEmpty": {
+      "state": "empty",
+      "docScrollHeight": 640,
+      "winInnerHeight": 640,
+      "visualViewportHeight": 640,
+      "hasDocScroll": false,
+      "hasHorizontalScroll": false,
+      "scrollableElements": []
+    },
+    "scrollAfterReply": {
+      "state": "after reply",
+      "docScrollHeight": 640,
+      "winInnerHeight": 640,
+      "visualViewportHeight": 640,
+      "hasDocScroll": false,
+      "hasHorizontalScroll": false,
+      "scrollableElements": [
+        {
+          "tag": "div",
+          "className": "chat-message-list-container",
+          "clientHeight": 452,
+          "scrollHeight": 660
+        }
+      ]
+    },
+    "alignment": {
+      "chatWidth": 360,
+      "userBubbles": [
+        {
+          "text": "Which schemes are available?  ...",
+          "width": 225,
+          "widthPct": "62.5%",
+          "leftGap": 123,
+          "leftGapPct": "34.2%",
+          "rightGap": 12
+        },
+        {
+          "text": "Hi",
+          "width": 50,
+          "widthPct": "13.8%",
+          "leftGap": 298,
+          "leftGapPct": "82.8%",
+          "rightGap": 12
+        },
+        {
+          "text": "👍🎯",
+          "width": 76,
+          "widthPct": "21.1%",
+          "leftGap": 272,
+          "leftGapPct": "75.6%",
+          "rightGap": 12
+        },
+        {
+          "text": "मुझे उच्च शिक्षा के लिए सबसे अ...",
+          "width": 276,
+          "widthPct": "76.5%",
+          "leftGap": 72,
+          "leftGapPct": "20%",
+          "rightGap": 12
+        }
+      ],
+      "avatarVisible": false,
+      "botBubble": {
+        "left": 12,
+        "right": 12,
+        "width": 336
+      },
+      "cards": [
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 336
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 336
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 336
+        }
+      ]
+    },
+    "keyboardCheck": {
+      "composerVisible": true,
+      "composerTop": 346,
+      "composerBottom": 392,
+      "containerScrollHeight": 1953,
+      "containerClientHeight": 212
+    },
+    "screenshot": "d:\\SIH_2026\\PradarsakAI\\screenshots\\after_360x640.png"
+  },
+  {
+    "viewport": "360x800",
+    "width": 360,
+    "height": 800,
+    "inputStates": [
+      {
+        "state": "initial load",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "focused",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "one line typed",
+        "controlsH": 80,
+        "composerH": 65,
+        "textareaH": 59,
+        "textareaScrollH": 59
+      },
+      {
+        "state": "five lines typed",
+        "controlsH": 117,
+        "composerH": 102,
+        "textareaH": 96,
+        "textareaScrollH": 146
+      },
+      {
+        "state": "immediately after sending",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "while loading / typing indicator",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "after AI reply arrives",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "after switching UI to Hindi",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      }
+    ],
+    "inputHeightDiff": 0,
+    "scrollEmpty": {
+      "state": "empty",
+      "docScrollHeight": 800,
+      "winInnerHeight": 800,
+      "visualViewportHeight": 800,
+      "hasDocScroll": false,
+      "hasHorizontalScroll": false,
+      "scrollableElements": []
+    },
+    "scrollAfterReply": {
+      "state": "after reply",
+      "docScrollHeight": 800,
+      "winInnerHeight": 800,
+      "visualViewportHeight": 800,
+      "hasDocScroll": false,
+      "hasHorizontalScroll": false,
+      "scrollableElements": [
+        {
+          "tag": "div",
+          "className": "chat-message-list-container",
+          "clientHeight": 612,
+          "scrollHeight": 1842
+        }
+      ]
+    },
+    "alignment": {
+      "chatWidth": 360,
+      "userBubbles": [
+        {
+          "text": "Which schemes are available?  ...",
+          "width": 225,
+          "widthPct": "62.5%",
+          "leftGap": 123,
+          "leftGapPct": "34.2%",
+          "rightGap": 12
+        },
+        {
+          "text": "Hi",
+          "width": 50,
+          "widthPct": "13.8%",
+          "leftGap": 298,
+          "leftGapPct": "82.8%",
+          "rightGap": 12
+        },
+        {
+          "text": "I am a first-year college stud...",
+          "width": 276,
+          "widthPct": "76.5%",
+          "leftGap": 72,
+          "leftGapPct": "20%",
+          "rightGap": 12
+        }
+      ],
+      "avatarVisible": false,
+      "botBubble": {
+        "left": 12,
+        "right": 12,
+        "width": 336
+      },
+      "cards": [
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 336
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 336
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 336
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 336
+        }
+      ]
+    },
+    "keyboardCheck": {
+      "composerVisible": true,
+      "composerTop": 346,
+      "composerBottom": 392,
+      "containerScrollHeight": 2763,
+      "containerClientHeight": 212
+    },
+    "screenshot": "d:\\SIH_2026\\PradarsakAI\\screenshots\\after_360x800.png"
+  },
+  {
+    "viewport": "375x667",
+    "width": 375,
+    "height": 667,
+    "inputStates": [
+      {
+        "state": "initial load",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "focused",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "one line typed",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 38,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "five lines typed",
+        "controlsH": 117,
+        "composerH": 102,
+        "textareaH": 96,
+        "textareaScrollH": 124
+      },
+      {
+        "state": "immediately after sending",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "while loading / typing indicator",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "after AI reply arrives",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "after switching UI to Hindi",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      }
+    ],
+    "inputHeightDiff": 0,
+    "scrollEmpty": {
+      "state": "empty",
+      "docScrollHeight": 667,
+      "winInnerHeight": 667,
+      "visualViewportHeight": 667,
+      "hasDocScroll": false,
+      "hasHorizontalScroll": false,
+      "scrollableElements": []
+    },
+    "scrollAfterReply": {
+      "state": "after reply",
+      "docScrollHeight": 667,
+      "winInnerHeight": 667,
+      "visualViewportHeight": 667,
+      "hasDocScroll": false,
+      "hasHorizontalScroll": false,
+      "scrollableElements": [
+        {
+          "tag": "div",
+          "className": "chat-message-list-container",
+          "clientHeight": 479,
+          "scrollHeight": 1903
+        }
+      ]
+    },
+    "alignment": {
+      "chatWidth": 375,
+      "userBubbles": [
+        {
+          "text": "Which schemes are available?  ...",
+          "width": 225,
+          "widthPct": "60%",
+          "leftGap": 138,
+          "leftGapPct": "36.8%",
+          "rightGap": 12
+        },
+        {
+          "text": "Hi",
+          "width": 50,
+          "widthPct": "13.3%",
+          "leftGap": 313,
+          "leftGapPct": "83.5%",
+          "rightGap": 12
+        }
+      ],
+      "avatarVisible": false,
+      "botBubble": {
+        "left": 12,
+        "right": 12,
+        "width": 351
+      },
+      "cards": [
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 351
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 351
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 351
+        }
+      ]
+    },
+    "keyboardCheck": {
+      "composerVisible": true,
+      "composerTop": 346,
+      "composerBottom": 392,
+      "containerScrollHeight": 2179,
+      "containerClientHeight": 212
+    },
+    "screenshot": "d:\\SIH_2026\\PradarsakAI\\screenshots\\after_375x667.png"
+  },
+  {
+    "viewport": "390x844",
+    "width": 390,
+    "height": 844,
+    "inputStates": [
+      {
+        "state": "initial load",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "focused",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "one line typed",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 38,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "five lines typed",
+        "controlsH": 117,
+        "composerH": 102,
+        "textareaH": 96,
+        "textareaScrollH": 124
+      },
+      {
+        "state": "immediately after sending",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "while loading / typing indicator",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "after AI reply arrives",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "after switching UI to Hindi",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      }
+    ],
+    "inputHeightDiff": 0,
+    "scrollEmpty": {
+      "state": "empty",
+      "docScrollHeight": 844,
+      "winInnerHeight": 844,
+      "visualViewportHeight": 844,
+      "hasDocScroll": false,
+      "hasHorizontalScroll": false,
+      "scrollableElements": []
+    },
+    "scrollAfterReply": {
+      "state": "after reply",
+      "docScrollHeight": 844,
+      "winInnerHeight": 844,
+      "visualViewportHeight": 844,
+      "hasDocScroll": false,
+      "hasHorizontalScroll": false,
+      "scrollableElements": [
+        {
+          "tag": "div",
+          "className": "chat-message-list-container",
+          "clientHeight": 656,
+          "scrollHeight": 1702
+        }
+      ]
+    },
+    "alignment": {
+      "chatWidth": 390,
+      "userBubbles": [
+        {
+          "text": "Which schemes are available?  ...",
+          "width": 225,
+          "widthPct": "57.7%",
+          "leftGap": 153,
+          "leftGapPct": "39.2%",
+          "rightGap": 12
+        },
+        {
+          "text": "Hi",
+          "width": 50,
+          "widthPct": "12.8%",
+          "leftGap": 328,
+          "leftGapPct": "84.1%",
+          "rightGap": 12
+        },
+        {
+          "text": "👍🎯",
+          "width": 76,
+          "widthPct": "19.4%",
+          "leftGap": 302,
+          "leftGapPct": "77.4%",
+          "rightGap": 12
+        },
+        {
+          "text": "मुझे उच्च शिक्षा के लिए सबसे अ...",
+          "width": 300,
+          "widthPct": "77%",
+          "leftGap": 78,
+          "leftGapPct": "20%",
+          "rightGap": 12
+        }
+      ],
+      "avatarVisible": false,
+      "botBubble": {
+        "left": 12,
+        "right": 12,
+        "width": 366
+      },
+      "cards": [
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 366
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 366
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 366
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 366
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 366
+        }
+      ]
+    },
+    "keyboardCheck": {
+      "composerVisible": true,
+      "composerTop": 346,
+      "composerBottom": 392,
+      "containerScrollHeight": 2753,
+      "containerClientHeight": 212
+    },
+    "screenshot": "d:\\SIH_2026\\PradarsakAI\\screenshots\\after_390x844.png"
+  },
+  {
+    "viewport": "412x915",
+    "width": 412,
+    "height": 915,
+    "inputStates": [
+      {
+        "state": "initial load",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "focused",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "one line typed",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 38,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "five lines typed",
+        "controlsH": 117,
+        "composerH": 102,
+        "textareaH": 96,
+        "textareaScrollH": 124
+      },
+      {
+        "state": "immediately after sending",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "while loading / typing indicator",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "after AI reply arrives",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "after switching UI to Hindi",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      }
+    ],
+    "inputHeightDiff": 0,
+    "scrollEmpty": {
+      "state": "empty",
+      "docScrollHeight": 915,
+      "winInnerHeight": 915,
+      "visualViewportHeight": 915,
+      "hasDocScroll": false,
+      "hasHorizontalScroll": false,
+      "scrollableElements": []
+    },
+    "scrollAfterReply": {
+      "state": "after reply",
+      "docScrollHeight": 915,
+      "winInnerHeight": 915,
+      "visualViewportHeight": 915,
+      "hasDocScroll": false,
+      "hasHorizontalScroll": false,
+      "scrollableElements": []
+    },
+    "alignment": {
+      "chatWidth": 412,
+      "userBubbles": [
+        {
+          "text": "Which schemes are available?  ...",
+          "width": 225,
+          "widthPct": "54.7%",
+          "leftGap": 175,
+          "leftGapPct": "42.5%",
+          "rightGap": 12
+        },
+        {
+          "text": "Hi",
+          "width": 50,
+          "widthPct": "12.1%",
+          "leftGap": 350,
+          "leftGapPct": "85%",
+          "rightGap": 12
+        },
+        {
+          "text": "I am a first-year college stud...",
+          "width": 318,
+          "widthPct": "77.2%",
+          "leftGap": 82,
+          "leftGapPct": "19.9%",
+          "rightGap": 12
+        }
+      ],
+      "avatarVisible": false,
+      "botBubble": {
+        "left": 12,
+        "right": 12,
+        "width": 388
+      },
+      "cards": []
+    },
+    "keyboardCheck": {
+      "composerVisible": true,
+      "composerTop": 346,
+      "composerBottom": 392,
+      "containerScrollHeight": 1038,
+      "containerClientHeight": 212
+    },
+    "screenshot": "d:\\SIH_2026\\PradarsakAI\\screenshots\\after_412x915.png"
+  },
+  {
+    "viewport": "430x932",
+    "width": 430,
+    "height": 932,
+    "inputStates": [
+      {
+        "state": "initial load",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "focused",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "one line typed",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 38,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "five lines typed",
+        "controlsH": 117,
+        "composerH": 102,
+        "textareaH": 96,
+        "textareaScrollH": 124
+      },
+      {
+        "state": "immediately after sending",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "while loading / typing indicator",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "after AI reply arrives",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "after switching UI to Hindi",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      }
+    ],
+    "inputHeightDiff": 0,
+    "scrollEmpty": {
+      "state": "empty",
+      "docScrollHeight": 932,
+      "winInnerHeight": 932,
+      "visualViewportHeight": 932,
+      "hasDocScroll": false,
+      "hasHorizontalScroll": false,
+      "scrollableElements": []
+    },
+    "scrollAfterReply": {
+      "state": "after reply",
+      "docScrollHeight": 932,
+      "winInnerHeight": 932,
+      "visualViewportHeight": 932,
+      "hasDocScroll": false,
+      "hasHorizontalScroll": false,
+      "scrollableElements": [
+        {
+          "tag": "div",
+          "className": "chat-message-list-container",
+          "clientHeight": 744,
+          "scrollHeight": 1858
+        }
+      ]
+    },
+    "alignment": {
+      "chatWidth": 430,
+      "userBubbles": [
+        {
+          "text": "Which schemes are available?  ...",
+          "width": 225,
+          "widthPct": "52.4%",
+          "leftGap": 193,
+          "leftGapPct": "44.9%",
+          "rightGap": 12
+        },
+        {
+          "text": "Hi",
+          "width": 50,
+          "widthPct": "11.6%",
+          "leftGap": 368,
+          "leftGapPct": "85.6%",
+          "rightGap": 12
+        }
+      ],
+      "avatarVisible": false,
+      "botBubble": {
+        "left": 12,
+        "right": 12,
+        "width": 406
+      },
+      "cards": [
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 406
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 406
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 406
+        }
+      ]
+    },
+    "keyboardCheck": {
+      "composerVisible": true,
+      "composerTop": 346,
+      "composerBottom": 392,
+      "containerScrollHeight": 2010,
+      "containerClientHeight": 212
+    },
+    "screenshot": "d:\\SIH_2026\\PradarsakAI\\screenshots\\after_430x932.png"
+  },
+  {
+    "viewport": "600x900",
+    "width": 600,
+    "height": 900,
+    "inputStates": [
+      {
+        "state": "initial load",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "focused",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "one line typed",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 38,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "five lines typed",
+        "controlsH": 117,
+        "composerH": 102,
+        "textareaH": 96,
+        "textareaScrollH": 124
+      },
+      {
+        "state": "immediately after sending",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "while loading / typing indicator",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "after AI reply arrives",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "after switching UI to Hindi",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      }
+    ],
+    "inputHeightDiff": 0,
+    "scrollEmpty": {
+      "state": "empty",
+      "docScrollHeight": 900,
+      "winInnerHeight": 900,
+      "visualViewportHeight": 900,
+      "hasDocScroll": false,
+      "hasHorizontalScroll": false,
+      "scrollableElements": []
+    },
+    "scrollAfterReply": {
+      "state": "after reply",
+      "docScrollHeight": 900,
+      "winInnerHeight": 900,
+      "visualViewportHeight": 900,
+      "hasDocScroll": false,
+      "hasHorizontalScroll": false,
+      "scrollableElements": [
+        {
+          "tag": "div",
+          "className": "chat-message-list-container",
+          "clientHeight": 712,
+          "scrollHeight": 1463
+        }
+      ]
+    },
+    "alignment": {
+      "chatWidth": 600,
+      "userBubbles": [
+        {
+          "text": "Which schemes are available?  ...",
+          "width": 225,
+          "widthPct": "37.5%",
+          "leftGap": 363,
+          "leftGapPct": "60.5%",
+          "rightGap": 12
+        },
+        {
+          "text": "Hi",
+          "width": 50,
+          "widthPct": "8.3%",
+          "leftGap": 538,
+          "leftGapPct": "89.7%",
+          "rightGap": 12
+        },
+        {
+          "text": "I am a first-year college stud...",
+          "width": 472,
+          "widthPct": "78.7%",
+          "leftGap": 116,
+          "leftGapPct": "19.3%",
+          "rightGap": 12
+        }
+      ],
+      "avatarVisible": false,
+      "botBubble": {
+        "left": 12,
+        "right": 12,
+        "width": 576
+      },
+      "cards": [
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 576
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 576
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 576
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 576
+        }
+      ]
+    },
+    "keyboardCheck": {
+      "composerVisible": true,
+      "composerTop": 346,
+      "composerBottom": 392,
+      "containerScrollHeight": 2122,
+      "containerClientHeight": 212
+    },
+    "screenshot": "d:\\SIH_2026\\PradarsakAI\\screenshots\\after_600x900.png"
+  },
+  {
+    "viewport": "844x390",
+    "width": 844,
+    "height": 390,
+    "inputStates": [
+      {
+        "state": "initial load",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "focused",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "one line typed",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 38,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "five lines typed",
+        "controlsH": 117,
+        "composerH": 102,
+        "textareaH": 96,
+        "textareaScrollH": 124
+      },
+      {
+        "state": "immediately after sending",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "while loading / typing indicator",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "after AI reply arrives",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      },
+      {
+        "state": "after switching UI to Hindi",
+        "controlsH": 61,
+        "composerH": 46,
+        "textareaH": 37.6,
+        "textareaScrollH": 38
+      }
+    ],
+    "inputHeightDiff": 0,
+    "scrollEmpty": {
+      "state": "empty",
+      "docScrollHeight": 390,
+      "winInnerHeight": 390,
+      "visualViewportHeight": 390,
+      "hasDocScroll": false,
+      "hasHorizontalScroll": false,
+      "scrollableElements": [
+        {
+          "tag": "div",
+          "className": "chat-message-list-container",
+          "clientHeight": 202,
+          "scrollHeight": 231
+        }
+      ]
+    },
+    "scrollAfterReply": {
+      "state": "after reply",
+      "docScrollHeight": 390,
+      "winInnerHeight": 390,
+      "visualViewportHeight": 390,
+      "hasDocScroll": false,
+      "hasHorizontalScroll": false,
+      "scrollableElements": [
+        {
+          "tag": "div",
+          "className": "chat-message-list-container",
+          "clientHeight": 202,
+          "scrollHeight": 1265
+        }
+      ]
+    },
+    "alignment": {
+      "chatWidth": 844,
+      "userBubbles": [
+        {
+          "text": "Which schemes are available?  ...",
+          "width": 225,
+          "widthPct": "26.7%",
+          "leftGap": 607,
+          "leftGapPct": "71.9%",
+          "rightGap": 12
+        },
+        {
+          "text": "Hi",
+          "width": 50,
+          "widthPct": "5.9%",
+          "leftGap": 782,
+          "leftGapPct": "92.7%",
+          "rightGap": 12
+        },
+        {
+          "text": "I am a first-year college stud...",
+          "width": 672,
+          "widthPct": "79.7%",
+          "leftGap": 160,
+          "leftGapPct": "19%",
+          "rightGap": 12
+        }
+      ],
+      "avatarVisible": false,
+      "botBubble": {
+        "left": 12,
+        "right": 12,
+        "width": 820
+      },
+      "cards": [
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 820
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 820
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 820
+        },
+        {
+          "id": "card",
+          "left": 12,
+          "right": 12,
+          "width": 820
+        }
+      ]
+    },
+    "keyboardCheck": {
+      "composerVisible": true,
+      "composerTop": 346,
+      "composerBottom": 392,
+      "containerScrollHeight": 1882,
+      "containerClientHeight": 212
+    },
+    "screenshot": "d:\\SIH_2026\\PradarsakAI\\screenshots\\after_844x390.png"
+  },
+  {
+    "viewport": "1366x768",
+    "width": 1366,
+    "height": 768,
+    "inputStates": [
+      {
+        "state": "initial load",
+        "controlsH": 81,
+        "composerH": 58,
+        "textareaH": 33.6,
+        "textareaScrollH": 34
+      },
+      {
+        "state": "focused",
+        "controlsH": 81,
+        "composerH": 58,
+        "textareaH": 33.6,
+        "textareaScrollH": 34
+      },
+      {
+        "state": "one line typed",
+        "controlsH": 81,
+        "composerH": 58,
+        "textareaH": 34,
+        "textareaScrollH": 34
+      },
+      {
+        "state": "five lines typed",
+        "controlsH": 133,
+        "composerH": 110,
+        "textareaH": 96,
+        "textareaScrollH": 120
+      },
+      {
+        "state": "immediately after sending",
+        "controlsH": 81,
+        "composerH": 58,
+        "textareaH": 33.6,
+        "textareaScrollH": 34
+      },
+      {
+        "state": "while loading / typing indicator",
+        "controlsH": 81,
+        "composerH": 58,
+        "textareaH": 33.6,
+        "textareaScrollH": 34
+      },
+      {
+        "state": "after AI reply arrives",
+        "controlsH": 81,
+        "composerH": 58,
+        "textareaH": 33.6,
+        "textareaScrollH": 34
+      },
+      {
+        "state": "after switching UI to Hindi",
+        "controlsH": 81,
+        "composerH": 58,
+        "textareaH": 33.6,
+        "textareaScrollH": 34
+      }
+    ],
+    "inputHeightDiff": 0,
+    "scrollEmpty": {
+      "state": "empty",
+      "docScrollHeight": 768,
+      "winInnerHeight": 768,
+      "visualViewportHeight": 768,
+      "hasDocScroll": false,
+      "hasHorizontalScroll": false,
+      "scrollableElements": []
+    },
+    "scrollAfterReply": {
+      "state": "after reply",
+      "docScrollHeight": 768,
+      "winInnerHeight": 768,
+      "visualViewportHeight": 768,
+      "hasDocScroll": false,
+      "hasHorizontalScroll": false,
+      "scrollableElements": [
+        {
+          "tag": "div",
+          "className": "chat-message-list-container",
+          "clientHeight": 621,
+          "scrollHeight": 1332
+        }
+      ]
+    },
+    "alignment": {
+      "chatWidth": 1366,
+      "userBubbles": [
+        {
+          "text": "Which schemes are available?  ...",
+          "width": 225,
+          "widthPct": "16.5%",
+          "leftGap": 869,
+          "leftGapPct": "63.6%",
+          "rightGap": 272
+        },
+        {
+          "text": "Hi",
+          "width": 50,
+          "widthPct": "3.6%",
+          "leftGap": 1044,
+          "leftGapPct": "76.4%",
+          "rightGap": 272
+        },
+        {
+          "text": "I am a first-year college stud...",
+          "width": 822,
+          "widthPct": "60.2%",
+          "leftGap": 272,
+          "leftGapPct": "19.9%",
+          "rightGap": 272
+        }
+      ],
+      "avatarVisible": true,
+      "botBubble": {
+        "left": 322,
+        "right": 272,
+        "width": 772
+      },
+      "cards": [
+        {
+          "id": "card",
+          "left": 322,
+          "right": 272,
+          "width": 772
+        },
+        {
+          "id": "card",
+          "left": 322,
+          "right": 272,
+          "width": 772
+        },
+        {
+          "id": "card",
+          "left": 322,
+          "right": 272,
+          "width": 772
+        },
+        {
+          "id": "card",
+          "left": 322,
+          "right": 272,
+          "width": 772
+        }
+      ]
+    },
+    "keyboardCheck": {
+      "composerVisible": true,
+      "composerTop": 346,
+      "composerBottom": 392,
+      "containerScrollHeight": 1844,
+      "containerClientHeight": 273
+    },
+    "screenshot": "d:\\SIH_2026\\PradarsakAI\\screenshots\\after_1366x768.png"
+  }
+]

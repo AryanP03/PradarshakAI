@@ -351,7 +351,9 @@ function MessageBubble({
         <div
           className={`chat-bubble ${isUser ? 'chat-bubble-user' : 'chat-bubble-bot'}`}
           style={{
-            maxWidth: 'min(85%, 680px)',
+            maxWidth: '100%',
+            width: isUser ? 'fit-content' : '100%',
+            flex: isUser ? 'none' : 1,
             minWidth: 0,
             boxSizing: 'border-box',
             padding: '14px 18px',
@@ -412,13 +414,15 @@ function MessageBubble({
         </div>
       </div>
 
-      {/* ── Structured Data Result Cards & Extras (Full Width — No Avatar Indent) ── */}
+      {/* ── Structured Data Result Cards & Extras (Avatar-Aligned with identical width) ── */}
       {showExtras && (
         <div
+          className="chat-extras-container"
           style={{
             width: '100%',
             maxWidth: '100%',
             minWidth: 0,
+            paddingLeft: 50,
             display: 'flex',
             flexDirection: 'column',
             gap: 14,
@@ -1062,6 +1066,8 @@ interface ChatInterfaceProps {
   inquiryId?: string | null;
   isNewInquiry?: boolean;
   category?: string | null;
+  isWide?: boolean;
+  sideWidth?: number;
 }
 
 export default function ChatInterface({
@@ -1076,6 +1082,8 @@ export default function ChatInterface({
   inquiryId,
   isNewInquiry,
   category,
+  isWide = false,
+  sideWidth = 260,
 }: ChatInterfaceProps) {
   const router = useRouter();
   // Always initialise with empty array on SSR; hydrate from sessionStorage in useEffect.
@@ -1867,6 +1875,10 @@ export default function ChatInterface({
       setIsWelcomeComplete(false);
       setHasDismissedGuidance(false);
       setInput('');
+      if (inputRef.current) {
+        inputRef.current.style.height = 'auto';
+        inputRef.current.style.overflowY = 'hidden';
+      }
       setLoading(false);
       setSpeechError(null);
       if (!inquiryId) {
@@ -1878,6 +1890,14 @@ export default function ChatInterface({
       setVoiceAgentState('IDLE');
     }
   }, [resetKey, stopAudio, stopListening, cleanupVoiceAgent, inquiryId]);
+
+  // Keep input height at exactly single-line whenever input is empty
+  useEffect(() => {
+    if (!input && inputRef.current) {
+      inputRef.current.style.height = 'auto';
+      inputRef.current.style.overflowY = 'hidden';
+    }
+  }, [input]);
 
   // Synchronize messages state with parent and sessionStorage for session retention
   useEffect(() => {
@@ -1971,6 +1991,10 @@ export default function ChatInterface({
       setIsWelcomeComplete(true);
       addMessage({ role: 'user', text });
       setInput('');
+      if (inputRef.current) {
+        inputRef.current.style.height = 'auto';
+        inputRef.current.style.overflowY = 'hidden';
+      }
       setLoading(true);
 
       try {
@@ -2238,7 +2262,10 @@ export default function ChatInterface({
           minHeight: 0,
           overflowY: 'auto',
           overflowX: 'hidden',
-          padding: 'clamp(14px, 3vw, 28px) clamp(8px, 2.5vw, 20px)',
+          paddingTop: isWide ? 14 : 'clamp(14px, 3vw, 28px)',
+          paddingBottom: 'clamp(14px, 3vw, 28px)',
+          paddingLeft: isWide ? sideWidth : 12,
+          paddingRight: isWide ? sideWidth : 12,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -2247,7 +2274,18 @@ export default function ChatInterface({
           boxSizing: 'border-box',
         }}
       >
-        <div style={{ maxWidth: 880, width: '100%', minWidth: 0, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div
+          className="chat-column-wrapper"
+          style={{
+            maxWidth: 1000,
+            width: '100%',
+            minWidth: 0,
+            boxSizing: 'border-box',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'stretch',
+          }}
+        >
 
           {/* ── Category-Specific Page View Header ─────────────────────────────────── */}
           {showWelcome && messages.length === 0 && activeCategoryItem && (
@@ -2437,7 +2475,10 @@ export default function ChatInterface({
         style={{
           borderTop: isBottomDocked ? '1px solid #e2e8f0' : '1px solid transparent',
           background: isBottomDocked ? '#ffffff' : 'transparent',
-          padding: '10px clamp(8px, 2.5vw, 18px) max(12px, env(safe-area-inset-bottom, 12px))',
+          paddingTop: 10,
+          paddingBottom: 'max(12px, env(safe-area-inset-bottom, 12px))',
+          paddingLeft: isWide ? sideWidth : 12,
+          paddingRight: isWide ? sideWidth : 12,
           flexShrink: 0,
           boxShadow: isBottomDocked ? '0 -4px 20px rgba(0,0,0,0.03)' : 'none',
           display: 'flex',
@@ -2459,7 +2500,7 @@ export default function ChatInterface({
               : 'transform 450ms cubic-bezier(0.16, 1, 0.3, 1), background-color 350ms ease, border-color 350ms ease, box-shadow 350ms ease',
         }}
       >
-        <div style={{ maxWidth: 880, width: '100%', minWidth: 0, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+        <div style={{ maxWidth: 1000, width: '100%', minWidth: 0, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
 
           {/* ── Active Live Voice-to-Voice Agent Panel (Shown ABOVE Chatbox when clicked/active) ── */}
           {voiceAgentState !== 'IDLE' && (
@@ -2667,7 +2708,7 @@ export default function ChatInterface({
                 onInput={(e) => {
                   const el = e.currentTarget;
                   el.style.height = 'auto';
-                  const newHeight = Math.min(Math.max(el.scrollHeight, 28), 96);
+                  const newHeight = Math.min(Math.max(el.scrollHeight, 22), 96);
                   el.style.height = `${newHeight}px`;
                   el.style.overflowY = el.scrollHeight > 96 ? 'auto' : 'hidden';
                 }}

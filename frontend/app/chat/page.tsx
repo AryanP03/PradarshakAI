@@ -65,6 +65,49 @@ function ChatPage() {
   const [journeyOpen, setJourneyOpen] = useState(false);
   const [resetKey, setResetKey] = useState(0);
 
+  // Floating Toolbar on wide screens & Dynamic Button Group measurement
+  const [isWide, setIsWide] = useState(false);
+  const [sideWidth, setSideWidth] = useState(260);
+  const leftGroupRef = useRef<HTMLDivElement>(null);
+  const rightGroupRef = useRef<HTMLDivElement>(null);
+
+  const measureLayout = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    const windowWidth = window.innerWidth;
+    const leftWidth = leftGroupRef.current ? leftGroupRef.current.offsetWidth : 240;
+    const rightWidth = rightGroupRef.current ? rightGroupRef.current.offsetWidth : 250;
+    const maxBtnGroupWidth = Math.max(leftWidth, rightWidth);
+    const TOOLBAR_EDGE_PAD = 14; // toolbar padding: '8px 14px'
+    const GUTTER = 16; // 16px gutter between buttons and chat column
+    const sideArea = TOOLBAR_EDGE_PAD + maxBtnGroupWidth + GUTTER;
+    const availableChatWidth = windowWidth - (2 * sideArea);
+
+    // Switch point rule:
+    // "Use the narrow layout whenever the gap between the two button groups (minus gutters)
+    // would be less than about 560px, or any time a button would overlap the column."
+    const wide = availableChatWidth >= 560;
+
+    setIsWide(wide);
+    setSideWidth(sideArea);
+  }, []);
+
+  useEffect(() => {
+    measureLayout();
+    window.addEventListener('resize', measureLayout);
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(() => {
+        measureLayout();
+      });
+      if (leftGroupRef.current) ro.observe(leftGroupRef.current);
+      if (rightGroupRef.current) ro.observe(rightGroupRef.current);
+    }
+    return () => {
+      window.removeEventListener('resize', measureLayout);
+      ro?.disconnect();
+    };
+  }, [measureLayout, t]);
+
   // Auth gating & Sharing UI states
   const [guestPastChatsPrompt, setGuestPastChatsPrompt] = useState(false);
   const [guestSharePrompt, setGuestSharePrompt] = useState(false);
@@ -470,28 +513,45 @@ function ChatPage() {
         )}
 
         {/* Central Workspace Canvas */}
-        <main className="flex-1 flex flex-col overflow-hidden bg-slate-50 w-full min-w-0">
-          {/* ── Dedicated Chat Top Toolbar (In-flow, never overlays messages) ── */}
+        <main className="flex-1 flex flex-col overflow-hidden bg-slate-50 w-full min-w-0 relative">
+          {/* ── Dedicated Chat Top Toolbar (Floating on wide screens, in-flow on narrow screens) ── */}
           {tab === 'chat' && (
             <div
               className="chat-top-toolbar"
               style={{
                 width: '100%',
+                position: isWide ? 'absolute' : 'static',
+                top: isWide ? 0 : undefined,
+                left: isWide ? 0 : undefined,
+                right: isWide ? 0 : undefined,
                 flexShrink: 0,
-                background: '#ffffff',
-                borderBottom: '1px solid #e2e8f0',
+                background: isWide ? 'transparent' : '#ffffff',
+                border: isWide ? 'none' : undefined,
+                borderBottom: isWide ? 'none' : '1px solid #e2e8f0',
+                boxShadow: isWide ? 'none' : undefined,
                 padding: '8px 14px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 zIndex: 20,
+                pointerEvents: isWide ? 'none' : 'auto',
                 gap: 8,
                 minWidth: 0,
                 boxSizing: 'border-box',
               }}
             >
               {/* Top-Left: [ Past Chats ] [ Share Chat ] */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, position: 'relative', minWidth: 0 }}>
+              <div
+                ref={leftGroupRef}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  position: 'relative',
+                  minWidth: 0,
+                  pointerEvents: 'auto',
+                }}
+              >
                 {/* [ Past Chats ] */}
                 <div style={{ position: 'relative' }}>
                   <button
@@ -756,7 +816,17 @@ function ChatPage() {
               </div>
 
               {/* Top-Right: [ Checklist Progress: X% ] [ + New Chat ] */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flexShrink: 0 }}>
+              <div
+                ref={rightGroupRef}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  minWidth: 0,
+                  flexShrink: 0,
+                  pointerEvents: 'auto',
+                }}
+              >
                 {/* 25% Chip: Advisory Checklist Progress */}
                 <button
                   onClick={() => setJourneyOpen((v) => !v)}
@@ -844,6 +914,8 @@ function ChatPage() {
               inquiryId={inquiryIdParam}
               isNewInquiry={isInquiryParam}
               category={searchParams.get('category')}
+              isWide={isWide}
+              sideWidth={sideWidth}
             />
           )}
 

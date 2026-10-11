@@ -582,7 +582,7 @@ p {
   display: none;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px), (max-height: 480px) and (orientation: landscape) {
   .comparison-desktop-canvas {
     display: none !important;
   }
@@ -1229,10 +1229,12 @@ html, body {
 .chat-app-shell {
   height: 100vh;
   height: 100dvh;
+  max-height: 100dvh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   width: 100%;
+  min-height: 0;
 }
 
 @media (max-width: 340px) {
@@ -1241,8 +1243,22 @@ html, body {
   }
 }
 
-/* ── Mobile Chat UI & Touch Target Responsive Rules ── */
-@media (max-width: 640px) {
+/* ── Mobile Chat UI & Touch Target Responsive Rules (Phones <= 768px & Phone Landscape) ── */
+@media (max-width: 768px), (max-height: 480px) and (orientation: landscape) {
+  /* Issue 3: Flex-column app shell with 100dvh & min-height: 0 on message list */
+  .chat-app-shell {
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
+    min-height: 0;
+  }
+
+  .chat-message-list-container {
+    min-height: 0 !important;
+    flex: 1 1 0% !important;
+  }
+
+  /* Issue 2: Fixed-height, stable chat controls and composer */
   .chat-controls-container {
     padding: 6px 8px max(8px, env(safe-area-inset-bottom, 8px)) !important;
     transform: none !important;
@@ -1253,33 +1269,85 @@ html, body {
   .chatbox-row {
     gap: 4px !important;
     width: 100% !important;
+    align-items: center !important;
   }
   .chat-composer {
-    padding: 3px 6px 3px 12px !important;
+    padding: 2px 4px 2px 12px !important;
     border-radius: 20px !important;
     gap: 4px !important;
-    min-height: 44px !important;
+    min-height: 46px !important;
+    height: auto !important;
     align-items: center !important;
     width: 100% !important;
     box-sizing: border-box !important;
   }
   .chat-composer textarea {
     font-size: 16px !important;
-    padding: 6px 0 !important;
-    min-height: 28px !important;
+    padding: 8px 0 !important;
+    min-height: 22px !important;
+    max-height: 96px !important;
     line-height: 1.35 !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
   }
   .chat-composer textarea::placeholder {
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+  }
+  .chat-composer button {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    border-radius: 12px !important;
+    flex-shrink: 0 !important;
   }
   .voice-idle-widget-desktop {
     display: none !important;
   }
+
+  /* Issue 1: Mobile Bubble Widths & Avatar Gutter Removal */
+  /* User Message Bubble: Right-aligned, max-width 82%, shrink-to-fit short, wrap long text */
+  .chat-message-row.chat-message-user {
+    justify-content: flex-end !important;
+    width: 100% !important;
+  }
+  .chat-bubble-user {
+    max-width: 82% !important;
+    width: fit-content !important;
+    margin-left: auto !important;
+    align-self: flex-end !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+  }
+  .chat-bubble-user p,
+  .chat-bubble-user div {
+    text-align: left !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  /* AI Message Bubble & Cards: Avatar gutter removed, full width minus side padding, identical edges */
+  .chat-avatar-bot {
+    display: none !important;
+  }
+  .chat-message-row.chat-message-bot {
+    gap: 0 !important;
+    width: 100% !important;
+  }
+  .chat-bubble-bot {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 100% !important;
+  }
+  .chat-extras-container {
+    padding-left: 0 !important;
+    width: 100% !important;
+  }
 }
 
-@media (min-width: 641px) {
+@media (min-width: 769px) and (min-height: 481px) {
   .voice-idle-btn-mobile {
     display: none !important;
   }
@@ -1293,5 +1361,6 @@ html, body {
     display: none !important;
   }
 }
+
 
 
