@@ -1245,17 +1245,47 @@ html, body {
 
 /* ── Mobile Chat UI & Touch Target Responsive Rules (Phones <= 768px & Phone Landscape) ── */
 @media (max-width: 768px), (max-height: 480px) and (orientation: landscape) {
-  /* Issue 3: Flex-column app shell with 100dvh & min-height: 0 on message list */
+  /* Prevent surplus body height from min-h-screen (100vh > 100dvh) on chat route */
+  body:has(.chat-app-shell),
+  html:has(.chat-app-shell) {
+    min-height: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Fixed-position viewport shell: locks the chat column to the visible viewport,
+     preventing mobile Chrome from scrolling the window and pushing the header offscreen */
   .chat-app-shell {
-    height: 100vh;
-    height: 100dvh;
-    max-height: 100dvh;
-    min-height: 0;
+    position: fixed !important;
+    inset: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    z-index: 10;
+  }
+
+  .chat-app-shell > header {
+    flex: 0 0 auto !important;
+  }
+
+  .chat-top-toolbar {
+    flex: 0 0 auto !important;
   }
 
   .chat-message-list-container {
     min-height: 0 !important;
-    flex: 1 1 0% !important;
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain !important;
   }
 
   /* Issue 2: Fixed-height, stable chat controls and composer */
@@ -1263,6 +1293,7 @@ html, body {
     padding: 6px 8px max(8px, env(safe-area-inset-bottom, 8px)) !important;
     transform: none !important;
     flex-shrink: 0 !important;
+    flex: 0 0 auto !important;
     background: #ffffff !important;
     border-top: 1px solid #e2e8f0 !important;
   }

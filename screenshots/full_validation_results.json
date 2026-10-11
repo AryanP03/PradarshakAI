@@ -1,0 +1,655 @@
+{
+  "results": {
+    "320x568": {
+      "name": "iPhone SE (1st gen)",
+      "basicScroll": {
+        "docScrollH": 568,
+        "docScrollW": 320,
+        "winInnerH": 568,
+        "winInnerW": 320,
+        "vvH": 568,
+        "scrollY": 0,
+        "scrollX": 0
+      },
+      "touchDragResults": {
+        "dragOnHeader": 0,
+        "dragOnToolbar": 0,
+        "dragOnInputRow": 0,
+        "dragOnBottomStripArea": 0
+      },
+      "emptyScrollable": [],
+      "geometry": {
+        "header": {
+          "top": 0,
+          "bottom": 66,
+          "height": 66
+        },
+        "toolbar": {
+          "top": 66,
+          "bottom": 127,
+          "height": 61
+        },
+        "messageList": {
+          "top": 127,
+          "bottom": 507,
+          "height": 380
+        },
+        "controls": {
+          "top": 507,
+          "bottom": 568,
+          "height": 61
+        },
+        "viewportH": 568,
+        "viewportW": 320
+      },
+      "elementsAtBottom": {
+        "tag": "div",
+        "className": "chat-controls-container",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "msgListScrollTest": {
+        "isScrollable": true,
+        "clientHeight": 380,
+        "scrollHeight": 2729,
+        "scrollYAtTop": 0,
+        "scrollYAtBottom": 0,
+        "allScrollable": [
+          {
+            "tag": "div",
+            "className": "chat-message-list-container",
+            "clientHeight": 380,
+            "scrollHeight": 2729
+          }
+        ]
+      }
+    },
+    "360x640": {
+      "name": "Galaxy S5 / Moto G4",
+      "basicScroll": {
+        "docScrollH": 640,
+        "docScrollW": 360,
+        "winInnerH": 640,
+        "winInnerW": 360,
+        "vvH": 640,
+        "scrollY": 0,
+        "scrollX": 0
+      },
+      "touchDragResults": {
+        "dragOnHeader": 0,
+        "dragOnToolbar": 0,
+        "dragOnInputRow": 0,
+        "dragOnBottomStripArea": 0
+      },
+      "emptyScrollable": [],
+      "geometry": {
+        "header": {
+          "top": 0,
+          "bottom": 66,
+          "height": 66
+        },
+        "toolbar": {
+          "top": 66,
+          "bottom": 127,
+          "height": 61
+        },
+        "messageList": {
+          "top": 127,
+          "bottom": 579,
+          "height": 452
+        },
+        "controls": {
+          "top": 579,
+          "bottom": 640,
+          "height": 61
+        },
+        "viewportH": 640,
+        "viewportW": 360
+      },
+      "elementsAtBottom": {
+        "tag": "div",
+        "className": "chat-controls-container",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "msgListScrollTest": {
+        "isScrollable": true,
+        "clientHeight": 452,
+        "scrollHeight": 2163,
+        "scrollYAtTop": 0,
+        "scrollYAtBottom": 0,
+        "allScrollable": [
+          {
+            "tag": "div",
+            "className": "chat-message-list-container",
+            "clientHeight": 452,
+            "scrollHeight": 2163
+          }
+        ]
+      }
+    },
+    "360x800": {
+      "name": "Galaxy S20 / Pixel 4a",
+      "basicScroll": {
+        "docScrollH": 800,
+        "docScrollW": 360,
+        "winInnerH": 800,
+        "winInnerW": 360,
+        "vvH": 800,
+        "scrollY": 0,
+        "scrollX": 0
+      },
+      "touchDragResults": {
+        "dragOnHeader": 0,
+        "dragOnToolbar": 0,
+        "dragOnInputRow": 0,
+        "dragOnBottomStripArea": 0
+      },
+      "emptyScrollable": [],
+      "geometry": {
+        "header": {
+          "top": 0,
+          "bottom": 66,
+          "height": 66
+        },
+        "toolbar": {
+          "top": 66,
+          "bottom": 127,
+          "height": 61
+        },
+        "messageList": {
+          "top": 127,
+          "bottom": 739,
+          "height": 612
+        },
+        "controls": {
+          "top": 739,
+          "bottom": 800,
+          "height": 61
+        },
+        "viewportH": 800,
+        "viewportW": 360
+      },
+      "elementsAtBottom": {
+        "tag": "div",
+        "className": "chat-controls-container",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "msgListScrollTest": {
+        "isScrollable": true,
+        "clientHeight": 612,
+        "scrollHeight": 1925,
+        "scrollYAtTop": 0,
+        "scrollYAtBottom": 0,
+        "allScrollable": [
+          {
+            "tag": "div",
+            "className": "chat-message-list-container",
+            "clientHeight": 612,
+            "scrollHeight": 1925
+          }
+        ]
+      }
+    },
+    "375x667": {
+      "name": "iPhone 8 / SE2 / SE3",
+      "basicScroll": {
+        "docScrollH": 667,
+        "docScrollW": 375,
+        "winInnerH": 667,
+        "winInnerW": 375,
+        "vvH": 667,
+        "scrollY": 0,
+        "scrollX": 0
+      },
+      "touchDragResults": {
+        "dragOnHeader": 0,
+        "dragOnToolbar": 0,
+        "dragOnInputRow": 0,
+        "dragOnBottomStripArea": 0
+      },
+      "emptyScrollable": [],
+      "geometry": {
+        "header": {
+          "top": 0,
+          "bottom": 66,
+          "height": 66
+        },
+        "toolbar": {
+          "top": 66,
+          "bottom": 127,
+          "height": 61
+        },
+        "messageList": {
+          "top": 127,
+          "bottom": 606,
+          "height": 479
+        },
+        "controls": {
+          "top": 606,
+          "bottom": 667,
+          "height": 61
+        },
+        "viewportH": 667,
+        "viewportW": 375
+      },
+      "elementsAtBottom": {
+        "tag": "div",
+        "className": "chat-controls-container",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "msgListScrollTest": {
+        "isScrollable": true,
+        "clientHeight": 479,
+        "scrollHeight": 2037,
+        "scrollYAtTop": 0,
+        "scrollYAtBottom": 0,
+        "allScrollable": [
+          {
+            "tag": "div",
+            "className": "chat-message-list-container",
+            "clientHeight": 479,
+            "scrollHeight": 2037
+          }
+        ]
+      }
+    },
+    "390x844": {
+      "name": "iPhone 12 / 13 / 14",
+      "basicScroll": {
+        "docScrollH": 844,
+        "docScrollW": 390,
+        "winInnerH": 844,
+        "winInnerW": 390,
+        "vvH": 844,
+        "scrollY": 0,
+        "scrollX": 0
+      },
+      "touchDragResults": {
+        "dragOnHeader": 0,
+        "dragOnToolbar": 0,
+        "dragOnInputRow": 0,
+        "dragOnBottomStripArea": 0
+      },
+      "emptyScrollable": [],
+      "geometry": {
+        "header": {
+          "top": 0,
+          "bottom": 66,
+          "height": 66
+        },
+        "toolbar": {
+          "top": 66,
+          "bottom": 127,
+          "height": 61
+        },
+        "messageList": {
+          "top": 127,
+          "bottom": 783,
+          "height": 656
+        },
+        "controls": {
+          "top": 783,
+          "bottom": 844,
+          "height": 61
+        },
+        "viewportH": 844,
+        "viewportW": 390
+      },
+      "elementsAtBottom": {
+        "tag": "div",
+        "className": "chat-controls-container",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "msgListScrollTest": {
+        "isScrollable": true,
+        "clientHeight": 656,
+        "scrollHeight": 2055,
+        "scrollYAtTop": 0,
+        "scrollYAtBottom": 0,
+        "allScrollable": [
+          {
+            "tag": "div",
+            "className": "chat-message-list-container",
+            "clientHeight": 656,
+            "scrollHeight": 2055
+          }
+        ]
+      }
+    },
+    "390x780": {
+      "name": "iPhone 12 with Address Bar",
+      "basicScroll": {
+        "docScrollH": 780,
+        "docScrollW": 390,
+        "winInnerH": 780,
+        "winInnerW": 390,
+        "vvH": 780,
+        "scrollY": 0,
+        "scrollX": 0
+      },
+      "touchDragResults": {
+        "dragOnHeader": 0,
+        "dragOnToolbar": 0,
+        "dragOnInputRow": 0,
+        "dragOnBottomStripArea": 0
+      },
+      "emptyScrollable": [],
+      "geometry": {
+        "header": {
+          "top": 0,
+          "bottom": 66,
+          "height": 66
+        },
+        "toolbar": {
+          "top": 66,
+          "bottom": 127,
+          "height": 61
+        },
+        "messageList": {
+          "top": 127,
+          "bottom": 719,
+          "height": 592
+        },
+        "controls": {
+          "top": 719,
+          "bottom": 780,
+          "height": 61
+        },
+        "viewportH": 780,
+        "viewportW": 390
+      },
+      "elementsAtBottom": {
+        "tag": "div",
+        "className": "chat-controls-container",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "msgListScrollTest": {
+        "isScrollable": true,
+        "clientHeight": 592,
+        "scrollHeight": 1822,
+        "scrollYAtTop": 0,
+        "scrollYAtBottom": 0,
+        "allScrollable": [
+          {
+            "tag": "div",
+            "className": "chat-message-list-container",
+            "clientHeight": 592,
+            "scrollHeight": 1822
+          }
+        ]
+      }
+    },
+    "412x915": {
+      "name": "Pixel 7 / Galaxy S22",
+      "basicScroll": {
+        "docScrollH": 915,
+        "docScrollW": 412,
+        "winInnerH": 915,
+        "winInnerW": 412,
+        "vvH": 915,
+        "scrollY": 0,
+        "scrollX": 0
+      },
+      "touchDragResults": {
+        "dragOnHeader": 0,
+        "dragOnToolbar": 0,
+        "dragOnInputRow": 0,
+        "dragOnBottomStripArea": 0
+      },
+      "emptyScrollable": [],
+      "geometry": {
+        "header": {
+          "top": 0,
+          "bottom": 66,
+          "height": 66
+        },
+        "toolbar": {
+          "top": 66,
+          "bottom": 127,
+          "height": 61
+        },
+        "messageList": {
+          "top": 127,
+          "bottom": 854,
+          "height": 727
+        },
+        "controls": {
+          "top": 854,
+          "bottom": 915,
+          "height": 61
+        },
+        "viewportH": 915,
+        "viewportW": 412
+      },
+      "elementsAtBottom": {
+        "tag": "div",
+        "className": "chat-controls-container",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "msgListScrollTest": {
+        "isScrollable": true,
+        "clientHeight": 727,
+        "scrollHeight": 1933,
+        "scrollYAtTop": 0,
+        "scrollYAtBottom": 0,
+        "allScrollable": [
+          {
+            "tag": "div",
+            "className": "chat-message-list-container",
+            "clientHeight": 727,
+            "scrollHeight": 1933
+          }
+        ]
+      }
+    },
+    "430x932": {
+      "name": "iPhone 14 Pro Max",
+      "basicScroll": {
+        "docScrollH": 932,
+        "docScrollW": 430,
+        "winInnerH": 932,
+        "winInnerW": 430,
+        "vvH": 932,
+        "scrollY": 0,
+        "scrollX": 0
+      },
+      "touchDragResults": {
+        "dragOnHeader": 0,
+        "dragOnToolbar": 0,
+        "dragOnInputRow": 0,
+        "dragOnBottomStripArea": 0
+      },
+      "emptyScrollable": [],
+      "geometry": {
+        "header": {
+          "top": 0,
+          "bottom": 66,
+          "height": 66
+        },
+        "toolbar": {
+          "top": 66,
+          "bottom": 127,
+          "height": 61
+        },
+        "messageList": {
+          "top": 127,
+          "bottom": 871,
+          "height": 744
+        },
+        "controls": {
+          "top": 871,
+          "bottom": 932,
+          "height": 61
+        },
+        "viewportH": 932,
+        "viewportW": 430
+      },
+      "elementsAtBottom": {
+        "tag": "div",
+        "className": "chat-controls-container",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "msgListScrollTest": {
+        "isScrollable": true,
+        "clientHeight": 744,
+        "scrollHeight": 2080,
+        "scrollYAtTop": 0,
+        "scrollYAtBottom": 0,
+        "allScrollable": [
+          {
+            "tag": "div",
+            "className": "chat-message-list-container",
+            "clientHeight": 744,
+            "scrollHeight": 2080
+          }
+        ]
+      }
+    },
+    "600x900": {
+      "name": "Fold / Tablet Mini",
+      "basicScroll": {
+        "docScrollH": 900,
+        "docScrollW": 600,
+        "winInnerH": 900,
+        "winInnerW": 600,
+        "vvH": 900,
+        "scrollY": 0,
+        "scrollX": 0
+      },
+      "touchDragResults": {
+        "dragOnHeader": 0,
+        "dragOnToolbar": 0,
+        "dragOnInputRow": 0,
+        "dragOnBottomStripArea": 0
+      },
+      "emptyScrollable": [],
+      "geometry": {
+        "header": {
+          "top": 0,
+          "bottom": 66,
+          "height": 66
+        },
+        "toolbar": {
+          "top": 66,
+          "bottom": 127,
+          "height": 61
+        },
+        "messageList": {
+          "top": 127,
+          "bottom": 839,
+          "height": 712
+        },
+        "controls": {
+          "top": 839,
+          "bottom": 900,
+          "height": 61
+        },
+        "viewportH": 900,
+        "viewportW": 600
+      },
+      "elementsAtBottom": {
+        "tag": "div",
+        "className": "chat-controls-container",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "msgListScrollTest": {
+        "isScrollable": true,
+        "clientHeight": 712,
+        "scrollHeight": 1612,
+        "scrollYAtTop": 0,
+        "scrollYAtBottom": 0,
+        "allScrollable": [
+          {
+            "tag": "div",
+            "className": "chat-message-list-container",
+            "clientHeight": 712,
+            "scrollHeight": 1612
+          }
+        ]
+      }
+    },
+    "844x390": {
+      "name": "Phone Landscape (iPhone 12)",
+      "basicScroll": {
+        "docScrollH": 390,
+        "docScrollW": 844,
+        "winInnerH": 390,
+        "winInnerW": 844,
+        "vvH": 390,
+        "scrollY": 0,
+        "scrollX": 0
+      },
+      "touchDragResults": {
+        "dragOnHeader": 0,
+        "dragOnToolbar": 0,
+        "dragOnInputRow": 0,
+        "dragOnBottomStripArea": 0
+      },
+      "emptyScrollable": [
+        {
+          "tag": "div",
+          "className": "chat-message-list-container",
+          "clientHeight": 202,
+          "scrollHeight": 231
+        }
+      ],
+      "geometry": {
+        "header": {
+          "top": 0,
+          "bottom": 66,
+          "height": 66
+        },
+        "toolbar": {
+          "top": 66,
+          "bottom": 127,
+          "height": 61
+        },
+        "messageList": {
+          "top": 127,
+          "bottom": 329,
+          "height": 202
+        },
+        "controls": {
+          "top": 329,
+          "bottom": 390,
+          "height": 61
+        },
+        "viewportH": 390,
+        "viewportW": 844
+      },
+      "elementsAtBottom": {
+        "tag": "div",
+        "className": "chat-controls-container",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "msgListScrollTest": {
+        "isScrollable": true,
+        "clientHeight": 202,
+        "scrollHeight": 1750,
+        "scrollYAtTop": 0,
+        "scrollYAtBottom": 0,
+        "allScrollable": [
+          {
+            "tag": "div",
+            "className": "chat-message-list-container",
+            "clientHeight": 202,
+            "scrollHeight": 1750
+          }
+        ]
+      }
+    }
+  },
+  "kbDiag": {
+    "winInnerH": 400,
+    "headerH": 66,
+    "toolbarH": 61,
+    "controlsH": 61,
+    "controlsBottom": 400,
+    "messageListH": 212,
+    "textareaVisible": true
+  },
+  "hindiDiag": {
+    "docScrollH": 844,
+    "winInnerH": 844,
+    "scrollY": 0
+  }
+}
