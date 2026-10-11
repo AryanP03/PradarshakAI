@@ -10,6 +10,7 @@ import { sendOtp, verifyOtp, isEmailVerified, clearVerification } from '../servi
 import { sendRegistrationSuccessEmail } from '../services/EmailService';
 import { setAuthCookie } from '../utils/authCookies';
 import jwt from 'jsonwebtoken';
+import { generateCaptchaChallenge, verifyCaptchaSolution, verifyAndConsumeCaptcha } from '../services/CaptchaService';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'nsfdc-dev-secret-change-in-production';
@@ -135,13 +136,29 @@ router.post('/verify-email-otp', async (req: Request, res: Response): Promise<vo
   }
 });
 
+router.get('/captcha', (_req: Request, res: Response): void => {
+  const challengeData = generateCaptchaChallenge();
+  res.json({ success: true, ...challengeData });
+});
+
+router.post('/verify-captcha', (req: Request, res: Response): void => {
+  const { captchaId, answer } = req.body;
+  const result = verifyCaptchaSolution(captchaId, answer);
+  if (!result.success) {
+    res.status(400).json(result);
+  } else {
+    res.json(result);
+  }
+});
+
 router.post('/complete', async (req: Request, res: Response): Promise<void> => {
   const {
     full_name, dob, gender, mobile, email,
     address_line1, address_line2, city, district, state, pincode,
     selfie_image, sc_certificate_file, income_certificate_file, aadhaar,
     password, eligibility_status,
-    education_level, trade_category, funding_bracket, caste_category
+    education_level, trade_category, funding_bracket, caste_category,
+    captcha_token, captcha_id, captcha_answer
   } = req.body;
 
   if (!full_name || !mobile || !password) {
@@ -150,6 +167,15 @@ router.post('/complete', async (req: Request, res: Response): Promise<void> => {
   }
 
   try {
+    const liveIdentityEnabled = process.env.LIVE_IDENTITY_VERIFICATION_ENABLED === 'true';
+    if (!liveIdentityEnabled) {
+      const isCaptchaValid = verifyAndConsumeCaptcha(captcha_id, captcha_answer, captcha_token);
+      if (!isCaptchaValid) {
+        res.status(400).json({ error: 'CAPTCHA verification failed or expired. Please complete the security check.' });
+        return;
+      }
+    }
+
     const passwordHash = await bcrypt.hash(password, 10);
     const emailStr = email ? email.toLowerCase().trim() : '';
     

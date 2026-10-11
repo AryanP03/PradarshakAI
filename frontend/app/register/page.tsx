@@ -78,6 +78,124 @@ const sectionHeadingStyle: React.CSSProperties = {
 
 type CertStatus = 'IDLE' | 'UPLOADING' | 'VERIFYING' | 'VERIFIED' | 'FAILED' | 'MANUAL_REVIEW';
 
+function renderCaptchaDisplay(challenge: string, id: string, isLoading: boolean) {
+  if (isLoading || !challenge) {
+    return (
+      <div
+        id="captcha-challenge-display"
+        style={{
+          width: 220,
+          height: 56,
+          background: '#fafbf9',
+          border: '1px solid #cbd5e1',
+          borderRadius: 6,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#64748b',
+          fontSize: 14,
+          fontWeight: 600,
+          fontStyle: 'italic',
+        }}
+      >
+        Loading code...
+      </div>
+    );
+  }
+
+  let seed = 0;
+  for (let i = 0; i < (challenge + id).length; i++) {
+    seed = (seed * 31 + (challenge + id).charCodeAt(i)) & 0xffffffff;
+  }
+  const rand = () => {
+    seed = (seed * 1664525 + 1013904223) & 0xffffffff;
+    return (seed >>> 0) / 4294967296;
+  };
+
+  const chars = challenge.split('');
+  const totalChars = chars.length;
+  const charSpacing = totalChars > 1 ? 165 / (totalChars - 1) : 30;
+
+  const charElements = chars.map((ch, idx) => {
+    const xBase = 22 + idx * charSpacing + (rand() * 6 - 3);
+    const yBase = 37 + (rand() * 6 - 3);
+    const rot = Math.round(rand() * 24 - 12);
+    const fontSize = Math.round(27 + rand() * 4);
+    return { ch, x: xBase, y: yBase, rot, fontSize, key: idx };
+  });
+
+  const lines = [
+    {
+      d: `M 0 ${Math.round(20 + rand() * 8)} Q ${Math.round(45 + rand() * 20)} ${Math.round(10 + rand() * 12)} ${Math.round(105 + rand() * 20)} ${Math.round(28 + rand() * 10)} T 220 ${Math.round(18 + rand() * 14)}`,
+      stroke: 'rgba(34, 197, 94, 0.45)',
+      strokeWidth: 1.5,
+    },
+    {
+      d: `M 0 ${Math.round(34 + rand() * 8)} Q ${Math.round(55 + rand() * 20)} ${Math.round(44 + rand() * 8)} ${Math.round(115 + rand() * 20)} ${Math.round(24 + rand() * 10)} T 220 ${Math.round(36 + rand() * 12)}`,
+      stroke: 'rgba(244, 114, 182, 0.5)',
+      strokeWidth: 1.4,
+    },
+    {
+      d: `M 0 ${Math.round(16 + rand() * 8)} Q ${Math.round(50 + rand() * 20)} ${Math.round(28 + rand() * 10)} ${Math.round(110 + rand() * 20)} ${Math.round(14 + rand() * 10)} T 220 ${Math.round(28 + rand() * 12)}`,
+      stroke: 'rgba(56, 189, 248, 0.45)',
+      strokeWidth: 1.4,
+    },
+    {
+      d: `M 0 ${Math.round(40 + rand() * 8)} Q ${Math.round(65 + rand() * 20)} ${Math.round(22 + rand() * 10)} ${Math.round(135 + rand() * 20)} ${Math.round(38 + rand() * 10)} T 220 ${Math.round(22 + rand() * 12)}`,
+      stroke: 'rgba(251, 191, 36, 0.45)',
+      strokeWidth: 1.3,
+    },
+  ];
+
+  return (
+    <svg
+      id="captcha-challenge-display"
+      width="220"
+      height="56"
+      viewBox="0 0 220 56"
+      style={{
+        background: '#fafbf9',
+        border: '1px solid #cbd5e1',
+        borderRadius: 6,
+        userSelect: 'none',
+        display: 'block',
+        boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.03)',
+      }}
+      aria-label={`CAPTCHA challenge: ${challenge}`}
+    >
+      <defs>
+        <filter id="captcha-distortion" x="0" y="0" width="220" height="56">
+          <feTurbulence type="fractalNoise" baseFrequency="0.025" numOctaves="1" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.2" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </defs>
+
+      <g filter="url(#captcha-distortion)">
+        {lines.map((line, lIdx) => (
+          <path key={lIdx} d={line.d} fill="none" stroke={line.stroke} strokeWidth={line.strokeWidth} />
+        ))}
+
+        {charElements.map((item) => (
+          <text
+            key={item.key}
+            x={item.x}
+            y={item.y}
+            transform={`rotate(${item.rot}, ${item.x}, ${item.y})`}
+            fill="#14532d"
+            fontStyle="italic"
+            fontWeight="bold"
+            fontSize={item.fontSize}
+            fontFamily="'Segoe Print', 'Bradley Hand', 'Chalkboard SE', 'Comic Sans MS', cursive, sans-serif"
+            letterSpacing="0.05em"
+          >
+            {item.ch}
+          </text>
+        ))}
+      </g>
+    </svg>
+  );
+}
+
 export default function RegisterPage() {
   return (
     <Suspense
@@ -119,6 +237,97 @@ function RegisterContent() {
 
   // Feature Gate: Document verification optional/disabled for development/demo
   const DOC_VERIFICATION_ENABLED = process.env.NEXT_PUBLIC_DOCUMENT_VERIFICATION_ENABLED === 'true';
+
+  // Feature Gate: Live identity verification optional/disabled for development/demo
+  const LIVE_IDENTITY_VERIFICATION_ENABLED = process.env.NEXT_PUBLIC_LIVE_IDENTITY_VERIFICATION_ENABLED === 'true';
+
+  // CAPTCHA State (replaces live identity verification in demo/dev mode)
+  const [captchaId, setCaptchaId] = useState('');
+  const [captchaChallenge, setCaptchaChallenge] = useState('');
+  const [captchaInput, setCaptchaInput] = useState('');
+  const [captchaToken, setCaptchaToken] = useState('');
+  const [captchaError, setCaptchaError] = useState('');
+  const [captchaSuccess, setCaptchaSuccess] = useState('');
+  const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
+  const [isCaptchaLoading, setIsCaptchaLoading] = useState(false);
+
+  const fetchCaptcha = async (clearError: boolean = true) => {
+    setIsCaptchaLoading(true);
+    if (clearError) {
+      setCaptchaError('');
+    }
+    setCaptchaSuccess('');
+    setIsCaptchaVerified(false);
+    setCaptchaInput('');
+    setCaptchaToken('');
+    try {
+      const res = await fetch(`${BACKEND}/api/registration/captcha`);
+      const data = await res.json();
+      if (data.success && data.captchaId && data.challenge) {
+        setCaptchaId(data.captchaId);
+        setCaptchaChallenge(data.challenge);
+      }
+    } catch {
+      setCaptchaError('Failed to load CAPTCHA challenge. Please refresh.');
+    } finally {
+      setIsCaptchaLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCaptcha(true);
+  }, []);
+
+  const handleCaptchaInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCaptchaInput(e.target.value);
+    if (captchaError) setCaptchaError('');
+    if (isCaptchaVerified) {
+      setIsCaptchaVerified(false);
+      setCaptchaToken('');
+      setCaptchaSuccess('');
+    }
+  };
+
+  const handleVerifyCaptcha = async () => {
+    const trimmed = captchaInput.trim();
+    if (!trimmed) {
+      setCaptchaError('Please enter the CAPTCHA code.');
+      setCaptchaSuccess('');
+      setIsCaptchaVerified(false);
+      return false;
+    }
+    setIsCaptchaLoading(true);
+    setCaptchaError('');
+    setCaptchaSuccess('');
+    try {
+      const res = await fetch(`${BACKEND}/api/registration/verify-captcha`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ captchaId, answer: trimmed }),
+      });
+      const data = await res.json();
+      if (data.success && data.captchaToken) {
+        setIsCaptchaVerified(true);
+        setCaptchaToken(data.captchaToken);
+        setCaptchaSuccess('CAPTCHA verified successfully!');
+        setCaptchaError('');
+        return true;
+      } else {
+        setIsCaptchaVerified(false);
+        setCaptchaToken('');
+        const errorMsg = data.error || 'Incorrect CAPTCHA code. Please try again.';
+        setCaptchaError(errorMsg);
+        await fetchCaptcha(false);
+        return false;
+      }
+    } catch {
+      setIsCaptchaVerified(false);
+      setCaptchaError('Verification failed. Please check connection and try again.');
+      return false;
+    } finally {
+      setIsCaptchaLoading(false);
+    }
+  };
 
   // Manual Annual Family Income (always collected)
   const [manualIncome, setManualIncome] = useState('');
@@ -356,25 +565,88 @@ function RegisterContent() {
       setError('Passwords do not match. Please re-enter.');
       return;
     }
-    if (!selfiePhoto) {
-      setError('Please provide your live selfie.');
+    if (LIVE_IDENTITY_VERIFICATION_ENABLED) {
+      if (!selfiePhoto) {
+        setError('Please provide your live selfie.');
+        return;
+      }
+    }
+
+    if (!acceptedTerms) {
+      setError('Please agree to the declaration to proceed.');
       return;
+    }
+
+    // CAPTCHA verification check (mandatory before submission)
+    let activeCaptchaToken = captchaToken;
+    const trimmedCaptcha = captchaInput.trim();
+    if (!trimmedCaptcha) {
+      setCaptchaError('Please enter the CAPTCHA code.');
+      setError('Please enter the CAPTCHA code before submitting.');
+      const el = document.getElementById('captcha-input');
+      if (el) {
+        el.focus();
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+
+    if (!isCaptchaVerified || !activeCaptchaToken) {
+      setIsCaptchaLoading(true);
+      setCaptchaError('');
+      try {
+        const res = await fetch(`${BACKEND}/api/registration/verify-captcha`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ captchaId, answer: trimmedCaptcha }),
+        });
+        const data = await res.json();
+        if (data.success && data.captchaToken) {
+          activeCaptchaToken = data.captchaToken;
+          setIsCaptchaVerified(true);
+          setCaptchaToken(data.captchaToken);
+          setCaptchaSuccess('CAPTCHA verified successfully!');
+        } else {
+          setIsCaptchaVerified(false);
+          setCaptchaToken('');
+          const errText = data.error || 'Incorrect CAPTCHA code. Please try again.';
+          setCaptchaError(errText);
+          setError(errText);
+          await fetchCaptcha(false);
+          const el = document.getElementById('captcha-input');
+          if (el) {
+            el.focus();
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          return;
+        }
+      } catch {
+        setIsCaptchaVerified(false);
+        setError('Failed to verify CAPTCHA. Please check connection and try again.');
+        return;
+      } finally {
+        setIsCaptchaLoading(false);
+      }
     }
 
     setLoading(true);
 
     try {
-      // Step 1: Upload only the selfie, certificates are already uploaded
-      setStatusText('Securely finalizing your registration...');
-      const formData = new FormData();
-      formData.append('selfie', dataURLtoFile(selfiePhoto, 'selfie.jpg'));
+      // Step 1: Upload selfie only if live identity verification is enabled
+      let selfieFilename: string | null = null;
+      if (LIVE_IDENTITY_VERIFICATION_ENABLED && selfiePhoto) {
+        setStatusText('Securely finalizing your registration...');
+        const formData = new FormData();
+        formData.append('selfie', dataURLtoFile(selfiePhoto, 'selfie.jpg'));
 
-      const uploadRes = await fetch(`${BACKEND}/api/registration/upload-docs`, {
-        method: 'POST',
-        body: formData,
-      });
-      if (!uploadRes.ok) throw new Error('Selfie upload failed');
-      const uploadData = await uploadRes.json();
+        const uploadRes = await fetch(`${BACKEND}/api/registration/upload-docs`, {
+          method: 'POST',
+          body: formData,
+        });
+        if (!uploadRes.ok) throw new Error('Selfie upload failed');
+        const uploadData = await uploadRes.json();
+        selfieFilename = uploadData.selfie;
+      }
 
       // Step 2: Create account
       const isVerifiedStatus = DOC_VERIFICATION_ENABLED && scStatus === 'VERIFIED' && incomeStatus === 'VERIFIED';
@@ -397,7 +669,10 @@ function RegisterContent() {
           pincode: pincode || null,
           password,
           aadhaar: aadhaar || null,
-          selfie_image: uploadData.selfie,
+          selfie_image: selfieFilename,
+          captcha_token: activeCaptchaToken,
+          captcha_id: captchaId,
+          captcha_answer: captchaInput.trim(),
           sc_certificate_file: scServerFileName || null,
           income_certificate_file: incomeServerFileName || null,
           eligibility_status: isVerifiedStatus ? 'verified' : 'pending_manual_review',
@@ -548,7 +823,7 @@ function RegisterContent() {
     );
   };
 
-  const isIdentityVerified = !!selfiePhoto;
+  const isIdentityVerified = LIVE_IDENTITY_VERIFICATION_ENABLED ? !!selfiePhoto : true;
   const isCertVerified = scStatus === 'VERIFIED' && incomeStatus === 'VERIFIED';
   const canProceedToNext = !DOC_VERIFICATION_ENABLED || isCertVerified;
 
@@ -589,7 +864,7 @@ function RegisterContent() {
               {[
                 { step: '1', title: 'Personal Details', done: !!fullName && !!mobile && emailStep === 'verified' },
                 { step: '2', title: 'Security & Access', done: password.length >= 8 && password === confirmPassword },
-                { step: '3', title: DOC_VERIFICATION_ENABLED ? 'Verification (OCR/Face)' : 'Face Verification', done: DOC_VERIFICATION_ENABLED ? (isCertVerified && isIdentityVerified) : isIdentityVerified },
+                { step: '3', title: DOC_VERIFICATION_ENABLED ? 'Verification (OCR/Face)' : 'Document Verification', done: isCertVerified },
                 { step: '4', title: 'Livelihood & Goals', done: !!manualIncome && !!educationLevel && !!jobCategory && (jobCategory !== 'other' || !!jobBusinessOther.trim()) },
               ].map((s, idx) => (
                 <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
@@ -837,24 +1112,59 @@ function RegisterContent() {
                     </div>
                   </section>
 
-                  {/* ── SECTION 3: Identity Verification ── */}
+                  {/* ── SECTION 3: Identity Verification & Security Check ── */}
                   <section style={sectionStyle}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '2px solid #f1f5f9', paddingBottom: 14, marginBottom: 24 }}>
                       <h2 style={{ ...sectionHeadingStyle, borderBottom: 'none', paddingBottom: 0, marginBottom: 0 }}>
                         3. Live Identity Check
                       </h2>
-                      {isIdentityVerified && (
+                      {LIVE_IDENTITY_VERIFICATION_ENABLED && isIdentityVerified ? (
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: '#059669', background: '#ecfdf5', padding: '4px 12px', borderRadius: 20, border: '1px solid #a7f3d0' }}>
                           <CheckCircle2 size={16} /> Live Face Verified
                         </span>
-                      )}
+                      ) : !LIVE_IDENTITY_VERIFICATION_ENABLED ? (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: '#475569', background: '#f1f5f9', padding: '4px 12px', borderRadius: 20, border: '1px solid #cbd5e1' }}>
+                          Demo Mode — Camera Bypassed
+                        </span>
+                      ) : null}
                     </div>
-                    <CameraCapture
-                      title="Live Selfie (for identity verification)"
-                      description="Face the camera directly in good lighting. Remove cap, mask, or sunglasses."
-                      onPhotoSet={setSelfiePhoto}
-                      isDocument={false}
-                    />
+
+                    {!LIVE_IDENTITY_VERIFICATION_ENABLED && (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: 12,
+                          padding: '14px 18px',
+                          borderRadius: 10,
+                          background: '#f1f5f9',
+                          border: '1.5px solid #cbd5e1',
+                          marginBottom: 0,
+                        }}
+                      >
+                        <AlertTriangle size={20} color="#475569" style={{ flexShrink: 0, marginTop: 2 }} />
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <strong style={{ fontSize: 13.5, color: '#1e293b' }}>Development / Demo Environment</strong>
+                            <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: '#e2e8f0', color: '#475569' }}>
+                              Bypassed
+                            </span>
+                          </div>
+                          <p style={{ margin: '4px 0 0', fontSize: 12.5, color: '#475569', lineHeight: 1.45 }}>
+                            Live identity verification is temporarily disabled in the development/demo environment. Camera-based facial recognition will be enabled for production.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {LIVE_IDENTITY_VERIFICATION_ENABLED && (
+                      <CameraCapture
+                        title="Live Selfie (for identity verification)"
+                        description="Face the camera directly in good lighting. Remove cap, mask, or sunglasses."
+                        onPhotoSet={setSelfiePhoto}
+                        isDocument={false}
+                      />
+                    )}
                   </section>
 
                   {/* ── SECTION 4: Certificate Verification ── */}
@@ -1191,6 +1501,165 @@ function RegisterContent() {
                             I declare that all information and documents are true and correct. I consent to PradarshakAI processing this data to determine my eligibility for NSFDC concessional finance schemes.
                           </span>
                         </label>
+
+                        {/* ── Security Verification (CAPTCHA) ── */}
+                        <div
+                          style={{
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: 12,
+                            padding: '18px 20px',
+                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+                            marginTop: 10,
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                            <div>
+                              <h3 style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', margin: '0 0 3px' }}>
+                                Security Verification (CAPTCHA) <span style={{ color: '#ef4444' }}>*</span>
+                              </h3>
+                              <p style={{ fontSize: 13, color: '#64748b', margin: 0 }}>
+                                Enter the alphanumeric characters shown below before submitting your application.
+                              </p>
+                            </div>
+                            {isCaptchaVerified && (
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700, color: '#059669', background: '#ecfdf5', padding: '3px 10px', borderRadius: 20, border: '1px solid #a7f3d0' }}>
+                                <CheckCircle2 size={14} /> Verified
+                              </span>
+                            )}
+                          </div>
+
+                          {/* CAPTCHA Challenge & Refresh Bar */}
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 12,
+                              marginBottom: 16,
+                              flexWrap: 'wrap',
+                            }}
+                          >
+                            {renderCaptchaDisplay(captchaChallenge, captchaId, isCaptchaLoading)}
+
+                            <button
+                              id="btn-refresh-captcha"
+                              type="button"
+                              onClick={() => fetchCaptcha(true)}
+                              disabled={isCaptchaLoading}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 6,
+                                padding: '9px 14px',
+                                borderRadius: 8,
+                                border: '1px solid #cbd5e1',
+                                background: '#f8fafc',
+                                color: '#334155',
+                                fontSize: 13,
+                                fontWeight: 600,
+                                cursor: isCaptchaLoading ? 'not-allowed' : 'pointer',
+                                transition: 'all 0.15s ease',
+                              }}
+                              title="Generate a new CAPTCHA challenge"
+                            >
+                              <RefreshCw size={14} style={{ animation: isCaptchaLoading ? 'spin 1s linear infinite' : 'none' }} />
+                              New Code
+                            </button>
+                          </div>
+
+                          {/* Input Field and Action */}
+                          <div style={{ maxWidth: 420 }}>
+                            <label htmlFor="captcha-input" style={labelStyle}>
+                              Enter CAPTCHA Code <span style={{ color: '#ef4444' }}>*</span>
+                            </label>
+                            <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+                              <input
+                                id="captcha-input"
+                                type="text"
+                                required
+                                autoComplete="off"
+                                placeholder="Type characters above"
+                                value={captchaInput}
+                                onChange={handleCaptchaInputChange}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleVerifyCaptcha();
+                                  }
+                                }}
+                                style={{
+                                  ...inputStyle,
+                                  flex: 1,
+                                  fontFamily: 'Consolas, Monaco, monospace',
+                                  fontSize: 16,
+                                  letterSpacing: '0.08em',
+                                  borderColor: captchaError ? '#ef4444' : isCaptchaVerified ? '#10b981' : '#e2e8f0',
+                                }}
+                              />
+                              <button
+                                id="btn-verify-captcha"
+                                type="button"
+                                onClick={handleVerifyCaptcha}
+                                disabled={isCaptchaLoading || !captchaInput.trim()}
+                                style={{
+                                  padding: '0 20px',
+                                  borderRadius: 8,
+                                  border: 'none',
+                                  background: isCaptchaVerified ? '#059669' : '#0b1f3a',
+                                  color: '#ffffff',
+                                  fontSize: 13.5,
+                                  fontWeight: 700,
+                                  cursor: isCaptchaLoading || !captchaInput.trim() ? 'not-allowed' : 'pointer',
+                                  opacity: isCaptchaLoading || !captchaInput.trim() ? 0.6 : 1,
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                {isCaptchaVerified ? 'Verified' : 'Verify'}
+                              </button>
+                            </div>
+                            <span style={{ fontSize: 12, color: '#64748b', marginTop: 4, display: 'block' }}>
+                              Code is not case-sensitive. Spaces are ignored automatically.
+                            </span>
+
+                            {/* Error Feedback */}
+                            {captchaError && (
+                              <div
+                                id="captcha-error-msg"
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 6,
+                                  marginTop: 8,
+                                  fontSize: 13,
+                                  color: '#dc2626',
+                                  fontWeight: 600,
+                                }}
+                              >
+                                <XCircle size={15} />
+                                <span>{captchaError}</span>
+                              </div>
+                            )}
+
+                            {/* Success Feedback */}
+                            {isCaptchaVerified && captchaSuccess && (
+                              <div
+                                id="captcha-success-msg"
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 6,
+                                  marginTop: 8,
+                                  fontSize: 13,
+                                  color: '#059669',
+                                  fontWeight: 600,
+                                }}
+                              >
+                                <CheckCircle2 size={15} />
+                                <span>{captchaSuccess}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
 
                         <button
                           type="submit"
