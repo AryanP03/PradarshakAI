@@ -1,3 +1,4 @@
+import { pool } from '../db/pool';
 import { detectLanguage } from './IntentClassifier';
 import type { Language } from './IntentClassifier';
 import { getOrCreate, updateSession, extractAndUpdateFacts } from './ConversationSession';
@@ -10,6 +11,107 @@ import type { ChatMessage } from '../lib/groq';
 import { getLanguageConfig } from '../config/languages';
 import { resolveEffectiveLanguage } from './LanguageResolver';
 import { translateText } from './TranslationService';
+
+let cachedValidEntities: {
+  schemeNames: Set<string>;
+  partnerNames: Set<string>;
+  lastFetched: number;
+} | null = null;
+
+export async function getValidDatabaseEntities(): Promise<{ schemeNames: Set<string>; partnerNames: Set<string> }> {
+  const now = Date.now();
+  if (cachedValidEntities && now - cachedValidEntities.lastFetched < 1000 * 60 * 15) {
+    return cachedValidEntities;
+  }
+
+  try {
+    const schemeRes = await pool.query('SELECT name, short_name, aliases FROM schemes');
+    const partnerRes = await pool.query('SELECT name FROM partners');
+
+    const schemeNames = new Set<string>();
+    const partnerNames = new Set<string>();
+
+    const canonicalAgencies = [
+      'nsfdc', 'national scheduled castes finance and development corporation',
+      'nbcfdc', 'nskfdc', 'sca', 'state channelizing agency', 'state channelising agency',
+      'rbi', 'reserve bank of india', 'channel partner', 'government of india', 'district office'
+    ];
+    canonicalAgencies.forEach((a) => partnerNames.add(a));
+
+    for (const row of schemeRes.rows) {
+      if (row.name) schemeNames.add(row.name.toLowerCase().trim());
+      if (row.short_name) schemeNames.add(row.short_name.toLowerCase().trim());
+      if (Array.isArray(row.aliases)) {
+        for (const al of row.aliases) {
+          if (al) schemeNames.add(al.toLowerCase().trim());
+        }
+      }
+    }
+
+    for (const row of partnerRes.rows) {
+      if (row.name) {
+        const pName = row.name.toLowerCase().trim();
+        partnerNames.add(pName);
+        const cleanRoot = pName.split('–')[0].split('-')[0].trim();
+        if (cleanRoot) partnerNames.add(cleanRoot);
+      }
+    }
+
+    cachedValidEntities = { schemeNames, partnerNames, lastFetched: now };
+    return cachedValidEntities;
+  } catch (err) {
+    console.error('[INTEGRITY] Failed to fetch valid entities from DB:', (err as Error)?.message);
+    return {
+      schemeNames: new Set<string>(),
+      partnerNames: new Set<string>(['nsfdc', 'sca', 'channel partner']),
+    };
+  }
+}
+
+export async function validateNamesInReply(replyText: string): Promise<string> {
+  if (!replyText || replyText.trim().length === 0) return replyText;
+
+  const { schemeNames, partnerNames } = await getValidDatabaseEntities();
+  let validated = replyText;
+
+  // 1. Detect candidate scheme names (e.g., "... Yojana", "... Scheme", "... Yojna")
+  const schemeRegex = /\b([A-Z][a-zA-Z0-9&.]*(?:\s+[A-Z][a-zA-Z0-9&.]*){0,6}\s+(?:Yojana|Yojna|Scheme|Abhiyan|Mission|Scholarship|Fellowship))\b/g;
+  validated = validated.replace(schemeRegex, (match) => {
+    const norm = match.toLowerCase().trim();
+    let isValid = false;
+    for (const s of schemeNames) {
+      if (s.includes(norm) || norm.includes(s)) {
+        isValid = true;
+        break;
+      }
+    }
+    if (!isValid) {
+      console.warn(`[INTEGRITY] Hallucinated/unverified scheme name "${match}" detected in reply. Rephrasing.`);
+      return 'eligible government scheme';
+    }
+    return match;
+  });
+
+  // 2. Detect candidate bank names (e.g., "... Bank", "... Gramin Bank", "... Cooperative Bank")
+  const bankRegex = /\b([A-Z][a-zA-Z0-9&.]*(?:\s+(?:of|and|for)?\s*[A-Z][a-zA-Z0-9&.]*){0,4}\s+(?:Bank|Gramin\s+Bank|Cooperative\s+Bank))\b/g;
+  validated = validated.replace(bankRegex, (match) => {
+    const norm = match.toLowerCase().trim();
+    let isValid = false;
+    for (const p of partnerNames) {
+      if (p.includes(norm) || norm.includes(p)) {
+        isValid = true;
+        break;
+      }
+    }
+    if (!isValid) {
+      console.warn(`[INTEGRITY] Hallucinated/unverified bank name "${match}" detected in reply. Rephrasing.`);
+      return 'authorized partner bank';
+    }
+    return match;
+  });
+
+  return validated;
+}
 
 /**
  * ChatOrchestrator.ts
@@ -1499,6 +1601,11 @@ Explain why these specific schemes fit the user's previously stated profile and 
 
             if (schemeCount === 0) {
               finalText = NO_SCHEME_MATCH_MESSAGE[session.language] || NO_SCHEME_MATCH_MESSAGE.en;
+            } else if ((smartFallbackResult.data.schemes as any[])[0]?.clarifyingQuestion) {
+              const q = (smartFallbackResult.data.schemes as any[])[0].clarifyingQuestion;
+              finalText = session.language === 'hi'
+                ? `${q}\n\nनिकटतम संबंधित योजनाएं नीचे दी गई हैं:`
+                : `${q}\n\nHere are the closest relevant schemes:`;
             } else {
               finalText = session.language === 'hi'
                 ? 'आपकी आवश्यकता के अनुसार उपयुक्त योजनाएं नीचे प्रदर्शित की गई हैं।'
@@ -1577,12 +1684,12 @@ Explain why these specific schemes fit the user's previously stated profile and 
   }
 
   finalText = stripMarkdown(finalText);
+  finalText = await validateNamesInReply(finalText);
 
   if (!speechText) {
     speechText = finalText;
-  }
-  if (lastToolData && !lastToolData.speechText) {
-    lastToolData.speechText = speechText;
+  } else {
+    speechText = await validateNamesInReply(speechText);
   }
 
   const type: ChatApiResponse['type'] = lastToolName

@@ -1,5 +1,5 @@
 import type { ToolDef } from '../lib/groq';
-import { recommendSchemes, fetchActiveSchemes, fetchSchemeByName, fetchSchemeById, detectEducationLevel, resolveUserState } from './SchemeEngine';
+import { recommendSchemes, fetchActiveSchemes, fetchSchemeByName, fetchSchemeById, detectEducationLevel, resolveUserState, extractUserProfileAndNeed } from './SchemeEngine';
 import type { ScoredScheme, Scheme } from './SchemeEngine';
 import { geocode, findNearbyPartners } from './LocationService';
 import type { UserEntities } from './ConversationSession';
@@ -176,34 +176,20 @@ export async function executeTool(name: string, args: Record<string, unknown>): 
       const rawPurpose = parts.join(' ').trim();
       const lowerPurpose = rawPurpose.toLowerCase();
 
-      const isEdu =
-        args.category_hint === 'education_loan' ||
-        lowerPurpose.includes('education') ||
-        lowerPurpose.includes('study') ||
-        lowerPurpose.includes('college') ||
-        lowerPurpose.includes('school') ||
-        lowerPurpose.includes('degree') ||
-        lowerPurpose.includes('course') ||
-        lowerPurpose.includes('student') ||
-        lowerPurpose.includes('scholarship') ||
-        lowerPurpose.includes('university') ||
-        lowerPurpose.includes('btech') ||
-        lowerPurpose.includes('mba') ||
-        lowerPurpose.includes('mbbs') ||
-        lowerPurpose.includes('laptop') ||
-        lowerPurpose.includes('iit') ||
-        lowerPurpose.includes('nit') ||
-        lowerPurpose.includes('iim') ||
-        lowerPurpose.includes('iiit') ||
-        lowerPurpose.includes('aiims') ||
-        lowerPurpose.includes('विद्या') ||
-        lowerPurpose.includes('शिक्षा') ||
-        lowerPurpose.includes('शिक्षण') ||
-        lowerPurpose.includes('पढ़ाई');
+      const intent = extractUserProfileAndNeed(rawPurpose, {
+        purpose: rawPurpose,
+        social_category: args.social_category as string | undefined,
+        gender: args.gender as string | undefined,
+        age: args.age as number | undefined,
+        family_income_rs: args.family_income_rs as number | undefined,
+        loan_amount_rs: args.loan_amount_rs as number | undefined,
+      });
+
+      const isEdu = args.category_hint === 'education_loan' || (!intent.need.is_clinic_or_doctor_setup && intent.need.is_education_funding);
 
       const isWomen =
         args.category_hint === 'women-exclusive' ||
-        args.gender === 'female' ||
+        intent.profile.gender === 'female' ||
         lowerPurpose.includes('women') ||
         lowerPurpose.includes('mahila') ||
         lowerPurpose.includes('महिला');

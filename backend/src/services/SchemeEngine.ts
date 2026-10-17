@@ -46,6 +46,13 @@ export interface Scheme {
 
 export type SchemeTier = 'ELIGIBLE_OPTIMAL' | 'ELIGIBLE_SUBOPTIMAL' | 'HARD_DISQUALIFIED';
 
+export interface DisqualificationRecord {
+  ruleId: string;
+  factUsed: string;
+  factSource: 'profile' | 'explicit_statement' | 'inferred';
+  reason: string;
+}
+
 export interface ScoredScheme extends Scheme {
   score: number;
   match_percentage?: number;
@@ -53,6 +60,8 @@ export interface ScoredScheme extends Scheme {
   matchReasons: string[];
   warnings: string[];
   disqualificationReason?: string;
+  disqualificationRecord?: DisqualificationRecord;
+  clarifyingQuestion?: string;
 }
 
 export function normalizeSchemeText(str: string): string {
@@ -209,7 +218,206 @@ export function schemeSupportsLevel(scheme: Scheme, targetLevel: EducationLevelS
   if (scheme.education_levels && scheme.education_levels.includes(targetLevel)) return true;
   if (targetLevel === 'undergraduate' && scheme.education_levels?.includes('higher_education')) return true;
   if (targetLevel === 'postgraduate' && scheme.education_levels?.includes('higher_education')) return true;
+  if (scheme.education_level === 'overseas' && (targetLevel === 'postgraduate' || targetLevel === 'doctoral' || targetLevel === 'undergraduate')) return true;
   return false;
+}
+
+export function isEducationStageScheme(scheme: Scheme): boolean {
+  const normTypes = (scheme.eligible_project_types || []).map((t) => (t || '').toLowerCase().replace(/_/g, ' '));
+  // Profession setup / clinic / enterprise is NOT an education stage scheme
+  if (
+    normTypes.some((t) => /clinic_setup|medical_equipment|self_employment|small_trade|business|manufacturing/.test(t)) ||
+    /clinic|doctor/i.test(scheme.name)
+  ) {
+    return false;
+  }
+
+  const isScholarshipOrTuition =
+    /scholarship|fellowship|shishyavrutti|tuition|vidyasiri|chhatra|balika shiksha/i.test(scheme.name) ||
+    normTypes.some((t) => /scholarship|fellowship|tuition|education|higher_education|post_matric|pre_matric|phd/.test(t)) ||
+    scheme.scheme_type === 'scholarship';
+
+  return isScholarshipOrTuition && Boolean(scheme.education_level && scheme.education_level !== 'not_applicable');
+}
+
+export interface ExtractedProfile {
+  community?: string;
+  qualification?: string;
+  occupation?: string;
+  is_current_student: boolean;
+  current_stage?: EducationLevelStage;
+  state?: string;
+  is_state_explicit: boolean;
+  gender?: string;
+  is_gender_explicit: boolean;
+  age?: number;
+  is_age_explicit: boolean;
+  family_income_rs?: number;
+  is_income_explicit: boolean;
+  loan_amount_rs?: number;
+  is_loan_explicit: boolean;
+}
+
+export interface ExtractedNeed {
+  raw_purpose: string;
+  clean_purpose: string;
+  need_type: 'loan' | 'grant' | 'scholarship' | 'insurance' | 'training' | 'pension' | 'housing' | 'business';
+  sector?: string;
+  is_education_funding: boolean;
+  is_health_treatment: boolean;
+  is_pension_need: boolean;
+  is_housing_need: boolean;
+  is_laptop_need: boolean;
+  is_fellowship_need: boolean;
+  is_clinic_or_doctor_setup: boolean;
+}
+
+export interface ExtractedIntent {
+  profile: ExtractedProfile;
+  need: ExtractedNeed;
+}
+
+export function extractUserProfileAndNeed(text: string | undefined, entities: UserEntities): ExtractedIntent {
+  const rawP = (text || entities.purpose || '').trim();
+  const lowerP = rawP.toLowerCase();
+
+  // 1. Profile Extraction
+  // A. Community
+  let community: string | undefined = entities.social_category;
+  if (!community) {
+    if (/\b(sc|scheduled\s*caste|dalit)\b/i.test(lowerP)) community = 'SC';
+    else if (/\b(st|scheduled\s*tribe|adivasi)\b/i.test(lowerP)) community = 'ST';
+    else if (/\b(obc|other\s*backward)\b/i.test(lowerP)) community = 'OBC';
+    else if (/\b(ebc|economically\s*backward)\b/i.test(lowerP)) community = 'EBC';
+  }
+
+  // B. Qualification (who the user is / has completed)
+  let qualification: string | undefined = undefined;
+  const qualMatch = lowerP.match(/\b(medical\s*graduate|mbbs\s*graduate|bds\s*graduate|engineering\s*graduate|college\s*graduate|graduate|postgraduate|bds\s*holder|mbbs\s*holder|b\.?tech\s*holder|degree\s*holder|diploma\s*holder|matriculate|10th\s*pass|12th\s*pass)\b/i);
+  if (qualMatch) qualification = qualMatch[1].toLowerCase();
+
+  // C. Occupation (who the user is)
+  let occupation: string | undefined = undefined;
+  const occMatch = lowerP.match(/\b(doctor|physician|dentist|surgeon|farmer|kisan|artisan|weaver|cobbler|leather\s*worker|tanner|driver|safai\s*karamchari|sanitation\s*worker|scavenger|tailor|carpenter|blacksmith)\b/i);
+  if (occMatch) occupation = occMatch[1].toLowerCase();
+
+  // D. Current Student Status (is the user currently enrolled / studying?)
+  // MUST NOT be triggered by past qualification words like "graduate", "medical graduate", "degree holder"
+  const currentStudentSignals = /\b(currently\s+studying|studying\s+in|student\s+in|enrolled\s+in|admission\s+to|admitted\s+to|pursuing\s+(?:phd|degree|btech|mbbs|masters)|school\s+student|college\s+student|in\s+class\s*\d+|in\s+\d+th\s+standard|school\s+fees|college\s+fees|tuition\s+fees|scholarship\s+for\s+(?:my|me)|school\s+scholarship)\b/i;
+  const is_current_student = Boolean(
+    entities.course ||
+    (entities.education_level && !qualification && !occupation) ||
+    currentStudentSignals.test(lowerP)
+  );
+
+  let current_stage: EducationLevelStage | undefined = undefined;
+  if (is_current_student) {
+    current_stage = (normalizeEducationLevel(entities.education_level) || detectEducationLevel(lowerP)) || undefined;
+  }
+
+  // E. Explicit State
+  const resolvedState = resolveUserState(entities);
+  const is_state_explicit = Boolean(
+    entities.state ||
+    entities.location ||
+    /\b(?:in|living in|resident of|from)\s+([a-zA-Z\s]+)\b/i.test(lowerP)
+  );
+
+  // F. Explicit Gender
+  const is_gender_explicit = Boolean(
+    entities.gender ||
+    /\b(i am a woman|female|pregnant|mother|widow|महिला|स्त्री|i am a man|male|पुरुष)\b/i.test(lowerP)
+  );
+  let gender = entities.gender;
+  if (!gender) {
+    if (/\b(i am a woman|female|pregnant|mother|widow|महिला|स्त्री)\b/i.test(lowerP)) gender = 'female';
+    else if (/\b(i am a man|male|पुरुष)\b/i.test(lowerP)) gender = 'male';
+  }
+
+  // G. Explicit Age
+  const is_age_explicit = Boolean(entities.age != null);
+  let age = entities.age;
+  if (age == null) {
+    const ageMatch = lowerP.match(/\b(?:age|aged|am)\s*(\d{1,2})\s*(?:years?\s*old|yr|yrs)?\b/i);
+    if (ageMatch && ageMatch[1]) {
+      const parsedAge = parseInt(ageMatch[1], 10);
+      if (parsedAge >= 10 && parsedAge <= 110) {
+        age = parsedAge;
+      }
+    }
+  }
+
+  // H. Explicit Income & Loan
+  const is_income_explicit = Boolean(entities.family_income_rs != null);
+  const is_loan_explicit = Boolean(entities.loan_amount_rs != null);
+
+  // 2. Need Extraction (What the user wants to do)
+  // Check specific intent flags
+  const is_clinic_or_doctor_setup = /\b(clinic|private\s*clinic|open\s*a?\s*clinic|start\s*a?\s*clinic|medical\s*equipment|clinic\s*setup|medical\s*practice)\b/i.test(lowerP);
+  
+  const is_health_treatment = !is_clinic_or_doctor_setup && (
+    /\b(health\s*insurance|mediclaim|health\s*cover|medical\s*insurance|hospitalisation|hospitalization)\b/i.test(lowerP) ||
+    /\b(medical\s*treatment|cancer\s*treatment|treatment\s*grant|surgery|illness|disease|medical\s*bill|hospital\s*bill|patient|इलाज|बीमारी|अस्पताल)\b/i.test(lowerP)
+  );
+
+  const is_pension_need = /\b(pension|old\s*age\s*pension|widow\s*pension|senior\s*citizen\s*pension|nsap|social\s*security\s*pension|पेंशन|वृद्धावस्था)\b/i.test(lowerP);
+  
+  const is_housing_need = !/poly\s*house|chhatrawas/i.test(lowerP) && /\b(housing|house|home|awas|residential|flat|shelter|pucca\s*house|construct\s*a?\s*house|build\s*a?\s*house|आवास|मकान|घर)\b/i.test(lowerP);
+
+  const is_laptop_need = /\b(laptop|laptops|computer|computers|pc|tablet|tablets|लैपटॉप|कंप्यूटर)\b/i.test(lowerP);
+
+  const is_fellowship_need = /\b(phd|ph\.d|doctoral|doctorate|m\.?phil|fellowship|research\s*fellowship|शोध|रिसर्च)\b/i.test(lowerP);
+
+  const is_education_funding = !is_clinic_or_doctor_setup && (
+    is_fellowship_need ||
+    is_laptop_need ||
+    is_current_student ||
+    /\b(education|study|studies|studying|college|school|university|degree|btech|mba|mbbs|engineering|scholarship|tuition|school\s*fees|college\s*fees|education\s*loan|study\s*loan|fund\s*my\s*studies|study\s*abroad|overseas\s*education|coaching|iit|nit|iim|iiit|aiims|छात्रवृत्ति|शिष्यवृत्ती|शिक्षा|पढ़ाई)\b/i.test(lowerP)
+  );
+
+  let need_type: ExtractedNeed['need_type'] = 'business';
+  if (is_fellowship_need || is_education_funding) need_type = 'scholarship';
+  else if (is_health_treatment) need_type = 'insurance';
+  else if (is_pension_need) need_type = 'pension';
+  else if (is_housing_need) need_type = 'housing';
+
+  // Clean purpose text stripped of profile prefixes
+  let clean_purpose = rawP
+    .replace(/^i\s+am\s+an?\s+(?:sc|st|obc|ebc|general)?\s*(?:medical\s*graduate|doctor|farmer|artisan|weaver|student|widow)?\s*(?:and\s+)?(?:want\s+to|need\s+to|looking\s+to)?/i, '')
+    .trim();
+  if (!clean_purpose) clean_purpose = rawP;
+
+  return {
+    profile: {
+      community,
+      qualification,
+      occupation,
+      is_current_student,
+      current_stage,
+      state: resolvedState || undefined,
+      is_state_explicit,
+      gender,
+      is_gender_explicit,
+      age,
+      is_age_explicit,
+      family_income_rs: entities.family_income_rs,
+      is_income_explicit,
+      loan_amount_rs: entities.loan_amount_rs,
+      is_loan_explicit,
+    },
+    need: {
+      raw_purpose: rawP,
+      clean_purpose,
+      need_type,
+      is_education_funding,
+      is_health_treatment,
+      is_pension_need,
+      is_housing_need,
+      is_laptop_need,
+      is_fellowship_need,
+      is_clinic_or_doctor_setup,
+    },
+  };
 }
 
 export function resolveUserState(entities: UserEntities): string | null {
@@ -707,16 +915,15 @@ function purposeMatchScore(scheme: Scheme, purpose: string | undefined): number 
   }
 
   // Health & Medical Insurance specialized semantic match
-  const healthWords = [
-    'health', 'medical', 'hospital', 'hospitalisation', 'hospitalization',
-    'treatment', 'illness', 'disease', 'surgery', 'doctor', 'medicine',
-    'ayushman', 'swasthya', 'arogya', 'mediclaim', 'healthcare',
-    'स्वास्थ्य', 'आरोग्य', 'इलाज', 'दवा', 'दवाई', 'अस्पताल', 'बीमारी'
-  ];
+  const isClinicOrDoctorSetup = /\b(clinic|private\s*clinic|open\s*a?\s*clinic|start\s*a?\s*clinic|medical\s*equipment|clinic\s*setup|medical\s*practice)\b/i.test(normP);
   const isHealthInsuranceQuery = /\b(health\s*insurance|mediclaim|health\s*cover|medical\s*insurance|hospitalisation|hospitalization)\b/i.test(normP) ||
-    ((normP.includes('health') || normP.includes('medical') || normP.includes('swasthya') || normP.includes('arogya') || normP.includes('स्वास्थ्य') || normP.includes('आरोग्य')) &&
+    ((normP.includes('health') || normP.includes('swasthya') || normP.includes('arogya') || normP.includes('स्वास्थ्य') || normP.includes('आरोग्य')) &&
      (normP.includes('insurance') || normP.includes('bima') || normP.includes('बीमा')));
-  const isHealthQuery = healthWords.some((w) => normP.includes(w));
+  const isHealthQuery = !isClinicOrDoctorSetup && (
+    isHealthInsuranceQuery ||
+    /\b(health|hospital|hospitalisation|hospitalization|treatment|illness|disease|surgery|medicine|ayushman|swasthya|arogya|mediclaim|healthcare|cancer|dialysis|cure|patient|स्वास्थ्य|आरोग्य|इलाज|दवा|दवाई|अस्पताल|बीमारी)\b/i.test(normP) ||
+    (/\bmedical\b/i.test(normP) && !/\b(medical\s*graduate|medical\s*college|medical\s*education|medical\s*admission|mbbs)\b/i.test(normP))
+  );
 
   const isHealthInsuranceScheme = normalizedTypes.some((t) => /health_insurance|medical_treatment|hospitalisation|hospitalization/.test(t)) ||
     /\b(ayushman|jan arogya|swasthya bima)\b/i.test(scheme.name);
@@ -1091,9 +1298,10 @@ function loanAmountScore(scheme: Scheme, amountRs: number | undefined): { score:
 }
 
 function educationScore(scheme: Scheme, isEducation: boolean): number {
-  if (isEducation && scheme.education_required) return 50;
-  if (isEducation && !scheme.education_required) return 0;
-  if (!isEducation && scheme.education_required) return -150;
+  const isEduStage = isEducationStageScheme(scheme);
+  if (isEducation && isEduStage) return 50;
+  if (isEducation && !isEduStage) return 0;
+  if (!isEducation && isEduStage) return -150;
   return 5;
 }
 
@@ -1103,7 +1311,11 @@ function genderScore(scheme: Scheme, gender: string | undefined): { score: numbe
     if (gender === 'female') {
       return { score: 25 };
     }
-    return { score: -300, warning: 'This scheme is exclusively for women applicants', disqualified: true };
+    if (gender && gender !== 'female') {
+      return { score: -300, warning: 'This scheme is exclusively for women applicants', disqualified: true };
+    }
+    // Unknown is not a mismatch. A missing fact (gender) must never disqualify.
+    return { score: 0, warning: 'This scheme is designated for women applicants' };
   }
   return { score: 0 };
 }
@@ -1127,34 +1339,26 @@ export function computeMatchPercentage(rawScore: number, tier: SchemeTier): numb
 
 export function scoreSchemes(schemes: Scheme[], entities: UserEntities, categoryHint?: string): ScoredScheme[] {
   const pNorm = (entities.purpose || '').toLowerCase();
-  const detectedLevel = detectEducationLevel(entities.purpose) || normalizeEducationLevel(entities.education_level);
-  const isEduCategory = categoryHint === 'education_loan' || (schemes.length > 0 && schemes.every((s) => s.category === 'education_loan'));
-  const isEduPurpose = MULTILINGUAL_EDUCATION_WORDS.some((w) => pNorm.includes(w.toLowerCase()));
-  const isEducation = !!(
-    isEduCategory ||
-    isEduPurpose ||
-    detectedLevel ||
-    entities.education_level ||
-    entities.course
+  const intent = extractUserProfileAndNeed(entities.purpose, entities);
+  const detectedLevel = intent.profile.current_stage || normalizeEducationLevel(entities.education_level);
+
+  // Education query intent applies ONLY when the need is to fund studying, or when the user is a current student
+  const isEducation = Boolean(
+    intent.need.is_education_funding ||
+    intent.profile.is_current_student ||
+    (categoryHint === 'education_loan' && !intent.need.is_clinic_or_doctor_setup)
   );
 
-  const housingWords = ['housing', 'house', 'home', 'awas', 'residential', 'shelter', 'flat', 'property', 'आवास', 'मकान', 'घर', 'गृह'];
-  const isHousingQuery = categoryHint === 'housing' || housingWords.some((w) => pNorm.includes(w));
-  const isPhdQuery = ['phd', 'ph.d', 'doctoral', 'doctorate', 'm.phil', 'mphil', 'fellowship', 'research'].some((w) => pNorm.includes(w));
+  const isHousingQuery = intent.need.is_housing_need || categoryHint === 'housing';
+  const isPhdQuery = intent.need.is_fellowship_need;
 
-  const healthWords = ['health', 'medical', 'hospital', 'hospitalisation', 'hospitalization', 'treatment', 'illness', 'disease', 'surgery', 'doctor', 'medicine', 'ayushman', 'swasthya', 'arogya', 'mediclaim', 'healthcare', 'स्वास्थ्य', 'आरोग्य', 'इलाज', 'दवा', 'दवाई', 'अस्पताल', 'बीमारी'];
-  const isHealthInsuranceQuery = /\b(health\s*insurance|mediclaim|health\s*cover|medical\s*insurance|hospitalisation|hospitalization)\b/i.test(pNorm) ||
-    ((pNorm.includes('health') || pNorm.includes('medical') || pNorm.includes('swasthya') || pNorm.includes('arogya') || pNorm.includes('स्वास्थ्य') || pNorm.includes('आरोग्य')) &&
-     (pNorm.includes('insurance') || pNorm.includes('bima') || pNorm.includes('बीमा')));
-  const isHealthQuery = healthWords.some((w) => pNorm.includes(w));
+  const isHealthInsuranceQuery = intent.need.is_health_treatment && (pNorm.includes('insurance') || pNorm.includes('bima') || pNorm.includes('cover'));
+  const isHealthQuery = intent.need.is_health_treatment;
 
-  const pensionWords = ['pension', 'old age', 'elderly', 'senior citizen', 'retirement', 'retire', 'widow pension', 'disability pension', 'nsap', 'vridha', 'vriddha', 'पेंशन', 'वृद्धावस्था', 'बुजुर्ग', 'वरिष्ठ नागरिक', 'निवृत्ती वेतन'];
-  const isPensionQuery = pensionWords.some((w) => pNorm.includes(w));
+  const isPensionQuery = intent.need.is_pension_need;
+  const isScholarshipQuery = intent.need.is_education_funding && !intent.need.is_clinic_or_doctor_setup;
 
-  const scholarshipWords = ['scholarship', 'scholarships', 'छात्रवृत्ति', 'शिष्यवृत्ती', 'वृत्ति'];
-  const isScholarshipQuery = scholarshipWords.some((w) => pNorm.includes(w));
-
-  const userState = resolveUserState(entities);
+  const userState = intent.profile.state || resolveUserState(entities);
 
   const scored = schemes
     .map((scheme): ScoredScheme => {
@@ -1182,22 +1386,38 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
         (scheme.education_level && scheme.education_level !== 'not_applicable') ||
         normalizedTypes.some((t) => /scholarship|fellowship/.test(t));
 
+      const isClinicSetupScheme = normalizedTypes.some((t) => /clinic|medical_equipment|doctor/.test(t)) || /clinic|doctor/i.test(scheme.name);
+
+      if (intent.need.is_clinic_or_doctor_setup && isClinicSetupScheme) {
+        score += 120;
+        matchReasons.push('Specifically designed for private clinic setup and medical equipment acquisition');
+      }
+
       if (isPhdQuery && isFellowship) {
         score += 60;
         matchReasons.push('Purpose-built doctoral research fellowship');
       }
 
+      if (isHousingQuery && isHousingScheme) {
+        score += 100;
+        matchReasons.push('Purpose-built residential housing scheme');
+      }
+
       if (isHealthInsuranceQuery && isHealthInsuranceScheme) {
+        score += 60;
         matchReasons.push('Comprehensive health / medical insurance coverage');
       } else if (isHealthQuery && isHealthScheme) {
+        score += 50;
         matchReasons.push('Health and medical assistance scheme');
       }
 
       if (isPensionQuery && isPensionScheme) {
+        score += 100;
         matchReasons.push('Social security pension for elderly/eligible beneficiaries');
       }
 
       if (isScholarshipQuery && isScholarshipScheme) {
+        score += 50;
         matchReasons.push('Educational scholarship support');
       }
 
@@ -1205,7 +1425,7 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
       score += pScore;
       if (pScore >= 30) matchReasons.push('Purpose matches this scheme\'s eligible activities');
 
-      const isDirectMatch = pScore >= 100;
+      const isDirectMatch = pScore >= 100 || (intent.need.is_clinic_or_doctor_setup && isClinicSetupScheme);
 
       const { score: iScore, warning: iWarn } = incomeScore(scheme, entities.family_income_rs);
       score += iScore;
@@ -1224,15 +1444,9 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
       score += eScore;
       if ((isEducation || isDirectMatch) && scheme.education_required) matchReasons.push('Designed for education/vocational financing');
 
-      // Education level categorical check & scoring
-      const isEduScheme = scheme.category === 'education_loan' ||
-        scheme.education_required ||
-        (scheme.education_level && scheme.education_level !== 'not_applicable');
-
-      let levelMatch = false;
-      if (detectedLevel && isEduScheme) {
+      // Education level categorical check & scoring: ONLY when user is a current student or need is study funding
+      if (detectedLevel && isEducationStageScheme(scheme)) {
         if (schemeSupportsLevel(scheme, detectedLevel)) {
-          levelMatch = true;
           score += 60;
           const schemeLevelLabel = (scheme.education_level || detectedLevel).replace(/_/g, ' ');
           matchReasons.push(`Specifically matches your requested ${detectedLevel.replace(/_/g, ' ')} education level (${schemeLevelLabel})`);
@@ -1242,13 +1456,12 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
         }
       }
 
-      let { score: gScore, warning: gWarn, disqualified: gDisqualified } = genderScore(scheme, entities.gender);
+      let { score: gScore, warning: gWarn } = genderScore(scheme, entities.gender);
       if (isDirectMatch && gScore < 0) {
         gScore = 0;
       }
       score += gScore;
       if (gWarn) warnings.push(gWarn);
-      if (gDisqualified) tier = 'HARD_DISQUALIFIED';
       else if (entities.gender === 'female' && gScore > 0) matchReasons.push('Exclusive concessional scheme for women entrepreneurs');
 
       // State relevance bonus
@@ -1266,16 +1479,15 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
         const isAgriQuery = agriWords.some(w => pNorm.includes(w));
         const isAgriScheme = normalizedTypes.some((t) => /agri|farm|dairy|poultry|crop|livestock|fisher|cattle|animal/.test(t)) || /kisan|krishi|fasal/i.test(scheme.name);
         if (isAgriQuery && isAgriScheme && pScore >= 35) {
-            score += 100;
+          score += 100;
         }
       }
 
       // SC / Social Category preference bonus
-      const pLower = (entities.purpose || '').toLowerCase();
-      const isScQuery = /\b(sc|scheduled\s*caste|dalit)\b/i.test(pLower);
+      const isScQuery = intent.profile.community === 'SC' || /\b(sc|scheduled\s*caste|dalit)\b/i.test(pNorm);
       if (isScQuery) {
         if (scheme.for_sc || /\bsc\b|scheduled caste/i.test(scheme.name)) {
-          score += 15;
+          score += 25;
           matchReasons.push('Exclusively designated for Scheduled Caste (SC) beneficiaries');
         } else if (/\bebc\b|economically backward/i.test(scheme.name)) {
           score -= 25; // Deduct for EBC scheme when SC is requested
@@ -1296,122 +1508,154 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
 
       score += Math.max(0, (10 - effectiveRate) * 2);
 
-      // --- 3-TIER DETERMINISTIC CLASSIFICATION ---
-      let disqualificationReason: string | undefined = undefined;
-
-      const loanLakh = entities.loan_amount_rs ? entities.loan_amount_rs / 100000 : null;
-      const incomeLakh = entities.family_income_rs ? entities.family_income_rs / 100000 : null;
-      const isWomenOnly = scheme.gender_eligibility === 'women_only' || scheme.name.toLowerCase().includes('mahila');
-      
-      if (scheme.id === 3) {
-        console.log(`[DEBUG ID 3] isWomenOnly: ${isWomenOnly}, entities.gender: ${entities.gender}, name: ${scheme.name}`);
-      }
-
-      const schemeMaxLoan = Number(scheme.max_loan_lakh || 0);
-      const schemeMaxIncome = Number(scheme.max_income_lakh || 0);
-
-      const isBusinessQuery = categoryHint === 'business_loan' ||
-        ['tailor', 'tailoring', 'sewing', 'business', 'shop', 'kirana', 'dairy', 'machine', 'transport', 'auto', 'सिलाई', 'शिलाई', 'दुकान', 'व्यापार'].some(w => pNorm.includes(w));
-
-      // Boundary check -1: Narrow trade mismatch (Hard filter)
+      // --- TYPE-B INFERRED SIGNAL ADJUSTMENTS (Score penalties/adjustments only, NEVER hard-disqualify) ---
       const narrow = checkNarrowTradeMismatch(scheme, pNorm);
       if (narrow.mismatched) {
-        tier = 'HARD_DISQUALIFIED';
-        disqualificationReason = narrow.reason;
+        score -= 150;
+        warnings.push(narrow.reason);
       }
-      // Boundary check 0: State eligibility (Hard filter)
-      else if (scheme.state && scheme.state !== 'Central' && (!userState || scheme.state.toLowerCase() !== userState.toLowerCase())) {
+
+      if (isHousingQuery && !isHousingScheme) {
+        score -= 80;
+        warnings.push(`${scheme.name} is a commercial/business/transport scheme, not an eligible housing scheme.`);
+      }
+
+      if (isHealthQuery && !isHealthScheme) {
+        score -= 80;
+        warnings.push(`${scheme.name} is not a health or medical assistance scheme.`);
+      }
+
+      if (isPensionQuery && !isPensionScheme) {
+        score -= 80;
+        warnings.push(`${scheme.name} is not a pension or senior citizen social security scheme.`);
+      }
+
+      if (isScholarshipQuery && !isScholarshipScheme) {
+        score -= 60;
+        warnings.push(`${scheme.name} is a loan or commercial scheme, not an educational student scholarship.`);
+      }
+
+      // --- 3-TIER DETERMINISTIC CLASSIFICATION (Type-A Explicit Facts Only) ---
+      let disqualificationReason: string | undefined = undefined;
+      let disqualificationRecord: DisqualificationRecord | undefined = undefined;
+
+      const loanLakh = intent.profile.loan_amount_rs ? intent.profile.loan_amount_rs / 100000 : null;
+      const incomeLakh = intent.profile.family_income_rs ? intent.profile.family_income_rs / 100000 : null;
+      const isWomenOnly = scheme.gender_eligibility === 'women_only' || scheme.name.toLowerCase().includes('mahila');
+      const schemeMaxLoan = Number(scheme.max_loan_lakh || 0);
+      const schemeMaxIncome = Number(scheme.max_income_lakh || 0);
+      const isFellowshipOrGrant = scheme.interest_rate_min === 0 || scheme.education_level === 'doctoral' || (scheme.eligible_project_types || []).includes('fellowship') || scheme.scheme_type === 'grant' || scheme.scheme_type === 'scholarship';
+
+      // Rule 1: State mismatch (Type-A explicit state)
+      if (scheme.state && scheme.state !== 'Central' && intent.profile.state && intent.profile.is_state_explicit && scheme.state.toLowerCase() !== intent.profile.state.toLowerCase()) {
         tier = 'HARD_DISQUALIFIED';
         disqualificationReason = `This scheme is exclusively for residents of ${scheme.state}.`;
+        disqualificationRecord = {
+          ruleId: 'RULE_STATE_MISMATCH',
+          factUsed: `User State: ${intent.profile.state}, Scheme State: ${scheme.state}`,
+          factSource: 'explicit_statement',
+          reason: disqualificationReason,
+        };
       }
-      // Boundary check 0b: State-only explicit request (Hard filter)
+      // Rule 2: State-only explicit request excludes Central schemes (Type-A explicit instruction)
       else if (
         (entities.state_only || entities.level === 'State' || /\b(state\s*specific|state\s*level|state\s*government|state\s*only|only\s*state|state\s*scheme|state\s*schemes)\b/i.test(pNorm)) &&
         (scheme.level === 'Central' || scheme.state === 'Central')
       ) {
         tier = 'HARD_DISQUALIFIED';
         disqualificationReason = 'User explicitly requested state-specific schemes; Central schemes are excluded.';
+        disqualificationRecord = {
+          ruleId: 'RULE_STATE_ONLY_CENTRAL_EXCLUDED',
+          factUsed: 'User requested state-only schemes',
+          factSource: 'explicit_statement',
+          reason: disqualificationReason,
+        };
       }
-      // Boundary check 1: Loan ceiling exceeded (e.g. ₹55L > ₹50L Term Loan cap) or non-loan scheme when loan requested
-      else if (loanLakh && (schemeMaxLoan === 0 || loanLakh > schemeMaxLoan)) {
-        const isFellowshipOrGrant = scheme.interest_rate_min === 0 || scheme.education_level === 'doctoral' || (scheme.eligible_project_types || []).includes('fellowship');
-        if (!isFellowshipOrGrant) {
-          tier = 'HARD_DISQUALIFIED';
-          disqualificationReason = schemeMaxLoan === 0
-            ? `${scheme.name} is a non-loan skill training or social welfare programme with no loan facility (₹0 cap). It cannot provide the requested loan of ₹${loanLakh.toFixed(1)}L.`
-            : `Requested loan amount (₹${loanLakh.toFixed(1)}L) exceeds the maximum statutory ceiling of ₹${schemeMaxLoan.toFixed(1)}L for ${scheme.name}.`;
-        }
-      }
-      // Boundary check 1b: Business query vs non-loan welfare / skill training
-      else if (isBusinessQuery && (scheme.category === 'skill_development' || scheme.category === 'welfare' || scheme.category === 'welfare_programme' || scheme.category === 'other_programme' || scheme.education_required)) {
+      // Rule 3: Gender exclusivity (Type-A explicit gender)
+      else if (isWomenOnly && intent.profile.gender && intent.profile.gender !== 'female') {
         tier = 'HARD_DISQUALIFIED';
-        disqualificationReason = `${scheme.name} is a skill training or welfare programme, not an enterprise business loan.`;
+        disqualificationReason = 'This scheme is exclusively reserved for women applicants.';
+        disqualificationRecord = {
+          ruleId: 'RULE_GENDER_MISMATCH',
+          factUsed: `Applicant Gender: ${intent.profile.gender}`,
+          factSource: intent.profile.is_gender_explicit ? 'explicit_statement' : 'profile',
+          reason: disqualificationReason,
+        };
       }
-      // Boundary check 2: Family income exceeded
-      else if (incomeLakh && schemeMaxIncome > 0 && incomeLakh > schemeMaxIncome) {
+      // Rule 4: Minimum Age limit (Type-A explicit age)
+      else if (intent.profile.age != null && scheme.age_min != null && intent.profile.age < scheme.age_min) {
+        tier = 'HARD_DISQUALIFIED';
+        disqualificationReason = `Applicant age (${intent.profile.age}) is below the minimum entry age of ${scheme.age_min} for this scheme.`;
+        disqualificationRecord = {
+          ruleId: 'RULE_AGE_MIN_MISMATCH',
+          factUsed: `Applicant Age: ${intent.profile.age}, Minimum Allowed: ${scheme.age_min}`,
+          factSource: intent.profile.is_age_explicit ? 'explicit_statement' : 'profile',
+          reason: disqualificationReason,
+        };
+      }
+      // Rule 5: Maximum Age limit (Type-A explicit age)
+      else if (intent.profile.age != null && scheme.age_max != null && intent.profile.age > scheme.age_max) {
+        tier = 'HARD_DISQUALIFIED';
+        disqualificationReason = `Applicant age (${intent.profile.age}) is above the maximum entry age of ${scheme.age_max} for this scheme.`;
+        disqualificationRecord = {
+          ruleId: 'RULE_AGE_MAX_MISMATCH',
+          factUsed: `Applicant Age: ${intent.profile.age}, Maximum Allowed: ${scheme.age_max}`,
+          factSource: intent.profile.is_age_explicit ? 'explicit_statement' : 'profile',
+          reason: disqualificationReason,
+        };
+      }
+      // Rule 6: Family income ceiling exceeded (Type-A explicit income)
+      else if (incomeLakh != null && schemeMaxIncome > 0 && incomeLakh > schemeMaxIncome) {
         tier = 'HARD_DISQUALIFIED';
         disqualificationReason = `Annual family income (₹${incomeLakh.toFixed(1)}L) exceeds the statutory eligibility cap of ₹${schemeMaxIncome.toFixed(1)}L/yr for this scheme.`;
+        disqualificationRecord = {
+          ruleId: 'RULE_INCOME_CEILING_EXCEEDED',
+          factUsed: `Family Income: ₹${incomeLakh.toFixed(1)}L, Statutory Cap: ₹${schemeMaxIncome.toFixed(1)}L`,
+          factSource: intent.profile.is_income_explicit ? 'explicit_statement' : 'profile',
+          reason: disqualificationReason,
+        };
       }
-      // Boundary check 3: Gender exclusivity
-      else if (isWomenOnly && entities.gender && entities.gender !== 'female') {
+      // Rule 7: Loan ceiling exceeded (Type-A explicit loan requirement)
+      else if (loanLakh != null && schemeMaxLoan > 0 && loanLakh > schemeMaxLoan && !isFellowshipOrGrant) {
         tier = 'HARD_DISQUALIFIED';
-        disqualificationReason = `This scheme is exclusively reserved for women applicants.`;
+        disqualificationReason = `Requested loan amount (₹${loanLakh.toFixed(1)}L) exceeds the maximum statutory ceiling of ₹${schemeMaxLoan.toFixed(1)}L for ${scheme.name}.`;
+        disqualificationRecord = {
+          ruleId: 'RULE_LOAN_CEILING_EXCEEDED',
+          factUsed: `Requested Loan: ₹${loanLakh.toFixed(1)}L, Scheme Ceiling: ₹${schemeMaxLoan.toFixed(1)}L`,
+          factSource: intent.profile.is_loan_explicit ? 'explicit_statement' : 'profile',
+          reason: disqualificationReason,
+        };
       }
-      // Boundary check 3b: Age limits
-      else if (entities.age && scheme.age_min && entities.age < scheme.age_min) {
+      // Rule 8: Non-loan scheme when loan requested (Type-A explicit loan requirement)
+      else if (loanLakh != null && loanLakh > 0 && schemeMaxLoan === 0 && !isFellowshipOrGrant && (scheme.category === 'skill_development' || scheme.category === 'welfare')) {
         tier = 'HARD_DISQUALIFIED';
-        disqualificationReason = `Applicant age (${entities.age}) is below the minimum entry age of ${scheme.age_min} for this scheme.`;
+        disqualificationReason = `${scheme.name} is a non-loan skill training or social welfare programme with no loan facility (₹0 cap). It cannot provide the requested loan of ₹${loanLakh.toFixed(1)}L.`;
+        disqualificationRecord = {
+          ruleId: 'RULE_NON_LOAN_FACILITY',
+          factUsed: `Requested Loan: ₹${loanLakh.toFixed(1)}L, Scheme Facility: ₹0`,
+          factSource: intent.profile.is_loan_explicit ? 'explicit_statement' : 'profile',
+          reason: disqualificationReason,
+        };
       }
-      else if (entities.age && scheme.age_max && entities.age > scheme.age_max) {
+      // Rule 9: Explicit current-education stage mismatch (Type-A fact: only when user states they are currently a student AND need is study funding)
+      else if (
+        intent.profile.is_current_student &&
+        intent.profile.current_stage &&
+        intent.need.is_education_funding &&
+        isEducationStageScheme(scheme) &&
+        !schemeSupportsLevel(scheme, intent.profile.current_stage)
+      ) {
         tier = 'HARD_DISQUALIFIED';
-        disqualificationReason = `Applicant age (${entities.age}) is above the maximum entry age of ${scheme.age_max} for this scheme.`;
-      }
-      // Boundary check 3c: Senior citizen (age >= 60) for youth/vocational skill training
-      else if (entities.age && entities.age >= 60 && scheme.category === 'skill_development') {
-        tier = 'HARD_DISQUALIFIED';
-        disqualificationReason = `${scheme.name} is a vocational skill training programme designed for youth and working-age applicants, not for senior citizens.`;
-      }
-      // Boundary check 4: Education requirement when completely non-educational
-      else if (scheme.education_required && !isEducation && !isDirectMatch) {
-        tier = 'HARD_DISQUALIFIED';
-        disqualificationReason = `This scheme requires enrollment in an eligible technical, vocational, or professional course.`;
-      }
-      // Boundary check 4b: Education level mismatch (Hard filter when specific level was stated)
-      else if (detectedLevel && !isEduScheme) {
-        tier = 'HARD_DISQUALIFIED';
-        disqualificationReason = `${scheme.name} is a non-educational scheme, not an educational scholarship for ${detectedLevel.replace('_', ' ')} students.`;
-      }
-      else if (detectedLevel && isEduScheme && !levelMatch) {
-        tier = 'HARD_DISQUALIFIED';
-        disqualificationReason = `Education level mismatch: This scheme is for ${scheme.education_level?.replace('_', ' ') || 'domestic/other'} education, not for ${detectedLevel.replace('_', ' ')}.`;
-      }
-      // Boundary check 4c: Housing query vs non-housing scheme (Hard filter)
-      else if (isHousingQuery && !isHousingScheme) {
-        tier = 'HARD_DISQUALIFIED';
-        disqualificationReason = `${scheme.name} is a commercial/business/transport scheme, not an eligible housing scheme for purchasing or constructing a house.`;
-      }
-      // Boundary check 4d: Health insurance query vs non-health-insurance scheme (Hard filter)
-      else if (isHealthInsuranceQuery && !isHealthInsuranceScheme) {
-        tier = 'HARD_DISQUALIFIED';
-        disqualificationReason = `${scheme.name} is not a health insurance scheme.`;
-      }
-      else if (isHealthQuery && !isHealthScheme) {
-        tier = 'HARD_DISQUALIFIED';
-        disqualificationReason = `${scheme.name} is not a health or medical scheme.`;
-      }
-      // Boundary check 4e: Pension / Senior citizen query vs non-pension scheme (Hard filter)
-      else if (isPensionQuery && !isPensionScheme) {
-        tier = 'HARD_DISQUALIFIED';
-        disqualificationReason = `${scheme.name} is not a pension or senior citizen social security scheme.`;
-      }
-      // Boundary check 4f: Scholarship query vs non-scholarship scheme (Hard filter)
-      else if (isScholarshipQuery && !isScholarshipScheme) {
-        tier = 'HARD_DISQUALIFIED';
-        disqualificationReason = `${scheme.name} is a loan or commercial scheme, not an educational student scholarship.`;
+        disqualificationReason = `Education level mismatch: This scheme is for ${scheme.education_level?.replace('_', ' ') || 'other'} stage, not for current ${intent.profile.current_stage.replace('_', ' ')} studies.`;
+        disqualificationRecord = {
+          ruleId: 'RULE_CURRENT_STAGE_MISMATCH',
+          factUsed: `Current Enrolled Stage: ${intent.profile.current_stage}, Scheme Stage: ${scheme.education_level || 'other'}`,
+          factSource: 'explicit_statement',
+          reason: disqualificationReason,
+        };
       }
       else {
         // Qualified schemes: Segment into OPTIMAL vs SUBOPTIMAL
-        // An optimal scheme must have a strong overall score AND a positive relevance connection to the purpose if a specific purpose was specified
         const hasSpecificPurpose = Boolean(
           entities.purpose &&
           entities.purpose.trim().length > 3 &&
@@ -1423,7 +1667,7 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
           scheme.category === 'entrepreneurship' ||
           /mcf|micro credit|term loan|udyam nidhi|swarojgar|finance and development|rscfdc/i.test(scheme.name);
 
-        const hasGenuinePurposeMatch = pScore >= 35 || isDirectMatch || isHealthScheme || isPensionScheme || isScholarshipScheme || isHousingScheme || isFellowship || isLivelihoodScheme;
+        const hasGenuinePurposeMatch = pScore >= 35 || isDirectMatch || isHealthScheme || isPensionScheme || isScholarshipScheme || isHousingScheme || isFellowship || isLivelihoodScheme || (intent.need.is_clinic_or_doctor_setup && isClinicSetupScheme);
 
         if (score >= 70 && (!hasSpecificPurpose || hasGenuinePurposeMatch)) {
           tier = 'ELIGIBLE_OPTIMAL';
@@ -1448,7 +1692,7 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
       }
 
       const match_percentage = computeMatchPercentage(score, tier);
-      return { ...scheme, score, match_percentage, tier, matchReasons, warnings, disqualificationReason };
+      return { ...scheme, score, match_percentage, tier, matchReasons, warnings, disqualificationReason, disqualificationRecord };
     })
     .filter((s) => s.score > -30)
     .sort((a, b) => {
@@ -1506,12 +1750,60 @@ export async function recommendSchemes(entities: UserEntities, categoryHint?: st
   const scored = scoreSchemes(all, { ...entities, state_only: isStateOnly, level: isStateOnly ? 'State' : entities.level }, categoryHint);
   console.log(`[SCHEME_SERVICE] scoreSchemes returned ${scored.length} scored schemes:`, scored.slice(0, 5).map(s => `${s.name}(score=${s.score},tier=${s.tier},state=${s.state})`).join(', '));
 
+  // Log disqualification records for top 5 candidates by purpose relevance
+  const top5ByRelevance = [...scored]
+    .sort((a, b) => purposeMatchScore(b, entities.purpose) - purposeMatchScore(a, entities.purpose))
+    .slice(0, 5);
+
+  for (const s of top5ByRelevance) {
+    if (s.tier === 'HARD_DISQUALIFIED' && s.disqualificationRecord) {
+      console.log(`[SCHEME_SERVICE] Top candidate "${s.name}" disqualified by rule=${s.disqualificationRecord.ruleId} fact="${s.disqualificationRecord.factUsed}" source=${s.disqualificationRecord.factSource}: ${s.disqualificationRecord.reason}`);
+    }
+  }
+
+  // Log warning if the highest raw scoring scheme was hard disqualified
+  const highestScoring = [...scored].sort((a, b) => b.score - a.score)[0];
+  if (highestScoring && highestScoring.tier === 'HARD_DISQUALIFIED') {
+    console.warn(`[SCHEME_SERVICE] WARNING: Highest-scoring scheme "${highestScoring.name}" (score=${highestScoring.score}) was HARD_DISQUALIFIED! Rule: ${highestScoring.disqualificationRecord?.ruleId}, Reason: ${highestScoring.disqualificationRecord?.reason}`);
+  }
+
   if (scored.length === 0) {
     return [];
   }
 
   const eligible = scored.filter((s) => s.tier !== 'HARD_DISQUALIFIED');
   if (eligible.length === 0) {
+    // Safety Net: check if any schemes cleared the purpose relevance threshold (purposeMatchScore >= 30)
+    const relevantCandidates = scored
+      .filter((s) => purposeMatchScore(s, entities.purpose) >= 30)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit);
+
+    if (relevantCandidates.length > 0) {
+      console.log(`[SCHEME_SERVICE] Safety net triggered: 0 eligible schemes, but ${relevantCandidates.length} relevant candidate(s) found. Generating clarifying question.`);
+      const topCand = relevantCandidates[0];
+      let clarifyingQuestion = '';
+
+      if (topCand.disqualificationRecord?.ruleId === 'RULE_CURRENT_STAGE_MISMATCH') {
+        clarifyingQuestion = 'Do you want funding for your studies, or to set up a professional practice or business?';
+      } else if (topCand.disqualificationRecord?.ruleId === 'RULE_STATE_MISMATCH') {
+        clarifyingQuestion = `Are you located in or seeking assistance specifically in ${topCand.state || 'your current state'}?`;
+      } else if (topCand.disqualificationRecord?.ruleId === 'RULE_LOAN_CEILING_EXCEEDED') {
+        clarifyingQuestion = `Your requested loan amount exceeds the ceiling of ₹${topCand.max_loan_lakh} Lakhs for ${topCand.name}. Would you consider a loan within this limit?`;
+      } else if (topCand.disqualificationRecord?.ruleId === 'RULE_GENDER_MISMATCH') {
+        clarifyingQuestion = `This scheme is reserved for women applicants. Would you like to explore general schemes open to all genders?`;
+      } else if (topCand.disqualificationRecord?.ruleId === 'RULE_INCOME_CEILING_EXCEEDED') {
+        clarifyingQuestion = `This scheme has an annual family income limit of ₹${topCand.max_income_lakh} Lakhs. Could you confirm your annual family income?`;
+      } else {
+        clarifyingQuestion = `Could you clarify your specific requirements or eligibility details so we can find matching schemes?`;
+      }
+
+      return relevantCandidates.map((c) => ({
+        ...c,
+        clarifyingQuestion,
+      }));
+    }
+
     return [];
   }
 
@@ -1524,7 +1816,6 @@ export async function recommendSchemes(entities: UserEntities, categoryHint?: st
   }
 
   // 2. If NO optimal matches exist, check if any suboptimal matches clear the genuine relevance threshold.
-  // A scheme is only worth showing if it has real relevance signals (genuine positive purpose match, domain match, or state/caste eligibility)
   const worthySuboptimal = eligible.filter((s) => {
     if (s.score < 50) return false;
     const hasPurposeMatch = s.matchReasons.some((r) =>
