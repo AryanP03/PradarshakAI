@@ -1512,7 +1512,7 @@ export function scoreSchemes(schemes: Scheme[], entities: UserEntities, category
       const narrow = checkNarrowTradeMismatch(scheme, pNorm);
       if (narrow.mismatched) {
         score -= 150;
-        warnings.push(narrow.reason);
+        if (narrow.reason) warnings.push(narrow.reason);
       }
 
       if (isHousingQuery && !isHousingScheme) {
